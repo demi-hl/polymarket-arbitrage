@@ -1,0 +1,61 @@
+{
+  "name": "polymarket-arbitrage-bot",
+  "version": "2.0.0",
+  "description": "Polymarket Arbitrage Bot - Advanced prediction market arbitrage with React dashboard and Discord integration",
+  "main": "polymarket.js",
+  "scripts": {
+    "start": "node polymarket.js",
+    "server": "node polymarket.js server",
+    "dashboard": "npm run build && node polymarket.js dashboard",
+    "scan": "node polymarket.js scan",
+    "watch": "node polymarket.js watch",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "backtest": "node backtest/engine.js",
+    "test": "jest",
+    "discord:deploy": "node discord/deploy-commands.js",
+    "discord:deploy-guild": "node discord/deploy-commands.js --guild",
+    "discord:clear": "node discord/deploy-commands.js --clear",
+    "discord:example": "node discord/example-integration.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "cors": "^2.8.5",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.9.0",
+    "express": "^4.18.0",
+    "js-yaml": "^4.1.0",
+    "ws": "^8.14.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "recharts": "^2.10.0",
+    "tailwindcss": "^3.4.0",
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "polymarket",
+    "arbitrage",
+    "trading",
+    "prediction-markets",
+    "defi",
+    "react",
+    "dashboard",
+    "discord",
+    "bot"
+  ],
+  "author": "CORTANA Elite 8",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

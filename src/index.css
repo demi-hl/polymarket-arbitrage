@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-trader-900 text-white;
+  }
+  
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-trader-800;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-trader-600 rounded;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-trader-500;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-trader-800 border border-trader-700 rounded-xl p-6;
+  }
+  
+  .card-hover {
+    @apply hover:border-accent/50 transition-all duration-300;
+  }
+  
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-glow text-white font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-trader-700 hover:bg-trader-600 text-white font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+  
+  .input-field {
+    @apply bg-trader-700 border border-trader-600 rounded-lg px-4 py-2 text-white placeholder-trader-500 focus:outline-none focus:border-accent;
+  }
+  
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .badge-success {
+    @apply badge bg-profit/20 text-profit;
+  }
+  
+  .badge-danger {
+    @apply badge bg-loss/20 text-loss;
+  }
+  
+  .badge-warning {
+    @apply badge bg-yellow-500/20 text-yellow-400;
+  }
+  
+  .badge-info {
+    @apply badge bg-accent/20 text-accent;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-accent to-profit bg-clip-text text-transparent;
+  }
+  
+  .glow-border {
+    @apply relative;
+  }
+  
+  .glow-border::before {
+    content: '';
+    @apply absolute inset-0 rounded-xl bg-gradient-to-r from-accent/50 to-profit/50 blur opacity-0 transition-opacity duration-300;
+  }
+  
+  .glow-border:hover::before {
+    @apply opacity-100;
+  }
+  
+  .data-table {
+    @apply w-full;
+  }
+  
+  .data-table th {
+    @apply text-left text-xs font-medium text-gray-400 uppercase tracking-wider py-3 px-4;
+  }
+  
+  .data-table td {
+    @apply py-4 px-4 border-t border-trader-700;
+  }
+  
+  .data-table tr:hover {
+    @apply bg-trader-700/50;
+  }
+  
+  .number-mono {
+    @apply font-mono tabular-nums;
+  }
+  
+  .profit-text {
+    @apply text-profit;
+  }
+  
+  .loss-text {
+    @apply text-loss;
+  }
+  
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  
+  .status-dot-online {
+    @apply status-dot bg-profit animate-pulse;
+  }
+  
+  .status-dot-offline {
+    @apply status-dot bg-loss;
+  }
+  
+  .status-dot-warning {
+    @apply status-dot bg-yellow-400;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
