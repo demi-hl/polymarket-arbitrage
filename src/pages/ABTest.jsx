@@ -28,7 +28,7 @@ function useAnimatedNumber(value, duration = 600) {
 const THEMES = {
   A: { color: '#f59e0b', label: 'Paper A', sub: 'Paper account' },
   B: { color: '#00d4ff', label: 'Paper B', sub: 'Paper account' },
-  paper: { color: '#10b981', label: 'Paper Trading', sub: '17 strategies + ML + news sentiment' },
+  paper: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
 }
 
 export default function ABTest() {
@@ -51,8 +51,30 @@ export default function ABTest() {
   if (loading) {
     return (
       <div className="min-h-full flex flex-col items-center justify-center font-futuristic">
-        <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500">Polymarket bot</p>
-        <p className="text-2xl font-light text-white mt-8">Loading...</p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center"
+        >
+          <p className="text-[11px] uppercase tracking-[0.3em] text-gray-500 mb-6">Polymarket bot</p>
+          <motion.div
+            className="w-12 h-12 mx-auto mb-8 rounded-full"
+            style={{
+              border: '2px solid rgba(0,212,255,0.2)',
+              borderTopColor: '#00d4ff',
+            }}
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}
+          />
+          <p className="text-xl font-light text-gray-300">Loading dashboard...</p>
+          <motion.p
+            className="text-sm text-gray-600 mt-2"
+            animate={{ opacity: [0.3, 0.7, 0.3] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+          >
+            Connecting to trading engine
+          </motion.p>
+        </motion.div>
       </div>
     )
   }
@@ -87,19 +109,35 @@ export default function ABTest() {
     const oneOpenCount = acct?.openTradeCount || acct?.openPositions || 0
     return (
       <div className="mx-auto font-futuristic pb-16">
-        <div className="mb-10">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">Polymarket bot</p>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="mb-10"
+        >
+          <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-2">Polymarket bot</p>
           <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-3">
             Paper <span className="text-gradient-minimal">Trading</span>
           </h1>
           <p className="text-base text-gray-500 font-light tracking-wide">
-            17 strategies &middot; ML scoring &middot; Oracle daemon &middot; whale tracking &middot; news sentiment &middot; Kelly sizing
+            20 strategies &middot; Deep learning &middot; GPU sentiment &middot; Oracle daemon &middot; Whale tracking &middot; Kelly sizing
           </p>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center gap-8 text-xs uppercase tracking-widest text-gray-500 mb-10 pb-6 border-b border-white/[0.04]">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+          className="flex items-center gap-8 text-xs uppercase tracking-widest text-gray-500 mb-10 pb-6 relative"
+        >
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
           <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#10b981', boxShadow: '0 0 6px rgba(16,185,129,0.4)' }} />
+            <motion.div
+              className="w-2 h-2 rounded-full"
+              style={{ background: '#10b981', boxShadow: '0 0 8px rgba(16,185,129,0.5)' }}
+              animate={{ boxShadow: ['0 0 6px rgba(16,185,129,0.4)', '0 0 16px rgba(16,185,129,0.7)', '0 0 6px rgba(16,185,129,0.4)'] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            />
             Live
           </div>
           <span className="font-mono tabular-nums text-gray-600">
@@ -109,7 +147,7 @@ export default function ABTest() {
             ${oneCash.toLocaleString(undefined, { maximumFractionDigits: 0 })} cash
           </span>
           {oneInvested > 0 && (
-            <span className="font-mono text-emerald-600">
+            <span className="font-mono text-emerald-500" style={{ textShadow: '0 0 10px rgba(16,185,129,0.2)' }}>
               ${oneInvested.toLocaleString(undefined, { maximumFractionDigits: 0 })} deployed
             </span>
           )}
@@ -123,7 +161,7 @@ export default function ABTest() {
               Updated {new Date(lastUpdate).toLocaleTimeString()}
             </span>
           )}
-        </div>
+        </motion.div>
 
         <div className="relative grid grid-cols-1 gap-8 mb-12">
           <AccountCard accountId={id} data={acct} />
@@ -299,62 +337,86 @@ function AccountDetailStats({ data, theme }) {
   ]
 
   return (
-    <div
-      className="rounded-lg border p-5"
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="card"
       style={{ borderColor: theme.color + '15' }}
     >
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-3 mb-5">
         <div
-          className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold"
-          style={{ background: theme.color + '18', color: theme.color }}
+          className="w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-bold"
+          style={{
+            background: theme.color + '18',
+            color: theme.color,
+            border: `1px solid ${theme.color}25`,
+            boxShadow: `0 0 12px ${theme.color}15`,
+          }}
         >
-          {theme.label.split(' ')[1]}
+          {theme.label.split(' ')[1]?.[0] || 'P'}
         </div>
         <span className="text-sm font-medium text-white">{theme.label}</span>
         <span className="text-[10px] text-gray-500 uppercase tracking-wider">{theme.sub}</span>
       </div>
       <div className="grid grid-cols-5 gap-5">
-        {stats.map((s) => (
-          <div key={s.label}>
-            <p className="text-[11px] text-gray-500 uppercase tracking-wider mb-1">{s.label}</p>
-            <p className={`text-base font-mono font-semibold ${s.positive === true ? 'text-profit' : s.positive === false ? 'text-loss' : 'text-white'}`}>
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.03 }}
+            className="p-3 rounded-lg"
+            style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.03)' }}
+          >
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">{s.label}</p>
+            <p className={`text-base font-mono font-semibold ${s.positive === true ? 'text-profit' : s.positive === false ? 'text-loss' : 'text-white'}`}
+              style={s.positive === true ? { textShadow: '0 0 10px rgba(16,185,129,0.2)' } : s.positive === false ? { textShadow: '0 0 10px rgba(239,68,68,0.2)' } : {}}
+            >
               {s.value}
             </p>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 function AccountTradeTable({ trades, theme }) {
   if (!trades || trades.length === 0) {
     return (
-      <div className="border border-white/[0.04] rounded-lg p-8 text-center">
-        <p className="text-sm text-gray-500">No trades recorded for this account</p>
+      <div className="card text-center py-12">
+        <motion.div animate={{ opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 3 }}>
+          <p className="text-sm text-gray-500">No trades recorded for this account</p>
+        </motion.div>
       </div>
     )
   }
 
   return (
-    <div className="border border-white/[0.04] rounded-lg overflow-hidden">
-      <div className="px-5 py-3 border-b border-white/[0.04] flex items-center justify-between">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="card overflow-hidden"
+      style={{ padding: 0 }}
+    >
+      <div className="px-6 py-4 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500">
           Trade History
         </p>
-        <span className="text-[10px] font-mono text-gray-600">{trades.length} trades</span>
+        <span className="badge-info text-[10px]">{trades.length} trades</span>
       </div>
       <div className="overflow-x-auto max-h-[560px] overflow-y-auto">
         <table className="w-full text-left">
-          <thead className="sticky top-0 bg-trader-950/95 backdrop-blur-sm">
-            <tr className="text-[11px] uppercase tracking-wider text-gray-500 border-b border-white/[0.04]">
-              <th className="px-5 py-3 font-medium">Time</th>
-              <th className="px-5 py-3 font-medium">Market</th>
-              <th className="px-5 py-3 font-medium">Strategy</th>
-              <th className="px-5 py-3 font-medium text-right">Size</th>
-              <th className="px-5 py-3 font-medium text-right">Edge</th>
-              <th className="px-5 py-3 font-medium text-right">P&L</th>
-              <th className="px-5 py-3 font-medium text-center">Status</th>
+          <thead className="sticky top-0 glass-panel z-10">
+            <tr className="text-[10px] uppercase tracking-wider text-gray-500" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <th className="px-5 py-3 font-semibold">Time</th>
+              <th className="px-5 py-3 font-semibold">Market</th>
+              <th className="px-5 py-3 font-semibold">Strategy</th>
+              <th className="px-5 py-3 font-semibold text-right">Size</th>
+              <th className="px-5 py-3 font-semibold text-right">Edge</th>
+              <th className="px-5 py-3 font-semibold text-right">P&L</th>
+              <th className="px-5 py-3 font-semibold text-center">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -413,7 +475,7 @@ function AccountTradeTable({ trades, theme }) {
           </tbody>
         </table>
       </div>
-    </div>
+    </motion.div>
   )
 }
 

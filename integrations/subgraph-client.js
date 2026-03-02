@@ -46,84 +46,115 @@ class SubgraphClient {
 
   async getWalletPositions(wallet, first = 100) {
     const gql = `{
-      positions(
+      userBalances(
         where: { user: "${wallet.toLowerCase()}" }
         first: ${first}
         orderBy: balance
         orderDirection: desc
       ) {
         id
-        condition
-        outcomeIndex
+        user
         balance
-        averagePrice
-        realizedPnl
-        user { id }
+        asset {
+          id
+          condition { id }
+          outcomeIndex
+        }
       }
     }`;
     const result = await this.query('positions', gql);
-    return result.positions || [];
+    return (result.userBalances || []).map(r => ({
+      id: r.id,
+      user: { id: r.user },
+      condition: r.asset?.condition?.id || r.asset?.id,
+      outcomeIndex: r.asset?.outcomeIndex || '0',
+      balance: r.balance,
+      averagePrice: '0',
+      realizedPnl: '0',
+    }));
   }
 
   async getTopHolders(conditionId, first = 20) {
     const gql = `{
-      positions(
-        where: { condition: "${conditionId}" }
+      userBalances(
+        where: { asset_: { condition: "${conditionId}" } }
         first: ${first}
         orderBy: balance
         orderDirection: desc
       ) {
         id
-        user { id }
-        outcomeIndex
+        user
         balance
-        averagePrice
-        realizedPnl
+        asset {
+          id
+          condition { id }
+          outcomeIndex
+        }
       }
     }`;
     const result = await this.query('positions', gql);
-    return result.positions || [];
+    return (result.userBalances || []).map(r => ({
+      id: r.id,
+      user: { id: r.user },
+      condition: r.asset?.condition?.id || conditionId,
+      outcomeIndex: r.asset?.outcomeIndex || '0',
+      balance: r.balance,
+      averagePrice: '0',
+      realizedPnl: '0',
+    }));
   }
 
   // ── PnL Subgraph ──
 
   async getWalletPnl(wallet, first = 50) {
     const gql = `{
-      pnls(
+      userPositions(
         where: { user: "${wallet.toLowerCase()}" }
         first: ${first}
         orderBy: realizedPnl
         orderDirection: desc
       ) {
         id
-        user { id }
-        condition
+        user
+        tokenId
         realizedPnl
-        numTrades
-        outcomeIndex
+        totalBought
       }
     }`;
     const result = await this.query('pnl', gql);
-    return result.pnls || [];
+    return (result.userPositions || []).map(r => ({
+      id: r.id,
+      user: { id: r.user },
+      condition: r.tokenId,
+      realizedPnl: r.realizedPnl,
+      numTrades: 1,
+      outcomeIndex: '0',
+    }));
   }
 
   async getTopProfitableWallets(first = 50) {
     const gql = `{
-      pnls(
+      userPositions(
         first: ${first}
         orderBy: realizedPnl
         orderDirection: desc
       ) {
         id
-        user { id }
+        user
+        tokenId
         realizedPnl
-        numTrades
-        condition
-        outcomeIndex
+        totalBought
       }
     }`;
     const result = await this.query('pnl', gql);
-    return result.pnls || [];
+    return (result.userPositions || []).map(r => ({
+      id: r.id,
+      user: { id: r.user },
+      condition: r.tokenId,
+      realizedPnl: r.realizedPnl,
+      numTrades: 1,
+      outcomeIndex: '0',
+    }));
   }
 
   // ── Activity Subgraph ──

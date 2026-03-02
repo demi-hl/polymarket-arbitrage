@@ -20,10 +20,24 @@ const EventCalendar = require('../lib/event-calendar');
 
 const calendar = new EventCalendar();
 
+const CRYPTO_PRICE_PATTERN = /\b(?:bitcoin|btc|ethereum|eth|solana|sol|crypto|doge)\b.*\b(?:price|above|below|between|dip|reach|hit)\b|\b(?:price|above|below|between|dip|reach|hit)\b.*\b(?:bitcoin|btc|ethereum|eth|solana|sol|crypto|doge)\b/i;
+const ESPORTS_PATTERN = /\b(?:esports?|lol|league of legends|counter-?strike|cs2|csgo|dota|valorant|overwatch|nongshim|t1|gen\.?g|weibo|fnatic|LoL:|CS2?:)\b/i;
+
+const CRYPTO_PRICE_MAX_POSITION = 50;
+const ESPORTS_MAX_POSITION = 50;
+
 const eventCatalystStrategy = {
   name: 'event-catalyst',
   type: 'fundamental',
   riskLevel: 'medium',
+
+  _isCryptoPriceMarket(question) {
+    return CRYPTO_PRICE_PATTERN.test(question || '');
+  },
+
+  _isEsportsMarket(question, category) {
+    return ESPORTS_PATTERN.test(question || '') || ESPORTS_PATTERN.test(category || '');
+  },
 
   async scan(bot) {
     const TIMEOUT = 15000;
@@ -85,13 +99,22 @@ const eventCatalystStrategy = {
           if (netEdge < 0.02) continue;
           if ((market.liquidity || 0) < 5000) continue;
 
+          const question = market.question || '';
+          const category = market.category || market.eventTitle || '';
+          const isCrypto = this._isCryptoPriceMarket(question);
+          const isEsports = this._isEsportsMarket(question, category);
+
+          if (isCrypto) continue;
+
           const direction = yesPrice >= noPrice ? 'BUY_YES' : 'BUY_NO';
+          let posCap = Math.min((market.liquidity || 0) * 0.01, 150);
+          if (isEsports) posCap = Math.min(posCap, ESPORTS_MAX_POSITION);
 
           opportunities.push({
             marketId: market.id,
-            question: market.question,
+            question,
             slug: market.slug,
-            category: market.category || market.eventTitle,
+            category,
             eventTitle: market.eventTitle,
             yesPrice, noPrice,
             sum: yesPrice + noPrice,
@@ -103,7 +126,7 @@ const eventCatalystStrategy = {
             conditionId: market.conditionId,
             endDate: market.endDate,
             direction,
-            maxPosition: Math.min((market.liquidity || 0) * 0.02, 300),
+            maxPosition: posCap,
             expectedReturn: netEdge,
             confidence: Math.min(highSide + (1 - hoursLeft / 48) * 0.1, 1),
             strategy: 'event-catalyst',
@@ -113,6 +136,7 @@ const eventCatalystStrategy = {
             discount: parseFloat(discount.toFixed(4)),
             calendarBoost,
             calendarReason,
+            isEsports,
           });
           continue;
         }
@@ -127,13 +151,22 @@ const eventCatalystStrategy = {
           if (netEdge < 0.02) continue;
           if ((market.liquidity || 0) < 8000) continue;
 
+          const question = market.question || '';
+          const category = market.category || market.eventTitle || '';
+          const isCrypto = this._isCryptoPriceMarket(question);
+          const isEsports = this._isEsportsMarket(question, category);
+
+          if (isCrypto) continue;
+
           const direction = yesPrice >= noPrice ? 'BUY_YES' : 'BUY_NO';
+          let posCap = Math.min((market.liquidity || 0) * 0.008, 100);
+          if (isEsports) posCap = Math.min(posCap, ESPORTS_MAX_POSITION);
 
           opportunities.push({
             marketId: market.id,
-            question: market.question,
+            question,
             slug: market.slug,
-            category: market.category || market.eventTitle,
+            category,
             eventTitle: market.eventTitle,
             yesPrice, noPrice,
             sum: yesPrice + noPrice,
@@ -145,7 +178,7 @@ const eventCatalystStrategy = {
             conditionId: market.conditionId,
             endDate: market.endDate,
             direction,
-            maxPosition: Math.min((market.liquidity || 0) * 0.015, 200),
+            maxPosition: posCap,
             expectedReturn: netEdge,
             confidence: conviction * urgency,
             strategy: 'event-catalyst',
@@ -153,6 +186,7 @@ const eventCatalystStrategy = {
             hoursLeft: Math.round(hoursLeft),
             conviction: parseFloat(conviction.toFixed(3)),
             urgency: parseFloat(urgency.toFixed(2)),
+            isEsports,
           });
         }
       }

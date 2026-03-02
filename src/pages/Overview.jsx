@@ -34,7 +34,7 @@ export default function Overview() {
       <div className="space-y-8">
         <Skeleton className="h-12 w-80" />
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-40" />)}
+          {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-44" />)}
         </div>
         <div className="grid grid-cols-3 gap-5">
           <Skeleton className="col-span-2 h-[500px]" />
@@ -77,47 +77,49 @@ export default function Overview() {
     .slice(0, 6)
 
   const anim = (delay = 0) => ({
-    initial: { opacity: 0, y: 16 },
-    animate: { opacity: 1, y: 0 },
-    transition: { delay, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+    initial: { opacity: 0, y: 20, filter: 'blur(6px)' },
+    animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+    transition: { delay, duration: 0.6, ease: [0.16, 1, 0.3, 1] },
   })
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <motion.div {...anim(0)}>
-        <h2 className="text-4xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-base text-gray-500 mt-2">
-          17 strategies &middot; ML scoring &middot; Oracle daemon &middot; whale tracking &middot; news sentiment &middot; Kelly sizing
+        <h2 className="text-4xl font-extralight tracking-tight text-gradient-minimal">Dashboard</h2>
+        <p className="text-[13px] text-gray-500 mt-2.5 tracking-wide font-light">
+          20 strategies · Deep learning · GPU sentiment · Oracle daemon · Whale tracking · Kelly sizing
         </p>
       </motion.div>
 
-      {/* Row 1: 4 big stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        <motion.div {...anim(0.05)} className="card card-hover stat-card" style={{ '--accent-color': totalPnl >= 0 ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)' }}>
+        <motion.div {...anim(0.05)} className="card card-hover animated-border stat-card" style={{ '--accent-color': totalPnl >= 0 ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)' }}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-3">Total P&L</p>
-              <AnimatedNumber value={Math.abs(totalPnl)} prefix={totalPnl >= 0 ? '+$' : '-$'} className={`text-4xl font-bold font-mono ${totalPnl >= 0 ? 'text-profit' : 'text-loss'}`} decimals={2} />
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Total P&L</p>
+              <AnimatedNumber value={Math.abs(totalPnl)} prefix={totalPnl >= 0 ? '+$' : '-$'} className={`text-4xl font-bold font-mono ${totalPnl >= 0 ? 'profit-glow' : 'loss-glow'}`} decimals={2} />
               <div className="flex gap-4 mt-3">
-                <span className={`text-xs font-mono ${realizedPnl >= 0 ? 'text-profit/60' : 'text-loss/60'}`}>{realizedPnl >= 0 ? '+' : ''}{realizedPnl.toFixed(2)} real</span>
-                <span className={`text-xs font-mono ${unrealizedPnl >= 0 ? 'text-profit/60' : 'text-loss/60'}`}>{unrealizedPnl >= 0 ? '+' : ''}{unrealizedPnl.toFixed(2)} unreal</span>
+                <span className={`text-xs font-mono ${realizedPnl >= 0 ? 'text-profit/70' : 'text-loss/70'}`}>{realizedPnl >= 0 ? '+' : ''}{realizedPnl.toFixed(2)} real</span>
+                <span className={`text-xs font-mono ${unrealizedPnl >= 0 ? 'text-profit/70' : 'text-loss/70'}`}>{unrealizedPnl >= 0 ? '+' : ''}{unrealizedPnl.toFixed(2)} unreal</span>
               </div>
             </div>
-            <div className={`p-4 rounded-xl ${totalPnl >= 0 ? 'bg-profit/10' : 'bg-loss/10'}`}>
+            <motion.div
+              className={`p-4 rounded-xl ${totalPnl >= 0 ? 'bg-profit/10' : 'bg-loss/10'}`}
+              animate={{ scale: [1, 1.05, 1] }}
+              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            >
               {totalPnl >= 0 ? <TrendingUp size={28} className="text-profit" /> : <TrendingDown size={28} className="text-loss" />}
-            </div>
+            </motion.div>
           </div>
         </motion.div>
 
-        <motion.div {...anim(0.1)} className="card card-hover stat-card" style={{ '--accent-color': 'rgba(16,185,129,0.5)' }}>
+        <motion.div {...anim(0.1)} className="card card-hover animated-border stat-card" style={{ '--accent-color': 'rgba(16,185,129,0.5)' }}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-3">Portfolio</p>
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Portfolio</p>
               <AnimatedNumber value={totalValue} prefix="$" className="text-4xl font-bold font-mono text-white" decimals={0} />
               <div className="flex gap-4 mt-3">
                 <span className="text-xs font-mono text-gray-500">${Math.round(cash).toLocaleString()} cash</span>
-                <span className="text-xs font-mono text-emerald-400">${Math.round(invested).toLocaleString()} deployed</span>
+                <span className="text-xs font-mono text-emerald-400/80">${Math.round(invested).toLocaleString()} deployed</span>
               </div>
             </div>
             <div className="p-4 rounded-xl bg-emerald-500/10">
@@ -126,12 +128,23 @@ export default function Overview() {
           </div>
         </motion.div>
 
-        <motion.div {...anim(0.15)} className="card card-hover stat-card" style={{ '--accent-color': 'rgba(0,212,255,0.5)' }}>
+        <motion.div {...anim(0.15)} className="card card-hover animated-border stat-card" style={{ '--accent-color': 'rgba(0,212,255,0.5)' }}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-3">Win Rate</p>
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Win Rate</p>
               {closedTrades.length > 0 ? (
-                <AnimatedNumber value={winRate} suffix="%" decimals={1} className="text-4xl font-bold font-mono text-white" />
+                <>
+                  <AnimatedNumber value={winRate} suffix="%" decimals={1} className="text-4xl font-bold font-mono text-white" />
+                  <div className="w-full h-1.5 rounded-full mt-4 overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <motion.div
+                      className="h-full rounded-full"
+                      style={{ background: 'linear-gradient(90deg, #00d4ff, #10b981)' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(winRate, 100)}%` }}
+                      transition={{ delay: 0.5, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    />
+                  </div>
+                </>
               ) : (
                 <span className="text-4xl font-bold font-mono text-gray-600">&mdash;</span>
               )}
@@ -147,10 +160,10 @@ export default function Overview() {
           </div>
         </motion.div>
 
-        <motion.div {...anim(0.2)} className="card card-hover stat-card" style={{ '--accent-color': 'rgba(168,85,247,0.5)' }}>
+        <motion.div {...anim(0.2)} className="card card-hover animated-border stat-card" style={{ '--accent-color': 'rgba(168,85,247,0.5)' }}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-400 mb-3">Trades</p>
+              <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Trades</p>
               <AnimatedNumber value={portfolio?.totalTrades || 0} decimals={0} className="text-4xl font-bold font-mono text-white" />
               <div className="flex gap-4 mt-3">
                 <span className="text-xs font-mono text-gray-500">{closedTrades.length} closed</span>
@@ -164,7 +177,6 @@ export default function Overview() {
         </motion.div>
       </div>
 
-      {/* Row 2: Secondary stats strip */}
       <motion.div {...anim(0.25)} className="grid grid-cols-3 lg:grid-cols-6 gap-4">
         {[
           { label: 'Avg Win', value: avgWin > 0 ? `+$${avgWin.toFixed(2)}` : '—', color: 'text-profit' },
@@ -174,14 +186,23 @@ export default function Overview() {
           { label: 'Worst Trade', value: worstTrade < 0 ? `$${worstTrade.toFixed(2)}` : '—', color: 'text-loss' },
           { label: 'Deployed %', value: totalValue > 0 ? `${((invested / totalValue) * 100).toFixed(0)}%` : '—', color: 'text-accent' },
         ].map((s, i) => (
-          <div key={s.label} className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
-            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">{s.label}</p>
+          <motion.div
+            key={s.label}
+            whileHover={{ scale: 1.03, y: -2 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className="rounded-xl p-4 cursor-default"
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.04)',
+              transition: 'border-color 0.3s, box-shadow 0.3s',
+            }}
+          >
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">{s.label}</p>
             <p className={`text-lg font-mono font-semibold ${s.color}`}>{s.value}</p>
-          </div>
+          </motion.div>
         ))}
       </motion.div>
 
-      {/* Row 3: Opportunities + Trades side by side */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div {...anim(0.3)} className="card">
           <div className="flex items-center justify-between mb-5">
@@ -192,20 +213,21 @@ export default function Overview() {
             {(opportunities || []).slice(0, 12).map((opp, i) => (
               <motion.div
                 key={opp?.marketId || i}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35 + i * 0.03 }}
-                className="p-4 rounded-xl hover:bg-white/[0.03] transition-colors"
+                initial={{ opacity: 0, x: -12, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                transition={{ delay: 0.35 + i * 0.04, duration: 0.5 }}
+                whileHover={{ x: 4, backgroundColor: 'rgba(0, 212, 255, 0.03)' }}
+                className="p-4 rounded-xl transition-colors"
                 style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
               >
                 <p className="text-sm font-medium truncate text-gray-200">{opp?.question ?? '—'}</p>
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-profit text-sm font-mono font-bold">+{((opp?.edgePercent ?? 0) * 100).toFixed(2)}%</span>
+                    <span className="text-profit text-sm font-mono font-bold" style={{ textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>+{((opp?.edgePercent ?? 0) * 100).toFixed(2)}%</span>
                     {opp?.direction && <span className="text-[10px] text-gray-500 font-mono">{opp.direction}</span>}
                   </div>
                   <div className="flex items-center gap-3">
-                    {opp?.strategy && <span className="text-[10px] text-accent/50 bg-accent/5 px-2 py-0.5 rounded-full">{opp.strategy}</span>}
+                    {opp?.strategy && <span className="text-[10px] text-accent/60 bg-accent/5 px-2 py-0.5 rounded-full border border-accent/10">{opp.strategy}</span>}
                     <span className="text-[11px] text-gray-500 font-mono">${(opp?.liquidity ?? 0).toLocaleString()}</span>
                   </div>
                 </div>
@@ -213,8 +235,13 @@ export default function Overview() {
             ))}
             {opportunities.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-gray-500 text-base">No opportunities</p>
-                <p className="text-gray-600 text-sm mt-1">Waiting for next scan cycle</p>
+                <motion.div
+                  animate={{ opacity: [0.4, 0.8, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 3 }}
+                >
+                  <p className="text-gray-500 text-base">No opportunities</p>
+                  <p className="text-gray-600 text-sm mt-1">Waiting for next scan cycle</p>
+                </motion.div>
               </div>
             )}
           </div>
@@ -225,7 +252,7 @@ export default function Overview() {
             <h3 className="text-xl font-semibold">
               Recent Trades
               {closedTrades.length > 0 && (
-                <span className={`ml-3 text-base font-mono ${realizedPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                <span className={`ml-3 text-base font-mono ${realizedPnl >= 0 ? 'profit-glow' : 'loss-glow'}`}>
                   {realizedPnl >= 0 ? '+' : ''}${realizedPnl.toFixed(2)}
                 </span>
               )}
@@ -238,21 +265,26 @@ export default function Overview() {
               return (
                 <motion.div
                   key={trade.id || i}
-                  initial={{ opacity: 0, x: 8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + i * 0.03 }}
-                  className="p-4 rounded-xl hover:bg-white/[0.03] transition-colors"
+                  initial={{ opacity: 0, x: 12, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                  transition={{ delay: 0.4 + i * 0.04, duration: 0.5 }}
+                  whileHover={{ x: -4, backgroundColor: 'rgba(0, 212, 255, 0.03)' }}
+                  className="p-4 rounded-xl transition-colors"
                   style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${hasRealized ? (pnl >= 0 ? 'bg-profit' : 'bg-loss') : 'bg-yellow-400'}`}
-                      style={{ boxShadow: hasRealized ? (pnl >= 0 ? '0 0 6px rgba(16,185,129,0.4)' : '0 0 6px rgba(239,68,68,0.4)') : '0 0 6px rgba(250,204,21,0.4)' }}
+                    <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${hasRealized ? (pnl >= 0 ? 'bg-profit' : 'bg-loss') : 'bg-yellow-400'}`}
+                      style={{
+                        boxShadow: hasRealized
+                          ? (pnl >= 0 ? '0 0 8px rgba(16,185,129,0.5)' : '0 0 8px rgba(239,68,68,0.5)')
+                          : '0 0 8px rgba(250,204,21,0.5)',
+                      }}
                     />
                     <p className="text-sm font-medium truncate flex-1 text-gray-200">{trade.question}</p>
-                    {trade.strategy && <span className="text-[10px] text-accent/50 bg-accent/5 px-2 py-0.5 rounded-full whitespace-nowrap">{trade.strategy}</span>}
+                    {trade.strategy && <span className="text-[10px] text-accent/60 bg-accent/5 px-2 py-0.5 rounded-full border border-accent/10 whitespace-nowrap">{trade.strategy}</span>}
                   </div>
                   <div className="flex justify-between text-xs pl-5">
-                    <span className={`font-mono font-semibold ${pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                    <span className={`font-mono font-semibold ${pnl >= 0 ? 'text-profit' : 'text-loss'}`} style={{ textShadow: pnl >= 0 ? '0 0 10px rgba(16,185,129,0.25)' : '0 0 10px rgba(239,68,68,0.25)' }}>
                       {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}
                       <span className="text-gray-600 ml-2 font-normal text-[10px]">{hasRealized ? 'realized' : 'est'}</span>
                     </span>
@@ -275,32 +307,47 @@ export default function Overview() {
         </motion.div>
       </div>
 
-      {/* Row 4: Strategy breakdown + Oracle intel */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Strategy performance */}
         <motion.div {...anim(0.4)} className="card">
           <h3 className="text-xl font-semibold mb-5">Strategy Breakdown</h3>
           <div className="space-y-3">
             {topStrategies.map(([name, data], i) => {
               const wr = data.count > 0 && data.wins > 0 ? ((data.wins / data.count) * 100).toFixed(0) : '—'
+              const maxCount = Math.max(...topStrategies.map(([, d]) => d.count), 1)
               return (
-                <div key={name} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}>
-                  <div className="flex items-center gap-3">
-                    <span className="text-accent/50 bg-accent/5 px-2.5 py-1 rounded-lg text-[11px] font-mono">{name}</span>
+                <motion.div
+                  key={name}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.45 + i * 0.05 }}
+                  className="strategy-bar flex items-center justify-between p-4 rounded-xl relative"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
+                >
+                  <div className="absolute left-0 top-0 bottom-0 rounded-xl opacity-[0.04]"
+                    style={{
+                      width: `${(data.count / maxCount) * 100}%`,
+                      background: data.pnl >= 0
+                        ? 'linear-gradient(90deg, rgba(16,185,129,0.8), transparent)'
+                        : 'linear-gradient(90deg, rgba(239,68,68,0.8), transparent)',
+                    }}
+                  />
+                  <div className="flex items-center gap-3 relative z-10">
+                    <span className="text-accent/60 bg-accent/5 px-2.5 py-1 rounded-lg text-[11px] font-mono border border-accent/10">{name}</span>
                   </div>
-                  <div className="flex items-center gap-6 text-xs font-mono">
+                  <div className="flex items-center gap-6 text-xs font-mono relative z-10">
                     <span className="text-gray-400">{data.count} trades</span>
                     <span className="text-gray-500">{wr}% wr</span>
-                    <span className={data.pnl >= 0 ? 'text-profit' : 'text-loss'}>{data.pnl >= 0 ? '+' : ''}${data.pnl.toFixed(2)}</span>
+                    <span className={data.pnl >= 0 ? 'text-profit' : 'text-loss'} style={{ textShadow: data.pnl >= 0 ? '0 0 8px rgba(16,185,129,0.2)' : '0 0 8px rgba(239,68,68,0.2)' }}>
+                      {data.pnl >= 0 ? '+' : ''}${data.pnl.toFixed(2)}
+                    </span>
                   </div>
-                </div>
+                </motion.div>
               )
             })}
             {topStrategies.length === 0 && <p className="text-gray-500 text-center py-8">No strategy data yet</p>}
           </div>
         </motion.div>
 
-        {/* Oracle intel */}
         <motion.div {...anim(0.45)} className="card">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-xl font-semibold">Oracle Intelligence</h3>
@@ -311,24 +358,41 @@ export default function Overview() {
           {oracle ? (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(0,212,255,0.04)', border: '1px solid rgba(0,212,255,0.08)' }}>
-                  <p className="text-2xl font-bold font-mono text-accent">{oracle.activeTheses || 0}</p>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Active Theses</p>
-                </div>
-                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.08)' }}>
-                  <p className="text-2xl font-bold font-mono text-amber-400">{oracle.recentWhaleSignals || 0}</p>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Whale Signals</p>
-                </div>
-                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(168,85,247,0.04)', border: '1px solid rgba(168,85,247,0.08)' }}>
-                  <p className="text-2xl font-bold font-mono text-purple-400">{oracle.stats?.totalRuns || 0}</p>
-                  <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Scan Cycles</p>
-                </div>
+                {[
+                  { value: oracle.activeTheses || 0, label: 'Active Theses', color: '0, 212, 255', textColor: 'text-accent' },
+                  { value: oracle.recentWhaleSignals || 0, label: 'Whale Signals', color: '245, 158, 11', textColor: 'text-amber-400' },
+                  { value: oracle.stats?.totalRuns || 0, label: 'Scan Cycles', color: '168, 85, 247', textColor: 'text-purple-400' },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.label}
+                    whileHover={{ scale: 1.04, y: -2 }}
+                    className="rounded-xl p-3 text-center cursor-default"
+                    style={{
+                      background: `rgba(${item.color}, 0.04)`,
+                      border: `1px solid rgba(${item.color}, 0.1)`,
+                    }}
+                  >
+                    <p className={`text-2xl font-bold font-mono ${item.textColor}`}
+                      style={{ textShadow: `0 0 15px rgba(${item.color}, 0.3)` }}
+                    >
+                      {item.value}
+                    </p>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">{item.label}</p>
+                  </motion.div>
+                ))}
               </div>
               {(oracle.theses || []).length > 0 && (
                 <div className="space-y-2 max-h-[300px] overflow-y-auto">
                   <p className="text-[10px] text-gray-500 uppercase tracking-wider">Recent Theses</p>
                   {(oracle.theses || []).slice(-6).reverse().map((t, i) => (
-                    <div key={t.id || i} className="p-3 rounded-xl text-xs" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                    <motion.div
+                      key={t.id || i}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + i * 0.04 }}
+                      className="p-3 rounded-xl text-xs strategy-bar"
+                      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
+                    >
                       <div className="flex items-center justify-between mb-1">
                         <span className={`font-mono font-semibold ${t.bias?.includes('BUY_YES') || t.direction === 'BUY_YES' ? 'text-profit' : t.bias?.includes('BUY_NO') || t.direction === 'BUY_NO' ? 'text-loss' : 'text-gray-400'}`}>
                           {t.direction || t.bias || '—'}
@@ -336,15 +400,17 @@ export default function Overview() {
                         <span className="text-[10px] text-gray-600">{t.source || 'manual'}</span>
                       </div>
                       <p className="text-gray-400 text-[11px] truncate">{t.rationale || t.notes || t.keywords?.join(', ')}</p>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500">Oracle daemon not connected</p>
-              <p className="text-gray-600 text-sm mt-1">Start the bot watcher to enable</p>
+              <motion.div animate={{ opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 3 }}>
+                <p className="text-gray-500">Oracle daemon not connected</p>
+                <p className="text-gray-600 text-sm mt-1">Start the bot watcher to enable</p>
+              </motion.div>
             </div>
           )}
         </motion.div>

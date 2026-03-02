@@ -219,7 +219,7 @@ const newsSentimentStrategy = {
             conditionId: market.conditionId,
             endDate: market.endDate,
             direction,
-            maxPosition: Math.min((market.liquidity || 0) * 0.008, 150),
+            maxPosition: Math.min((market.liquidity || 0) * 0.015, 300),
             expectedReturn: netEdge,
             confidence: thesis.confidence,
             strategy: 'news-sentiment',

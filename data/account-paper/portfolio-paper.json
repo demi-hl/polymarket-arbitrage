@@ -1,10 +1,1 @@
-{
-  "cash": 10000,
-  "positions": {},
-  "trades": [],
-  "pnl": {
-    "realized": 0,
-    "unrealized": 0,
-    "total": 0
-  }
-}
+../portfolio-paper.json

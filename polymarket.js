@@ -17,6 +17,11 @@ const EdgeScorer = require('./lib/edge-scorer');
 const RiskManager = require('./lib/risk-manager');
 const OrderbookImbalanceAnalyzer = require('./lib/orderbook-imbalance');
 const GPUClient = require('./lib/gpu-client');
+let WhaleTracker, setWhaleTracker;
+try {
+  WhaleTracker = require('./integrations/whale-tracker');
+  ({ setWhaleTracker } = require('./strategies'));
+} catch { WhaleTracker = null; setWhaleTracker = null; }
 let oracleModule;
 try { oracleModule = require('./oracle'); } catch { oracleModule = null; }
 
@@ -153,6 +158,20 @@ program
 
     const riskManager = new RiskManager(bot.portfolio);
 
+    // Wire whale tracker into strategy scoring
+    let whaleTracker = null;
+    if (WhaleTracker && setWhaleTracker) {
+      try {
+        whaleTracker = new WhaleTracker();
+        await whaleTracker.init();
+        setWhaleTracker(whaleTracker);
+        whaleTracker.startPolling();
+      } catch (err) {
+        console.error(chalk.yellow(`  Whale tracker init failed: ${err.message} — continuing without`));
+        whaleTracker = null;
+      }
+    }
+
     // Start Oracle research daemon (runs news, X sentiment, whale tracking on a timer)
     let oracleRunning = false;
     let lastOracleRun = 0;
@@ -179,7 +198,8 @@ program
     console.log(chalk.gray(`Strategies: ${STRATEGY_COUNT} loaded`));
     console.log(chalk.gray(`ML Edge Scorer: loaded (${edgeScorer.trainCount} training samples)`));
     console.log(chalk.gray(`GPU Worker: ${gpuAvailable ? chalk.green('connected') + ' (' + gpu.baseUrl + ')' : chalk.yellow('offline — using local models')}`));
-    console.log(chalk.gray(`Risk Manager: Kelly sizing + circuit breaker active`));
+    console.log(chalk.gray(`Risk Manager: Kelly sizing + VaR + circuit breaker active`));
+    console.log(chalk.gray(`Whale Tracker: ${whaleTracker ? chalk.green('active') + ` (${whaleTracker.trackedWallets.size} wallets)` : chalk.yellow('not loaded')}`));
     console.log(chalk.gray(`Oracle Daemon: ${oracleModule ? 'active (news + X sentiment + whale tracking)' : 'not loaded'}`));
     console.log(chalk.yellow('Paper trading only — no real orders sent'));
     console.log(chalk.gray(`Mode: ${autoExecute ? 'AUTO-EXECUTE' : 'MONITOR ONLY'}`));
@@ -191,6 +211,7 @@ program
     const TAKE_PROFIT_ARB = 0.005;         // 0.5% — arb profits are smaller but real
     const STOP_LOSS_DIRECTIONAL = -0.08;   // 8% — give directional bets room to breathe
     const STOP_LOSS_ARB = -0.15;           // 15% — arbs should rarely hit this; if they do, something is wrong
+    const STOP_LOSS_EVENT_CATALYST = -0.03; // 3% — tight stop on catalyst trades (historically large losers)
     const TRAILING_DROP = 0.03;            // 3% drop from peak → lock in gains
     const GAS_COST = 0.04;
 
@@ -303,9 +324,11 @@ program
           pos.strategy === 'correlated-market-arb' ||
           pos.direction === 'BUY_BOTH';
 
+        const isEventCatalyst = pos.strategy === 'event-catalyst';
         const maxHold = isHoldToResolution ? MAX_HOLD_TIME_RESOLUTION : MAX_HOLD_TIME_DIRECTIONAL;
         const takeProfit = isHoldToResolution ? TAKE_PROFIT_ARB : TAKE_PROFIT_DIRECTIONAL;
-        const stopLoss = isHoldToResolution ? STOP_LOSS_ARB : STOP_LOSS_DIRECTIONAL;
+        const stopLoss = isEventCatalyst ? STOP_LOSS_EVENT_CATALYST
+          : isHoldToResolution ? STOP_LOSS_ARB : STOP_LOSS_DIRECTIONAL;
 
         if (!prices && age < maxHold) continue;
 
@@ -542,6 +565,7 @@ program
     process.on('SIGINT', () => {
       isStopping = true;
       if (nextTimer) clearTimeout(nextTimer);
+      if (whaleTracker) whaleTracker.stopPolling();
       console.log(chalk.bold(`\n\n📊 WATCH SUMMARY${label}`));
       console.log(chalk.gray(`Total scans: ${scanCount}`));
       console.log(chalk.gray(`Strategies: ${STRATEGY_COUNT}`));

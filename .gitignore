@@ -1,5 +1,22 @@
+node_modules/
+dist/
 .vercel
 .env
+.env.*
+*.pem
 .kalshi-private.pem
 kalshi-private.pem
 kalshi-key-paste-here.pem
+
+# GPU worker
+gpu-worker/__pycache__/
+gpu-worker/venv/
+gpu-worker/*.pt
+gpu-worker/models/__pycache__/
+
+# Data files (runtime state)
+data/*.json
+
+# OS
+.DS_Store
+Thumbs.db

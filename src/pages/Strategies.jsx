@@ -61,7 +61,7 @@ export default function Strategies() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold">Trading Strategies</h2>
+          <h2 className="text-2xl font-bold text-gradient-minimal">Trading Strategies</h2>
           <p className="text-xs text-gray-500 mt-1">
             {enabledStrategies.size} / {strategies.length} active · all strategies scanned every cycle
           </p>
@@ -78,10 +78,14 @@ export default function Strategies() {
               const riskClass = RISK_COLORS[strategy.riskLevel] || RISK_COLORS.medium
               return (
                 <StaggerItem key={strategy.name}>
-                  <div className={`rounded-lg border p-4 transition-colors ${enabled ? 'border-white/[0.06] bg-white/[0.02]' : 'border-white/[0.03] bg-transparent opacity-50'}`}>
+                  <div className={`strategy-bar rounded-xl border p-4 transition-all duration-300 ${enabled ? 'border-white/[0.06]' : 'border-white/[0.03] opacity-50'}`}
+                    style={{ background: enabled ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.1)' }}
+                        >
                           <Brain size={16} className="text-accent" />
                         </div>
                         <div>

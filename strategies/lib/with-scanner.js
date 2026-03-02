@@ -17,7 +17,7 @@ function getScanner(bot, minEdge = null) {
   const sectors = bot.sectors;
   return new PolymarketScanner({
     edgeThreshold: threshold,
-    minLiquidity: 500,
+    minLiquidity: 5000,
     ...(sectors && sectors.length ? { sectors } : {})
   });
 }
@@ -36,7 +36,7 @@ async function fetchMarketsOnce(options = {}) {
   _fetchPromise = (async () => {
     try {
       const scanner = new PolymarketScanner({
-        minLiquidity: 500,
+        minLiquidity: 5000,
         ...(key ? { sectors: sectors } : {})
       });
       const markets = await scanner.fetchMarkets({ sectors: key ? sectors : undefined });

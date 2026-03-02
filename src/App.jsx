@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion'
 import { Toaster } from 'sonner'
 import Sidebar from './components/Sidebar'
 import Header from './components/Header'
+import ParticleBackground from './components/ParticleBackground'
 import PageTransition from './components/PageTransition'
 import ErrorBoundary from './components/ErrorBoundary'
 import Landing from './pages/Landing'
@@ -22,6 +23,9 @@ function AppLayout() {
 
   return (
     <div className="flex h-screen bg-trader-950 bg-grid overflow-hidden font-futuristic">
+      <ParticleBackground count={isLanding ? 80 : 40} />
+      <div className="noise-overlay" />
+      <div className="scan-line" />
       <div className="ambient-light-2" />
       {!isLanding && <Sidebar />}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">

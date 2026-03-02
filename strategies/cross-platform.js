@@ -49,7 +49,7 @@ function crossPlatformOpportunity(match, source) {
   const pm = match.polyMarket;
   const liquidity = pm.liquidity || 0;
 
-  const positionCap = Math.min(liquidity * 0.02, 500);
+  const positionCap = Math.min(liquidity * 0.025, 750);
 
   let feeDrag = REALISTIC_SPREAD_COST;
   if (source === 'kalshi') feeDrag += KALSHI_FEE_EQUIVALENT;

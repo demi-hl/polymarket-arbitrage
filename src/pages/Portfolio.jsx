@@ -17,7 +17,7 @@ export default function Portfolio() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Portfolio</h2>
+        <h2 className="text-2xl font-bold text-gradient-minimal">Portfolio</h2>
         <div className="flex rounded-lg bg-trader-800 p-1 relative">
           {(accountIds?.length ? accountIds : [selectedAccount]).map((id) => (
             <button

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useTrading } from '../context/TradingContext'
 import { useMultiAccount } from '../context/MultiAccountContext'
 
@@ -21,18 +22,22 @@ export default function Header({ minimal = false }) {
         className="h-14 flex items-center justify-end px-8 relative z-20"
         style={{
           background: 'transparent',
-          borderBottom: '1px solid rgba(255,255,255,0.03)',
         }}
       >
-        <div className="flex items-center gap-5 text-xs uppercase tracking-widest text-gray-500 font-futuristic">
+        <div className="flex items-center gap-5 text-[10px] uppercase tracking-[0.25em] text-gray-600 font-futuristic">
           <div className="flex items-center gap-2.5">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{
-                background: isLive ? '#10b981' : '#6b7280',
-                boxShadow: isLive ? '0 0 8px rgba(16,185,129,0.5)' : 'none',
-              }}
-            />
+            <div className="relative">
+              <motion.div
+                className="w-2 h-2 rounded-full"
+                animate={isLive ? {
+                  boxShadow: ['0 0 6px rgba(16,185,129,0.4)', '0 0 16px rgba(16,185,129,0.8)', '0 0 6px rgba(16,185,129,0.4)'],
+                } : {}}
+                transition={{ repeat: Infinity, duration: 2 }}
+                style={{
+                  background: isLive ? '#10b981' : '#6b7280',
+                }}
+              />
+            </div>
             <span>{isLive ? 'Live' : 'Standby'}</span>
           </div>
           <span className="font-mono tabular-nums text-gray-600">
@@ -43,37 +48,62 @@ export default function Header({ minimal = false }) {
     )
   }
 
+  const cash = portfolio?.cash ?? 0
+  const pnl = portfolio?.pnl?.total ?? 0
+
   return (
     <header
       className="h-14 flex items-center justify-between px-8 relative z-20"
       style={{
-        background: 'rgba(18, 18, 26, 0.4)',
-        backdropFilter: 'blur(16px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+        background: 'rgba(10, 10, 18, 0.6)',
+        backdropFilter: 'blur(40px) saturate(1.4)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
       }}
     >
-      <Link to="/" className="text-sm uppercase tracking-[0.2em] text-gray-500 hover:text-gray-300 transition-colors font-futuristic">
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/8 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,212,255,0.01))' }} />
+
+      <Link to="/" className="text-[13px] uppercase tracking-[0.22em] text-gray-500 hover:text-gray-200 transition-colors duration-500 font-futuristic">
         Polymarket Bot
       </Link>
-      <div className="flex items-center gap-6 text-xs uppercase tracking-widest text-gray-500 font-futuristic">
+
+      <div className="flex items-center gap-6 text-[10px] uppercase tracking-[0.2em] text-gray-500 font-futuristic">
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-2 h-2 rounded-full"
-            style={{
-              background: isLive ? '#10b981' : '#6b7280',
-              boxShadow: isLive ? '0 0 8px rgba(16,185,129,0.5)' : 'none',
-            }}
-          />
+          <div className="relative">
+            <motion.div
+              className="w-2 h-2 rounded-full"
+              animate={isLive ? {
+                boxShadow: ['0 0 6px rgba(16,185,129,0.5)', '0 0 14px rgba(16,185,129,0.8)', '0 0 6px rgba(16,185,129,0.5)'],
+              } : {}}
+              transition={{ repeat: Infinity, duration: 2 }}
+              style={{
+                background: isLive ? '#10b981' : '#6b7280',
+              }}
+            />
+          </div>
           <span>{isLive ? 'Live' : 'Standby'}</span>
         </div>
+
         <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
-        <span className="font-mono tabular-nums text-gray-600 text-sm">
+
+        <span className="font-mono tabular-nums text-gray-500 text-sm">
           {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
+
         <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
-        <span className="font-mono text-gray-500 text-sm">
-          ${(portfolio?.cash ?? 0).toLocaleString()}
+
+        <span className="font-mono text-gray-400 text-sm">
+          ${cash.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </span>
+
+        {pnl !== 0 && (
+          <>
+            <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <span className={`font-mono text-sm font-medium ${pnl >= 0 ? 'profit-glow' : 'loss-glow'}`}>
+              {pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}
+            </span>
+          </>
+        )}
       </div>
     </header>
   )

@@ -13,7 +13,7 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 class PolymarketScanner {
   constructor(config = {}) {
     this.gammaApi = config.gammaApi || 'https://gamma-api.polymarket.com';
-    this.minLiquidity = config.minLiquidity || 1000;
+    this.minLiquidity = config.minLiquidity || 5000;
     this.edgeThreshold = config.edgeThreshold || 0.05;
     this.timeout = config.timeout || 15000;
     this.pageSize = config.pageSize || 100;
