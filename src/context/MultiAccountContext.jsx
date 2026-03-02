@@ -31,6 +31,7 @@ export function MultiAccountProvider({ children }) {
               if (!a?.id) return
               const portfolio = a.portfolio || {}
               const trades = portfolio.trades || []
+              const positions = portfolio.positions || {}
               const closedTrades = trades.filter(t => t.realizedPnl != null)
               const openTrades = trades.filter(t => t.realizedPnl == null)
               const wins = closedTrades.filter(t => t.realizedPnl > 0)
@@ -45,6 +46,27 @@ export function MultiAccountProvider({ children }) {
               const edgeSum = trades.reduce((s, t) => s + (t.edgePercent || 0), 0)
               const avgEdge = trades.length > 0 ? ((edgeSum / trades.length) * 100).toFixed(2) : '0.00'
               const allTrades = trades.length > 0 ? trades : (a.recentTrades || [])
+
+              // More realistic hit rate: include mark-to-market open positions.
+              const openPositions = Object.values(positions).filter(p => p?.status === 'open')
+              let openWinCount = 0
+              let openLossCount = 0
+              for (const p of openPositions) {
+                const yesShares = Number(p.yesShares || 0)
+                const noShares = Number(p.noShares || 0)
+                const curYes = Number(p.currentYesPrice)
+                const curNo = Number(p.currentNoPrice)
+                const entryCost = Number(p.entryCost || 0)
+                if (!Number.isFinite(curYes) || !Number.isFinite(curNo) || entryCost <= 0) continue
+                const currentValue = yesShares * curYes + noShares * curNo
+                const openPnl = currentValue - entryCost
+                if (openPnl > 0) openWinCount++
+                else if (openPnl < 0) openLossCount++
+              }
+              const realisticDenominator = wins.length + losses.length + openWinCount + openLossCount
+              const realisticWinRate = realisticDenominator > 0
+                ? (wins.length + openWinCount) / realisticDenominator * 100
+                : 0
 
               const startingCapital = 10000
               const events = []
@@ -107,6 +129,11 @@ export function MultiAccountProvider({ children }) {
                 recentTrades: (a.recentTrades || allTrades).slice(0, 80),
                 equityCurve: curve,
                 rust: a.rust || null,
+                positions,
+                closedWinRate: winRate,
+                openWinCount,
+                openLossCount,
+                realisticWinRate,
               }
             })
             cmp = null
