@@ -319,13 +319,16 @@ export default function ABTest() {
 function AccountDetailStats({ data, theme }) {
   const realizedPnl = data.pnl?.realized || 0
   const unrealizedPnl = data.pnl?.unrealized || 0
+  const liveHitRate = Number.isFinite(data.realisticWinRate) ? data.realisticWinRate : (data.winRate || 0)
+  const closedWinRate = Number.isFinite(data.closedWinRate) ? data.closedWinRate : (data.winRate || 0)
   const stats = [
     { label: 'Total Value', value: `$${(data.totalValue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
     { label: 'Cash', value: `$${(data.cash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
     { label: 'Realized P&L', value: `${realizedPnl >= 0 ? '+' : ''}$${realizedPnl.toFixed(2)}`, positive: realizedPnl >= 0 },
     { label: 'Unrealized P&L', value: `${unrealizedPnl >= 0 ? '+' : ''}$${unrealizedPnl.toFixed(2)}`, positive: unrealizedPnl >= 0 },
     { label: 'Return', value: `${(data.totalReturn || 0) >= 0 ? '+' : ''}${(data.totalReturn || 0).toFixed(2)}%`, positive: (data.totalReturn || 0) >= 0 },
-    { label: 'Win Rate', value: data.closedTradeCount > 0 ? `${(data.winRate || 0).toFixed(1)}%` : '—' },
+    { label: 'Live Hit Rate', value: data.closedTradeCount > 0 ? `${liveHitRate.toFixed(1)}%` : '—' },
+    { label: 'Closed Win Rate', value: data.closedTradeCount > 0 ? `${closedWinRate.toFixed(1)}%` : '—' },
     { label: 'W / L', value: `${data.winCount || 0}W / ${data.lossCount || 0}L` },
     { label: 'Avg Edge', value: `${parseFloat(data.avgEdge || 0).toFixed(2)}%` },
     { label: 'Trades', value: `${data.totalTrades || 0} (${data.closedTradeCount || 0} closed)` },
@@ -482,7 +485,8 @@ function ComparisonTable({ a, b }) {
     { label: 'Cash', aVal: a.cash || 0, bVal: b.cash || 0, fmt: v => `$${v.toFixed(2)}` },
     { label: 'Realized P&L', aVal: a.pnl?.realized || 0, bVal: b.pnl?.realized || 0, fmt: v => `${v >= 0 ? '+' : ''}$${v.toFixed(2)}` },
     { label: 'Unrealized P&L', aVal: a.pnl?.unrealized || 0, bVal: b.pnl?.unrealized || 0, fmt: v => `${v >= 0 ? '+' : ''}$${v.toFixed(2)}` },
-    { label: 'Win rate', aVal: a.winRate || 0, bVal: b.winRate || 0, fmt: v => `${v.toFixed(1)}%` },
+    { label: 'Live hit rate', aVal: (a.realisticWinRate ?? a.winRate ?? 0), bVal: (b.realisticWinRate ?? b.winRate ?? 0), fmt: v => `${v.toFixed(1)}%` },
+    { label: 'Closed win rate', aVal: (a.closedWinRate ?? a.winRate ?? 0), bVal: (b.closedWinRate ?? b.winRate ?? 0), fmt: v => `${v.toFixed(1)}%` },
     { label: 'Wins', aVal: a.winCount || 0, bVal: b.winCount || 0, fmt: v => String(Math.round(v)) },
     { label: 'Losses', aVal: a.lossCount || 0, bVal: b.lossCount || 0, fmt: v => String(Math.round(v)), invert: true },
     { label: 'Total trades', aVal: a.totalTrades || 0, bVal: b.totalTrades || 0, fmt: v => String(Math.round(v)) },

@@ -55,6 +55,11 @@ export default function AccountCard({ accountId, data, isWinner = false }) {
   const pnl = data.pnl?.total || 0
   const openCount = data.openTradeCount || data.openPositions || 0
   const deployedPct = totalValue > 0 ? ((invested / totalValue) * 100) : 0
+  const closedWinRate = data.closedTradeCount > 0 ? (data.closedWinRate ?? data.winRate ?? 0) : 0
+  const liveHitRate = Number.isFinite(data.realisticWinRate) ? data.realisticWinRate : closedWinRate
+  const openWinCount = data.openWinCount || 0
+  const openLossCount = data.openLossCount || 0
+  const hasLiveHitRate = (data.winCount || 0) + (data.lossCount || 0) + openWinCount + openLossCount > 0
 
   return (
     <motion.div
@@ -138,10 +143,13 @@ export default function AccountCard({ accountId, data, isWinner = false }) {
         <Stat label="Total value" value={totalValue} prefix="$" themeColor={theme.color} />
         <Stat label="Realized P&L" value={data.pnl?.realized || 0} prefix={(data.pnl?.realized || 0) >= 0 ? '+$' : '-$'} abs valueClass={(data.pnl?.realized || 0) >= 0 ? 'text-profit' : 'text-loss'} />
         <Stat label="Unrealized P&L" value={data.pnl?.unrealized || 0} prefix={(data.pnl?.unrealized || 0) >= 0 ? '+$' : '-$'} abs valueClass={(data.pnl?.unrealized || 0) >= 0 ? 'text-profit' : 'text-loss'} />
-        <Stat label="Win rate" value={data.closedTradeCount > 0 ? (data.winRate || 0) : 0} suffix={data.closedTradeCount > 0 ? '%' : ''} decimals={data.closedTradeCount > 0 ? 1 : 0} custom={data.closedTradeCount > 0 ? null : '—'} />
-        <Stat label="W / L" value={0} decimals={0} custom={`${data.winCount || 0}W / ${data.lossCount || 0}L`} />
+        <Stat label="Live hit rate" value={hasLiveHitRate ? liveHitRate : 0} suffix={hasLiveHitRate ? '%' : ''} decimals={hasLiveHitRate ? 1 : 0} custom={hasLiveHitRate ? null : '—'} />
+        <Stat label="Closed W / L" value={0} decimals={0} custom={`${data.winCount || 0}W / ${data.lossCount || 0}L`} />
         <Stat label="Trades" value={data.totalTrades || 0} decimals={0} custom={`${data.closedTradeCount || 0} closed / ${openCount} open`} />
       </div>
+      <p className="text-[10px] text-gray-600 mt-3">
+        Closed WR: {closedWinRate.toFixed(1)}% · Open M2M bias: {openWinCount} green / {openLossCount} red
+      </p>
     </motion.div>
   )
 }
