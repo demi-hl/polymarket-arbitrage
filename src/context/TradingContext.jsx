@@ -7,6 +7,7 @@ const TradingContext = createContext()
 export function TradingProvider({ children }) {
   const [portfolio, setPortfolio] = useState(null)
   const [opportunities, setOpportunities] = useState([])
+  const [opportunitiesMeta, setOpportunitiesMeta] = useState({ stale: false, warning: null, marketsScanned: 0 })
   const [trades, setTrades] = useState([])
   const [strategies, setStrategies] = useState([])
   const [systemStatus, setSystemStatus] = useState({ connected: true })
@@ -82,6 +83,11 @@ export function TradingProvider({ children }) {
         const oppRes = await api.get('/opportunities?threshold=5')
         if (!cancelled && oppRes?.success) {
           setOpportunities(oppRes.data?.opportunities || [])
+          setOpportunitiesMeta({
+            stale: !!oppRes.data?.stale,
+            warning: oppRes.data?.warning || null,
+            marketsScanned: oppRes.data?.marketsScanned || 0,
+          })
         }
       } catch (err) {
         // opportunities scan can be slow/fail — don't block UI
@@ -116,6 +122,7 @@ export function TradingProvider({ children }) {
 
   const value = {
     portfolio, opportunities, trades, strategies,
+    opportunitiesMeta,
     selectedAccount, setSelectedAccount, accountIds,
     systemStatus,
     loading, executeTrade,

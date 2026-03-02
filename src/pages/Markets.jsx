@@ -3,7 +3,7 @@ import { useTrading } from '../context/TradingContext'
 import { Search, ArrowUpDown } from '../components/Icons'
 
 export default function Markets() {
-  const { opportunities, executeTrade } = useTrading()
+  const { opportunities, executeTrade, opportunitiesMeta } = useTrading()
   const [search, setSearch] = useState('')
   const [minEdge, setMinEdge] = useState(5)
   const [sortBy, setSortBy] = useState('edge')
@@ -65,6 +65,24 @@ export default function Markets() {
           </button>
         </div>
       </div>
+
+      {opportunitiesMeta?.stale && (
+        <div
+          className="rounded-lg px-4 py-3 text-sm"
+          style={{
+            background: 'rgba(250, 204, 21, 0.08)',
+            border: '1px solid rgba(250, 204, 21, 0.25)',
+            color: 'rgba(250, 204, 21, 0.95)',
+          }}
+        >
+          Live opportunities are temporarily stale. Showing cached results while the scanner catches up.
+          {opportunitiesMeta?.warning ? (
+            <span className="block text-xs mt-1 text-yellow-300/80">
+              Reason: {opportunitiesMeta.warning}
+            </span>
+          ) : null}
+        </div>
+      )}
       
       <div className="card overflow-hidden">
         <table className="data-table">
