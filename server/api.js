@@ -558,10 +558,30 @@ function createApiServer(wsServer) {
     return Number.isFinite(n) ? n : fallback;
   }
 
-  function getOpenPositionCost(positions = {}) {
+  function isSyntheticRustPosition(position) {
+    return Boolean(position?.rustEngine) || String(position?.strategy || '') === 'crypto-latency-arb';
+  }
+
+  function getOpenPositionCost(positions = {}, { includeSyntheticRust = true } = {}) {
     return Object.values(positions)
       .filter(p => p?.status === 'open')
+      .filter(p => includeSyntheticRust || !isSyntheticRustPosition(p))
       .reduce((sum, p) => sum + toNumber(p.entryCost, 0), 0);
+  }
+
+  function estimateNodeUnrealizedFromPositions(positions = {}) {
+    return Object.values(positions)
+      .filter(p => p?.status === 'open')
+      .filter(p => !isSyntheticRustPosition(p))
+      .reduce((sum, p) => {
+        const yesShares = toNumber(p.yesShares, 0);
+        const noShares = toNumber(p.noShares, 0);
+        const currentYes = toNumber(p.currentYesPrice, toNumber(p.entryYesPrice, 0.5));
+        const currentNo = toNumber(p.currentNoPrice, toNumber(p.entryNoPrice, 0.5));
+        const entryCost = toNumber(p.entryCost, 0);
+        const currentValue = yesShares * currentYes + noShares * currentNo;
+        return sum + (currentValue - entryCost);
+      }, 0);
   }
 
   function mapRustTrades(trades = []) {
@@ -602,10 +622,10 @@ function createApiServer(wsServer) {
   }
 
   function computeMergedStats(portfolio, report, rust) {
-    const nodePnl = report?.pnl || portfolio?.pnl || { realized: 0, unrealized: 0, total: 0 };
     const rustPnl = rust?.pnl || { realized: 0, unrealized: 0, total: 0 };
 
-    const nodeTrades = portfolio?.trades || [];
+    const allNodeTrades = portfolio?.trades || [];
+    const nodeTrades = allNodeTrades.filter(t => t?.fillMethod !== 'rust-engine' && t?.strategy !== 'crypto-latency-arb');
     const rustTrades = rust?.recentTrades || [];
     const mergedTrades = mergeTrades(nodeTrades, rustTrades);
     const closedTrades = mergedTrades.filter(t => t.realizedPnl != null);
@@ -613,11 +633,18 @@ function createApiServer(wsServer) {
     const wins = closedTrades.filter(t => toNumber(t.realizedPnl, 0) > 0);
     const losses = closedTrades.filter(t => toNumber(t.realizedPnl, 0) < 0);
 
-    const openCost = getOpenPositionCost(portfolio?.positions || {});
-    const baseTotalValue = toNumber(portfolio?.cash, 0) + openCost + toNumber(nodePnl.unrealized, 0);
+    const syntheticRustOpenCost = getOpenPositionCost(portfolio?.positions || {}, { includeSyntheticRust: true })
+      - getOpenPositionCost(portfolio?.positions || {}, { includeSyntheticRust: false });
+    const normalizedCash = toNumber(portfolio?.cash, 0) + syntheticRustOpenCost;
+    const openCost = getOpenPositionCost(portfolio?.positions || {}, { includeSyntheticRust: false });
+    const normalizedNodeRealized = nodeTrades
+      .filter(t => t.realizedPnl != null)
+      .reduce((sum, t) => sum + toNumber(t.realizedPnl, 0), 0);
+    const normalizedNodeUnrealized = estimateNodeUnrealizedFromPositions(portfolio?.positions || {});
+    const baseTotalValue = normalizedCash + openCost + normalizedNodeUnrealized;
     const combinedTotalValue = baseTotalValue + toNumber(rustPnl.total, 0);
     const allTimePnl = combinedTotalValue - STARTING_CAPITAL;
-    const mergedRealized = toNumber(nodePnl.realized, 0) + toNumber(rustPnl.realized, 0);
+    const mergedRealized = normalizedNodeRealized + toNumber(rustPnl.realized, 0);
     const mergedUnrealized = allTimePnl - mergedRealized;
     const mergedPnl = {
       realized: mergedRealized,
@@ -625,9 +652,9 @@ function createApiServer(wsServer) {
       total: allTimePnl,
       components: {
         node: {
-          realized: toNumber(nodePnl.realized, 0),
-          unrealized: toNumber(nodePnl.unrealized, 0),
-          total: toNumber(nodePnl.total, 0),
+          realized: normalizedNodeRealized,
+          unrealized: normalizedNodeUnrealized,
+          total: normalizedNodeRealized + normalizedNodeUnrealized,
         },
         rust: {
           realized: toNumber(rustPnl.realized, 0),

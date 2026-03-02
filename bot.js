@@ -267,6 +267,10 @@ class PolymarketArbitrageBot extends EventEmitter {
   }
 
   async recordRustEngineTrade(opportunity) {
+    if (!(opportunity.alreadyExecuted && opportunity.rustPnl != null)) {
+      throw new Error('Rust signal not executed yet; skipping Node portfolio entry');
+    }
+
     const timestamp = new Date().toISOString();
     const size = opportunity.maxPosition || 25;
     const yesPrice = opportunity.yesPrice || 0.5;
@@ -300,29 +304,9 @@ class PolymarketArbitrageBot extends EventEmitter {
       status: 'filled', filledAt: timestamp,
     };
 
-    if (opportunity.alreadyExecuted && opportunity.rustPnl != null) {
-      trade.realizedPnl = opportunity.rustPnl;
-      trade.closedAt = timestamp;
-      trade.closeMethod = 'rust-instant';
-    } else {
-      this.portfolio.cash -= size;
-      this.portfolio.positions[opportunity.marketId] = {
-        marketId: opportunity.marketId,
-        question: opportunity.question,
-        yesShares: trade.yesShares,
-        noShares: trade.noShares,
-        entryYesPrice: yesPrice,
-        entryNoPrice: noPrice,
-        entryCost: size,
-        entryTime: timestamp,
-        direction: opportunity.direction,
-        strategy: 'crypto-latency-arb',
-        holdUntilResolution: false,
-        clobTokenIds: opportunity.clobTokenIds || [],
-        status: 'open',
-        rustEngine: true,
-      };
-    }
+    trade.realizedPnl = opportunity.rustPnl;
+    trade.closedAt = timestamp;
+    trade.closeMethod = 'rust-instant';
 
     this.portfolio.trades.push(trade);
     this.updatePnL();
@@ -356,6 +340,10 @@ class PolymarketArbitrageBot extends EventEmitter {
     for (const opp of ranked) {
       try {
         if (opp.rustEngine) {
+          if (!(opp.alreadyExecuted && opp.rustPnl != null)) {
+            skipped.push({ opportunity: opp, reason: 'Rust signal pending execution' });
+            continue;
+          }
           const trade = await this.execute(opp);
           executed.push(trade);
           const pnlTag = trade.realizedPnl != null ? ` PnL: $${trade.realizedPnl.toFixed(2)}` : '';
