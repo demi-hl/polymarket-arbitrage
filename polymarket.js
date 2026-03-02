@@ -519,6 +519,7 @@ program
         if (autoExecute && !riskStatus.paused) {
           // Apply risk manager sizing to each opportunity before execution
           for (const opp of ranked) {
+            if (opp.rustEngine) continue; // Rust engine manages its own risk
             const riskCheck = riskManager.check(opp, opp.maxPosition || positionSize);
             if (!riskCheck.allowed) {
               opp._riskBlocked = riskCheck.reason;
