@@ -86,7 +86,19 @@ function createApiServer(wsServer) {
       const bot = new PolymarketArbitrageBot({ mode: 'paper', dataDir: botDataDir });
       await bot.loadPortfolio();
       const portfolio = bot.getPortfolio();
-      res.json({ success: true, data: portfolio });
+      const report = await bot.generateReport();
+      const rust = await fetchRustSnapshot();
+      const merged = computeMergedStats(portfolio, report, rust);
+      res.json({
+        success: true,
+        data: {
+          ...portfolio,
+          pnl: merged.mergedPnl,
+          totalValue: merged.totalValue,
+          totalReturn: merged.totalReturn,
+          rust,
+        },
+      });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
