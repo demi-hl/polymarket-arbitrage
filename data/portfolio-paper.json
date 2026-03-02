@@ -1,10 +1,49 @@
 {
-  "cash": 10000,
-  "positions": {},
-  "trades": [],
+  "cash": 9817.559832,
+  "positions": {
+    "1454080": {
+      "marketId": "1454080",
+      "question": "Will Google (GOOGL) close above $300 on March 2?",
+      "yesShares": 157.82157977145135,
+      "noShares": 371.5383023786251,
+      "entryCost": 182.44016800000003,
+      "entryTime": "2026-02-27T18:14:05.158Z",
+      "status": "open"
+    }
+  },
+  "trades": [
+    {
+      "id": "trade-1772216045158-z1enuwy8a",
+      "timestamp": "2026-02-27T18:14:05.158Z",
+      "marketId": "1454080",
+      "question": "Will Google (GOOGL) close above $300 on March 2?",
+      "strategy": "basic-arbitrage",
+      "mode": "paper",
+      "direction": "BUY_BOTH",
+      "yesPrice": 0.5779949999999999,
+      "noPrice": 0.24551999999999996,
+      "yesShares": 157.82157977145135,
+      "noShares": 371.5383023786251,
+      "yesSize": 91.22008400000001,
+      "noSize": 91.22008400000001,
+      "totalCost": 182.44016800000003,
+      "yesSlippage": 0.023,
+      "noSlippage": 0.023,
+      "grossEdge": 0.19500000000000006,
+      "slippageCost": 0.023,
+      "spreadCost": 0.005,
+      "netEdge": 0.16700000000000007,
+      "edgePercent": 0.16700000000000007,
+      "expectedReturn": 212.90767605600004,
+      "expectedProfit": 30.467508056000014,
+      "liquidityCap": 182.44016800000003,
+      "status": "filled",
+      "filledAt": "2026-02-27T18:14:05.158Z"
+    }
+  ],
   "pnl": {
     "realized": 0,
-    "unrealized": 0,
-    "total": 0
+    "unrealized": 82.23977307503816,
+    "total": 82.23977307503816
   }
 }

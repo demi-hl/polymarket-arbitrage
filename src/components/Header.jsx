@@ -1,62 +1,79 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useTrading } from '../context/TradingContext'
-import { Activity, Wifi, WifiOff, DollarSign } from './Icons'
+import { useMultiAccount } from '../context/MultiAccountContext'
 
-export default function Header() {
-  const { portfolio, systemStatus, opportunities } = useTrading()
-  
-  const totalPnl = portfolio?.pnl?.total || 0
-  const openPositions = portfolio?.openPositions || 0
-  
-  return (
-    <header className="h-16 bg-trader-800 border-b border-trader-700 flex items-center justify-between px-6">
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2">
-          <Activity size={20} className="text-accent" />
-          <span className="font-semibold">Live Trading</span>
-        </div>
-        
-        <div className="flex items-center gap-2 text-sm">
-          {systemStatus.connected ? (
-            <>
-              <Wifi size={16} className="text-profit" />
-              <span className="text-gray-400">Connected</span>
-            </>
-          ) : (
-            <>
-              <WifiOff size={16} className="text-loss" />
-              <span className="text-gray-400">Disconnected</span>
-            </>
-          )}
-        </div>
-        
-        <div className="flex items-center gap-2 text-sm">
-          <span className="w-2 h-2 rounded-full bg-profit animate-pulse" />
-          <span className="text-gray-400">{opportunities.length} Opportunities</span>
-        </div>
-      </div>
-      
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-xs text-gray-400">Open Positions</p>
-            <p className="font-mono font-semibold">{openPositions}</p>
+export default function Header({ minimal = false }) {
+  const [clock, setClock] = useState(new Date())
+  const { portfolio } = useTrading()
+  const { accountIds, loading } = useMultiAccount()
+
+  useEffect(() => {
+    const t = setInterval(() => setClock(new Date()), 1000)
+    return () => clearInterval(t)
+  }, [])
+
+  const isLive = !loading && accountIds.length >= 1
+
+  if (minimal) {
+    return (
+      <header
+        className="h-14 flex items-center justify-end px-8 relative z-20"
+        style={{
+          background: 'transparent',
+          borderBottom: '1px solid rgba(255,255,255,0.03)',
+        }}
+      >
+        <div className="flex items-center gap-5 text-xs uppercase tracking-widest text-gray-500 font-futuristic">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{
+                background: isLive ? '#10b981' : '#6b7280',
+                boxShadow: isLive ? '0 0 8px rgba(16,185,129,0.5)' : 'none',
+              }}
+            />
+            <span>{isLive ? 'Live' : 'Standby'}</span>
           </div>
-          <div className="w-px h-8 bg-trader-600" />
-          <div className="text-right">
-            <p className="text-xs text-gray-400">Total P&L</p>
-            <p className={`font-mono font-semibold ${totalPnl >= 0 ? 'text-profit' : 'text-loss'}`}>
-              {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 px-4 py-2 bg-trader-700 rounded-lg">
-          <DollarSign size={16} className="text-gray-400" />
-          <span className="font-mono font-semibold">
-            ${(portfolio?.cash || 0).toLocaleString()}
+          <span className="font-mono tabular-nums text-gray-600">
+            {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         </div>
+      </header>
+    )
+  }
+
+  return (
+    <header
+      className="h-14 flex items-center justify-between px-8 relative z-20"
+      style={{
+        background: 'rgba(18, 18, 26, 0.4)',
+        backdropFilter: 'blur(16px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+      }}
+    >
+      <Link to="/" className="text-sm uppercase tracking-[0.2em] text-gray-500 hover:text-gray-300 transition-colors font-futuristic">
+        Polymarket Bot
+      </Link>
+      <div className="flex items-center gap-6 text-xs uppercase tracking-widest text-gray-500 font-futuristic">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-2 h-2 rounded-full"
+            style={{
+              background: isLive ? '#10b981' : '#6b7280',
+              boxShadow: isLive ? '0 0 8px rgba(16,185,129,0.5)' : 'none',
+            }}
+          />
+          <span>{isLive ? 'Live' : 'Standby'}</span>
+        </div>
+        <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <span className="font-mono tabular-nums text-gray-600 text-sm">
+          {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+        </span>
+        <div className="w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <span className="font-mono text-gray-500 text-sm">
+          ${(portfolio?.cash ?? 0).toLocaleString()}
+        </span>
       </div>
     </header>
   )

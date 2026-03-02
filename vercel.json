@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://polymarket-bot.life.conway.tech/api/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

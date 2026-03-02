@@ -1,0 +1,374 @@
+{
+  "theses": [
+    {
+      "id": "iran-escalation",
+      "keywords": [
+        "iran",
+        "israel strike",
+        "retaliation",
+        "middle east war"
+      ],
+      "bias": "bearish-crypto",
+      "direction": "context",
+      "confidence": 0.7,
+      "notes": "US/Israel struck Iran Feb 28. BTC dropped to 63K. Monitoring for retaliation.",
+      "createdAt": 1772278501460,
+      "expiresAt": 1772883301460
+    },
+    {
+      "id": "btc-dip-overpriced",
+      "keywords": [
+        "bitcoin dip",
+        "btc dip"
+      ],
+      "bias": "contrarian-bullish",
+      "direction": "BUY_NO",
+      "confidence": 0.65,
+      "notes": "BTC dip markets overpriced after Iran shock. Bear rallies common. RSI oversold at 27.",
+      "createdAt": 1772278501461,
+      "expiresAt": 1772537701461
+    },
+    {
+      "id": "eth-institutional",
+      "keywords": [
+        "ethereum price",
+        "eth price",
+        "ether above"
+      ],
+      "bias": "bullish",
+      "direction": "BUY_YES",
+      "confidence": 0.7,
+      "notes": "BlackRock staked ETH ETF. $157M inflows Feb 25. Glamsterdam upgrade. Support at $1,850.",
+      "createdAt": 1772278501461,
+      "expiresAt": 1773488101461
+    },
+    {
+      "id": "shutdown-early",
+      "keywords": [
+        "government shutdown",
+        "shutdown end"
+      ],
+      "bias": "contrarian",
+      "direction": "BUY_YES",
+      "confidence": 0.5,
+      "notes": "Senate returns March 2. Markets price end ~March 26 but deal could come sooner.",
+      "createdAt": 1772278501461,
+      "expiresAt": 1774870501461
+    },
+    {
+      "id": "newsom-leading",
+      "keywords": [
+        "newsom",
+        "gavin newsom"
+      ],
+      "bias": "bullish",
+      "direction": "BUY_YES",
+      "confidence": 0.6,
+      "notes": "Emerson Feb 2026: Newsom 20% leading CA primary. RCP avg 30.5%. Polymarket may underprice.",
+      "createdAt": 1772278501461,
+      "expiresAt": 1777462501461
+    },
+    {
+      "id": "harris-overpriced",
+      "keywords": [
+        "kamala harris",
+        "harris win"
+      ],
+      "bias": "bearish",
+      "direction": "BUY_NO",
+      "confidence": 0.55,
+      "notes": "Harris at 13% in latest poll but Polymarket may have her higher. Newsom/Buttigieg eating share.",
+      "createdAt": 1772278501461,
+      "expiresAt": 1777462501461
+    },
+    {
+      "id": "whale-whale-flow-1772375199602",
+      "keywords": [
+        "0x15519d29f4256ada6f7280910a456c52b7108e1b6fa2cc820b90ae0dbc2cd6c1"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.57939914,
+      "rationale": "[Auto/Whale] $13233 in BUY flow (1 trades, 100% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T14:26:39.602Z",
+      "expiresAt": "2026-03-01T20:26:39.602Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772375199602",
+      "keywords": [
+        "0x6d7f8d105c6ad2ac13ea31218ab2c03715c5af922a42c4f39ab83d397fd5d570"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gopatriots (PnL: $577207) placed $10560 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T14:26:39.602Z",
+      "expiresAt": "2026-03-01T20:26:39.602Z"
+    },
+    {
+      "id": "whale-whale-flow-1772375199624",
+      "keywords": [
+        "0x15519d29f4256ada6f7280910a456c52b7108e1b6fa2cc820b90ae0dbc2cd6c1"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.57939914,
+      "rationale": "[Auto/Whale] $13233 in BUY flow (1 trades, 100% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T14:26:39.624Z",
+      "expiresAt": "2026-03-01T20:26:39.624Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772375199624",
+      "keywords": [
+        "0x6d7f8d105c6ad2ac13ea31218ab2c03715c5af922a42c4f39ab83d397fd5d570"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gopatriots (PnL: $577207) placed $10560 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T14:26:39.624Z",
+      "expiresAt": "2026-03-01T20:26:39.624Z"
+    },
+    {
+      "id": "whale-whale-flow-1772382524950",
+      "keywords": [
+        "0x2278d6f034785bf2d65c8580a8340c72acbf6a5fa3d5566842f5983693c272b4"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.53676842,
+      "rationale": "[Auto/Whale] $6128 in BUY flow (1 trades, 100% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:28:44.950Z",
+      "expiresAt": "2026-03-01T22:28:44.950Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772382524950",
+      "keywords": [
+        "0xd2f24335e6d602d940ddf87ab1650bae3834dd07d70318914bb206c0f6839390"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $353 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:28:44.950Z",
+      "expiresAt": "2026-03-01T22:28:44.950Z"
+    },
+    {
+      "id": "whale-whale-flow-1772382562189",
+      "keywords": [
+        "0x2278d6f034785bf2d65c8580a8340c72acbf6a5fa3d5566842f5983693c272b4"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.53676842,
+      "rationale": "[Auto/Whale] $6128 in BUY flow (1 trades, 100% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:29:22.189Z",
+      "expiresAt": "2026-03-01T22:29:22.189Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772382562189",
+      "keywords": [
+        "0xc65e24cc10c071c4643186287441624cb41040a3c66a2971e5fc44479cc25146"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @lfc123 (PnL: $1089076) placed $38500 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:29:22.189Z",
+      "expiresAt": "2026-03-01T22:29:22.189Z"
+    },
+    {
+      "id": "whale-whale-flow-1772383782497",
+      "keywords": [
+        "0xd4bbf7f6707c67beb736135ad32a41f6db41f8ae52d3ac4919650de9eeb94ed8"
+      ],
+      "bias": "BUY_NO",
+      "confidence": 0.70253084,
+      "rationale": "[Auto/Whale] $33755 in SELL flow (2 trades, 0% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:49:42.497Z",
+      "expiresAt": "2026-03-01T22:49:42.497Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772383782497",
+      "keywords": [
+        "0xd2f24335e6d602d940ddf87ab1650bae3834dd07d70318914bb206c0f6839390"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $283 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:49:42.497Z",
+      "expiresAt": "2026-03-01T22:49:42.497Z"
+    },
+    {
+      "id": "whale-whale-flow-1772383782525",
+      "keywords": [
+        "0xd4bbf7f6707c67beb736135ad32a41f6db41f8ae52d3ac4919650de9eeb94ed8"
+      ],
+      "bias": "BUY_NO",
+      "confidence": 0.70253084,
+      "rationale": "[Auto/Whale] $33755 in SELL flow (2 trades, 0% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:49:42.525Z",
+      "expiresAt": "2026-03-01T22:49:42.525Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772383782525",
+      "keywords": [
+        "0xd2f24335e6d602d940ddf87ab1650bae3834dd07d70318914bb206c0f6839390"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $283 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T16:49:42.525Z",
+      "expiresAt": "2026-03-01T22:49:42.525Z"
+    },
+    {
+      "id": "whale-whale-flow-1772388809548",
+      "keywords": [
+        "0xe06a7e94cf2fa8dc2085b7610fe16e9be1cde6654f34d365c13da1149b276c61"
+      ],
+      "bias": "BUY_NO",
+      "confidence": 0.55407602,
+      "rationale": "[Auto/Whale] $9013 in SELL flow (1 trades, 0% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T18:13:29.548Z",
+      "expiresAt": "2026-03-02T00:13:29.548Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772388809548",
+      "keywords": [
+        "0xc65e24cc10c071c4643186287441624cb41040a3c66a2971e5fc44479cc25146"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $667 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T18:13:29.548Z",
+      "expiresAt": "2026-03-02T00:13:29.548Z"
+    },
+    {
+      "id": "whale-whale-flow-1772389077894",
+      "keywords": [
+        "0xe06a7e94cf2fa8dc2085b7610fe16e9be1cde6654f34d365c13da1149b276c61"
+      ],
+      "bias": "BUY_NO",
+      "confidence": 0.55407602,
+      "rationale": "[Auto/Whale] $9013 in SELL flow (1 trades, 0% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T18:17:57.894Z",
+      "expiresAt": "2026-03-02T00:17:57.894Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772389077894",
+      "keywords": [
+        "0xc65e24cc10c071c4643186287441624cb41040a3c66a2971e5fc44479cc25146"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $667 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T18:17:57.894Z",
+      "expiresAt": "2026-03-02T00:17:57.894Z"
+    },
+    {
+      "id": "whale-whale-flow-1772392768753",
+      "keywords": [
+        "0xb09bf482a77b86b1ea4cd9dcbe129d1fc7a36a6a5178f9dac0875bd5610575a3"
+      ],
+      "bias": "BUY_NO",
+      "confidence": 0.56274968,
+      "rationale": "[Auto/Whale] $10458 in SELL flow (1 trades, 0% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:19:28.753Z",
+      "expiresAt": "2026-03-02T01:19:28.753Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772392768753",
+      "keywords": [
+        "0xed9bfc5bc5a9244d1e005c6ade94890733e7b210de4c98abfa47807acce8cac0"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @auggl00p (PnL: $554163) placed $13000 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:19:28.753Z",
+      "expiresAt": "2026-03-02T01:19:28.753Z"
+    },
+    {
+      "id": "whale-whale-flow-1772392839720",
+      "keywords": [
+        "0xb09bf482a77b86b1ea4cd9dcbe129d1fc7a36a6a5178f9dac0875bd5610575a3"
+      ],
+      "bias": "BUY_NO",
+      "confidence": 0.56274968,
+      "rationale": "[Auto/Whale] $10458 in SELL flow (1 trades, 0% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:20:39.720Z",
+      "expiresAt": "2026-03-02T01:20:39.720Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772392839720",
+      "keywords": [
+        "0xed9bfc5bc5a9244d1e005c6ade94890733e7b210de4c98abfa47807acce8cac0"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @auggl00p (PnL: $554163) placed $13000 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:20:39.720Z",
+      "expiresAt": "2026-03-02T01:20:39.720Z"
+    },
+    {
+      "id": "whale-whale-flow-1772394507740",
+      "keywords": [
+        "0xa1f9ea0567d771d73da6f8f21aa75e3c12c357c0b0fac675cbf2db7f31c80f6d"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.73705076,
+      "rationale": "[Auto/Whale] $39508 in BUY flow (1 trades, 100% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:48:27.740Z",
+      "expiresAt": "2026-03-02T01:48:27.740Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772394507740",
+      "keywords": [
+        "0x0bb53ade8791bcc72cadda44f27d7af9b7b12bd4a528abf00826b4cab2c50138"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $502 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:48:27.740Z",
+      "expiresAt": "2026-03-02T01:48:27.740Z"
+    },
+    {
+      "id": "whale-whale-flow-1772394506720",
+      "keywords": [
+        "0xa1f9ea0567d771d73da6f8f21aa75e3c12c357c0b0fac675cbf2db7f31c80f6d"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.73705076,
+      "rationale": "[Auto/Whale] $39508 in BUY flow (1 trades, 100% buy)",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:48:26.720Z",
+      "expiresAt": "2026-03-02T01:48:26.720Z"
+    },
+    {
+      "id": "whale-smart-wallet-1772394506720",
+      "keywords": [
+        "0x0bb53ade8791bcc72cadda44f27d7af9b7b12bd4a528abf00826b4cab2c50138"
+      ],
+      "bias": "BUY_YES",
+      "confidence": 0.85,
+      "rationale": "[Auto/SmartWallet] @gmanas (PnL: $1643651) placed $502 BUY",
+      "source": "oracle-whale-tracker",
+      "createdAt": "2026-03-01T19:48:26.720Z",
+      "expiresAt": "2026-03-02T01:48:26.720Z"
+    }
+  ],
+  "lastUpdated": 1772394512213
+}

@@ -1,0 +1,1558 @@
+{
+  "runs": [
+    {
+      "timestamp": 1772279770179,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 35
+        }
+      },
+      "elapsed": "23.9",
+      "activeTheses": 7
+    },
+    {
+      "timestamp": 1772280172193,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 39
+        }
+      },
+      "elapsed": "53.7",
+      "activeTheses": 9
+    },
+    {
+      "timestamp": 1772280438790,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 36
+        }
+      },
+      "elapsed": "53.4",
+      "activeTheses": 10
+    },
+    {
+      "timestamp": 1772302677002,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 28
+        }
+      },
+      "elapsed": "37.6",
+      "activeTheses": 8
+    },
+    {
+      "timestamp": 1772303087493,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 25
+        }
+      },
+      "elapsed": "50.2",
+      "activeTheses": 10
+    },
+    {
+      "timestamp": 1772303360527,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 24
+        }
+      },
+      "elapsed": "51.9",
+      "activeTheses": 12
+    },
+    {
+      "timestamp": 1772303852801,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 29
+        }
+      },
+      "elapsed": "49.0",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772304039261,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 29
+        }
+      },
+      "elapsed": "62.3",
+      "activeTheses": 16
+    },
+    {
+      "timestamp": 1772304674400,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 28
+        }
+      },
+      "elapsed": "149.5",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772304713048,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 28
+        }
+      },
+      "elapsed": "156.5",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772305470185,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772305489851,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772306123334,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772306147614,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772306749285,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772306799336,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772312457771,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.2",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772312460291,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772314652241,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772314690867,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "141.7",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772315296289,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772315447278,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772315937777,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.2",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772316106477,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772316592645,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772316740529,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772317216327,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772317398173,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772317839496,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772318020875,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772318491459,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772318640124,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772319123734,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772319263322,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772319770690,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.2",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772319915743,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.2",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772320399350,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772320543938,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772324706366,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772324725690,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772329357573,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 6
+    },
+    {
+      "timestamp": 1772329378502,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 6
+    },
+    {
+      "timestamp": 1772332731068,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 6
+    },
+    {
+      "timestamp": 1772332731113,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 6
+    },
+    {
+      "timestamp": 1772333363014,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 27
+        }
+      },
+      "elapsed": "41.9",
+      "activeTheses": 8
+    },
+    {
+      "timestamp": 1772333495547,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 27
+        }
+      },
+      "elapsed": "49.8",
+      "activeTheses": 10
+    },
+    {
+      "timestamp": 1772334166166,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 19
+        }
+      },
+      "elapsed": "107.2",
+      "activeTheses": 12
+    },
+    {
+      "timestamp": 1772334190566,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 19
+        }
+      },
+      "elapsed": "97.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772334999899,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "56.0",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772335083109,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772335691565,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772335714177,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772336327363,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772336334658,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772336948103,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772336965981,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772337618258,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 26
+        }
+      },
+      "elapsed": "40.3",
+      "activeTheses": 16
+    },
+    {
+      "timestamp": 1772337702064,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 376
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 27
+        }
+      },
+      "elapsed": "45.8",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772343102366,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772343102563,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772347722996,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772347739507,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772352092099,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772352113727,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772356610056,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 10
+    },
+    {
+      "timestamp": 1772356611646,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 0
+        }
+      },
+      "elapsed": "19.1",
+      "activeTheses": 10
+    },
+    {
+      "timestamp": 1772358324982,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 1
+        }
+      },
+      "elapsed": "103.0",
+      "activeTheses": 11
+    },
+    {
+      "timestamp": 1772358326158,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 0
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 21
+        }
+      },
+      "elapsed": "118.8",
+      "activeTheses": 12
+    },
+    {
+      "timestamp": 1772359468619,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 399
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 33
+        }
+      },
+      "elapsed": "2243.3",
+      "activeTheses": 10
+    },
+    {
+      "timestamp": 1772359471709,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 399
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 33
+        }
+      },
+      "elapsed": "2245.7",
+      "activeTheses": 12
+    },
+    {
+      "timestamp": 1772362724640,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 399
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 27
+        }
+      },
+      "elapsed": "26.6",
+      "activeTheses": 14
+    },
+    {
+      "timestamp": 1772362730046,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 399
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 27
+        }
+      },
+      "elapsed": "97.2",
+      "activeTheses": 16
+    },
+    {
+      "timestamp": 1772364177024,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 399
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 41
+        }
+      },
+      "elapsed": "5446.2",
+      "activeTheses": 17
+    },
+    {
+      "timestamp": 1772364199256,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 399
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 41
+        }
+      },
+      "elapsed": "5722.5",
+      "activeTheses": 18
+    },
+    {
+      "timestamp": 1772375176437,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 33
+        }
+      },
+      "elapsed": "1700.8",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772375176271,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 33
+        }
+      },
+      "elapsed": "1700.9",
+      "activeTheses": 22
+    },
+    {
+      "timestamp": 1772382501961,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 42
+        }
+      },
+      "elapsed": "27.4",
+      "activeTheses": 20
+    },
+    {
+      "timestamp": 1772382510457,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 41
+        }
+      },
+      "elapsed": "55.5",
+      "activeTheses": 22
+    },
+    {
+      "timestamp": 1772383760163,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 31
+        }
+      },
+      "elapsed": "155.0",
+      "activeTheses": 22
+    },
+    {
+      "timestamp": 1772383759480,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 31
+        }
+      },
+      "elapsed": "155.7",
+      "activeTheses": 24
+    },
+    {
+      "timestamp": 1772388769296,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 34
+        }
+      },
+      "elapsed": "43.5",
+      "activeTheses": 22
+    },
+    {
+      "timestamp": 1772388784870,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 34
+        }
+      },
+      "elapsed": "296.9",
+      "activeTheses": 24
+    },
+    {
+      "timestamp": 1772389658209,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 46
+        }
+      },
+      "elapsed": "3114.3",
+      "activeTheses": 26
+    },
+    {
+      "timestamp": 1772389717397,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 46
+        }
+      },
+      "elapsed": "3125.6",
+      "activeTheses": 28
+    },
+    {
+      "timestamp": 1772393511593,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 34
+        }
+      },
+      "elapsed": "1000.6",
+      "activeTheses": 28
+    },
+    {
+      "timestamp": 1772393508523,
+      "scanners": {
+        "news": {
+          "newsResults": 6,
+          "matches": 0,
+          "markets": 419
+        },
+        "xSentiment": {
+          "signals": 0
+        },
+        "whales": {
+          "signals": 34
+        }
+      },
+      "elapsed": "1003.7",
+      "activeTheses": 30
+    }
+  ],
+  "stats": {
+    "totalRuns": 86,
+    "totalSignals": 1109,
+    "totalTheses": 30,
+    "lastRun": "2026-03-01T19:48:32.214Z"
+  }
+}

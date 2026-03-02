@@ -1,0 +1,6586 @@
+{
+  "articles": [
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772280463566
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772280463566
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772302694997
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772302694997
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772302694997
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772302694997
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772302694997
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772302694997
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772303113718
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772303113718
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772303113718
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772303113718
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772303113718
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772303113718
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772303384380
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772303384380
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772303384380
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772303384380
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772303384380
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772303384380
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772303874286
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772303874286
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772303874286
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772303874286
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772303874286
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772303874286
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772304066147
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772304066147
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772304066147
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772304066147
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772304066147
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772304066147
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772304727313
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772304727313
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772304727313
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772304727313
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772304727313
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772304727313
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772304776635
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772304776635
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772304776635
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772304776635
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772304776635
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772304776635
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772305479230
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772305479230
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772305479230
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772305479230
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772305479230
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772305479230
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772305498887
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772305498887
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772305498887
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772305498887
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772305498887
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772305498887
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772306132379
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772306132379
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772306132379
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772306132379
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772306132379
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772306132379
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772306156657
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772306156657
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772306156657
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772306156657
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772306156657
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772306156657
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772306758318
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772306758318
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772306758318
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772306758318
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772306758318
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772306758318
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772306808378
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772306808378
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772306808378
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772306808378
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772306808378
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772306808378
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772312466834
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772312466834
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772312466834
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772312466834
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772312466834
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772312466834
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772312469357
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772312469357
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772312469357
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772312469357
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772312469357
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772312469357
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772314661299
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772314661299
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772314661299
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772314661299
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772314661299
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772314661299
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772314738427
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772314738427
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772314738427
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772314738427
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772314738427
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772314738427
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772315305335
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772315305335
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772315305335
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772315305335
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772315305335
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772315305335
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772315456312
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772315456312
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772315456312
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772315456312
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772315456312
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772315456312
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772315946826
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772315946826
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772315946826
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772315946826
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772315946826
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772315946826
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772316115509
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772316115509
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772316115509
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772316115509
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772316115509
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772316115509
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772316601692
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772316601692
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772316601692
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772316601692
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772316601692
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772316601692
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772316749568
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772316749568
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772316749568
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772316749568
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772316749568
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772316749568
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772317225375
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772317225375
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772317225375
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772317225375
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772317225375
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772317225375
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772317407214
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772317407214
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772317407214
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772317407214
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772317407214
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772317407214
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772317848541
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772317848541
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772317848541
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772317848541
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772317848541
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772317848541
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772318029919
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772318029919
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772318029919
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772318029919
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772318029919
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772318029919
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772318500496
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772318500496
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772318500496
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772318500496
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772318500496
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772318500496
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772318649157
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772318649157
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772318649157
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772318649157
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772318649157
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772318649157
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772319132785
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772319132785
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772319132785
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772319132785
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772319132785
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772319132785
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772319272369
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772319272369
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772319272369
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772319272369
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772319272369
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772319272369
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772319779736
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772319779736
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772319779736
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772319779736
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772319779736
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772319779736
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772319924786
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772319924786
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772319924786
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772319924786
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772319924786
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772319924786
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772320408383
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772320408383
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772320408383
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772320408383
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772320408383
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772320408383
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772320552984
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772320552984
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772320552984
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772320552984
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772320552984
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772320552984
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772324715419
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772324715419
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772324715419
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772324715419
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772324715419
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772324715419
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772324734730
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772324734730
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772324734730
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772324734730
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772324734730
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772324734730
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772329366616
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772329366616
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772329366616
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772329366616
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772329366616
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772329366616
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772329387551
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772329387551
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772329387551
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772329387551
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772329387551
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772329387551
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740119
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740119
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740119
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740119
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740119
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740119
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740181
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740181
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740181
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740181
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740181
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772332740181
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772333376630
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772333376630
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772333376630
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772333376630
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772333376630
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772333376630
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772333520554
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772333520554
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772333520554
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772333520554
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772333520554
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772333520554
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772334197005
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772334197005
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772334197005
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772334197005
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772334197005
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772334197005
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772334231094
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772334231094
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772334231094
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772334231094
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772334231094
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772334231094
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772335045841
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772335045841
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772335045841
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772335045841
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772335045841
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772335045841
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772335092140
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772335092140
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772335092140
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772335092140
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772335092140
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772335092140
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772335700600
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772335700600
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772335700600
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772335700600
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772335700600
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772335700600
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772335723214
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772335723214
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772335723214
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772335723214
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772335723214
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772335723214
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772336336406
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772336336406
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772336336406
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772336336406
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772336336406
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772336336406
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772336343694
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772336343694
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772336343694
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772336343694
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772336343694
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772336343694
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772336957146
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772336957146
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772336957146
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772336957146
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772336957146
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772336957146
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772336975021
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772336975021
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772336975021
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772336975021
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772336975021
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772336975021
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772337634590
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772337634590
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772337634590
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772337634590
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772337634590
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772337634590
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772337718705
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772337718705
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772337718705
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772337718705
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772337718705
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772337718705
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111397
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111397
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111397
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111397
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111397
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111397
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111588
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111588
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111588
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111588
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111588
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772343111588
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772347732027
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772347732027
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772347732027
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772347732027
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772347732027
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772347732027
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772347748540
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772347748540
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772347748540
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772347748540
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772347748540
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772347748540
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772352101130
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772352101130
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772352101130
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772352101130
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772352101130
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772352101130
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772352122755
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772352122755
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772352122755
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772352122755
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772352122755
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772352122755
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772356619094
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772356619094
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772356619094
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772356619094
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772356619094
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772356619094
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772356620687
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772356620687
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772356620687
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772356620687
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772356620687
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772356620687
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772358334014
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772358334014
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772358334014
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772358334014
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772358334014
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772358334014
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772358336108
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772358336108
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772358336108
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772358336108
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772358336108
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772358336108
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772359482118
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772359482118
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772359482118
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772359482118
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772359482118
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772359482118
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772359483588
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772359483588
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772359483588
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772359483588
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772359483588
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772359483588
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772362736062
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772362736062
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772362736062
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772362736062
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772362736062
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772362736062
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772362741194
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772362741194
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772362741194
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772362741194
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772362741194
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772362741194
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772364594082
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772364594082
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772364594082
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772364594082
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772364594082
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772364594082
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772364622699
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772364622699
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772364622699
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772364622699
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772364622699
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772364622699
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188173
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188173
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188173
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188173
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188173
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188173
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188182
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188182
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188182
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188182
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188182
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772375188182
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772382513465
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772382513465
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772382513465
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772382513465
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772382513465
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772382513465
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772382521600
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772382521600
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772382521600
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772382521600
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772382521600
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772382521600
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771046
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771046
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771046
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771046
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771046
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771046
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771053
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771053
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771053
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771053
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771053
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772383771053
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772388782006
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772388782006
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772388782006
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772388782006
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772388782006
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772388782006
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772388811475
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772388811475
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772388811475
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772388811475
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772388811475
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772388811476
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772389718249
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772389718249
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772389718249
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772389718249
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772389718249
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772389718249
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772392263691
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772392263691
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772392263691
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772392263691
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772392263691
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772392263691
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772394416682
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772394416682
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772394416682
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772394416682
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772394416682
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772394416682
+    },
+    {
+      "category": "crypto",
+      "keywords": [
+        "bitcoin",
+        "BTC",
+        "ethereum",
+        "ETH",
+        "crypto regulation",
+        "SEC crypto",
+        "bitcoin ETF"
+      ],
+      "snippets": [],
+      "timestamp": 1772394417692
+    },
+    {
+      "category": "politics",
+      "keywords": [
+        "Trump",
+        "Biden",
+        "Congress",
+        "executive order",
+        "government shutdown",
+        "election 2026",
+        "midterm"
+      ],
+      "snippets": [],
+      "timestamp": 1772394417692
+    },
+    {
+      "category": "geopolitics",
+      "keywords": [
+        "Ukraine",
+        "Russia",
+        "China Taiwan",
+        "Iran",
+        "Israel",
+        "NATO",
+        "sanctions"
+      ],
+      "snippets": [],
+      "timestamp": 1772394417692
+    },
+    {
+      "category": "finance",
+      "keywords": [
+        "Fed rate",
+        "interest rate",
+        "inflation",
+        "recession",
+        "stock market crash",
+        "S&P 500"
+      ],
+      "snippets": [],
+      "timestamp": 1772394417692
+    },
+    {
+      "category": "tech",
+      "keywords": [
+        "AI regulation",
+        "OpenAI",
+        "Google AI",
+        "TikTok ban",
+        "antitrust"
+      ],
+      "snippets": [],
+      "timestamp": 1772394417692
+    },
+    {
+      "category": "sports",
+      "keywords": [
+        "NFL",
+        "NBA",
+        "Super Bowl",
+        "March Madness",
+        "UFC"
+      ],
+      "snippets": [],
+      "timestamp": 1772394417692
+    }
+  ],
+  "lastScan": 1772394417692
+}

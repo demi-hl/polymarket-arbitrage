@@ -4,6 +4,10 @@
 
 const EventEmitter = require('events');
 
+let _whaleTracker = null;
+function setWhaleTracker(tracker) { _whaleTracker = tracker; }
+function getWhaleTracker() { return _whaleTracker; }
+
 class StrategyRegistry extends EventEmitter {
   constructor(bot, riskManager) {
     super();
@@ -41,21 +45,39 @@ class StrategyRegistry extends EventEmitter {
 
   async scanAll(filters = {}) {
     const opportunities = [];
-    const scanStart = Date.now();
+    let failedStrategies = 0;
+    let rateLimitHits = 0;
     let strategiesToScan = Array.from(this.strategies.values());
     
     if (filters.type) strategiesToScan = strategiesToScan.filter(s => s.type === filters.type);
     if (filters.riskLevel) strategiesToScan = strategiesToScan.filter(s => s.riskLevel === filters.riskLevel);
+    if (Array.isArray(filters.strategyNames) && filters.strategyNames.length > 0) {
+      const selected = new Set(filters.strategyNames);
+      strategiesToScan = strategiesToScan.filter(s => selected.has(s.name));
+    }
     
-    const scanResults = await Promise.allSettled(strategiesToScan.map(async (strategy) => {
+    const PER_STRATEGY_TIMEOUT = 45000;
+    const BATCH_SIZE = 4;
+
+    // Pre-warm the shared market cache before strategies run
+    try {
+      const { fetchMarketsOnce } = require('./lib/with-scanner');
+      await fetchMarketsOnce();
+    } catch {}
+
+
+    const runStrategy = async (strategy) => {
       const perf = this.performance.get(strategy.name);
       perf.scans++;
       perf.lastScan = Date.now();
       try {
         const start = Date.now();
-        const opps = await strategy.scan(this.bot);
+        const opps = await Promise.race([
+          strategy.scan(this.bot),
+          new Promise((_, rej) => setTimeout(() => rej(new Error(`${strategy.name} timed out (${PER_STRATEGY_TIMEOUT / 1000}s)`)), PER_STRATEGY_TIMEOUT)),
+        ]);
         const duration = Date.now() - start;
-        const enriched = opps.map(opp => ({ 
+        const enriched = (opps || []).map(opp => ({ 
           ...opp, 
           strategy: strategy.name, 
           strategyType: strategy.type, 
@@ -67,14 +89,27 @@ class StrategyRegistry extends EventEmitter {
         perf.opportunities += enriched.length;
         return enriched;
       } catch (err) { 
+        failedStrategies++;
+        if ((err?.message || '').includes('429')) rateLimitHits++;
         console.error(strategy.name, 'scan failed:', err.message); 
         return []; 
       }
-    }));
+    };
 
-    for (const result of scanResults) {
-      if (result.status === 'fulfilled') opportunities.push(...result.value);
+    // Run strategies in batches to avoid overwhelming APIs
+    for (let i = 0; i < strategiesToScan.length; i += BATCH_SIZE) {
+      const batch = strategiesToScan.slice(i, i + BATCH_SIZE);
+      const scanResults = await Promise.allSettled(batch.map(s => runStrategy(s)));
+      for (const result of scanResults) {
+        if (result.status === 'fulfilled') opportunities.push(...result.value);
+      }
     }
+
+    this.lastScanMeta = {
+      scannedStrategies: strategiesToScan.length,
+      failedStrategies,
+      rateLimitHits,
+    };
     opportunities.sort((a, b) => b.score - a.score);
     return opportunities;
   }
@@ -86,8 +121,16 @@ class StrategyRegistry extends EventEmitter {
     const speed = opp.executionSpeed || 0.5;
     const riskMultipliers = { low: 1.0, medium: 0.85, high: 0.7 };
     const riskAdj = riskMultipliers[strategy.riskLevel] || 0.85;
-    return (edge * this.weights.edge + confidence * this.weights.confidence * 100 + 
+
+    let whaleMultiplier = 1.0;
+    if (_whaleTracker && opp.conditionId) {
+      whaleMultiplier = _whaleTracker.getConfidenceMultiplier(opp.conditionId);
+    }
+
+    const baseScore = (edge * this.weights.edge + confidence * this.weights.confidence * 100 + 
             liquidity * this.weights.liquidity * 100 + speed * this.weights.speed * 100) * riskAdj;
+
+    return baseScore * whaleMultiplier;
   }
 
   getPerformanceReport() {
@@ -110,41 +153,36 @@ class StrategyRegistry extends EventEmitter {
   }
 }
 
-// All 24 strategies defined inline
-const ALL_STRATEGIES = [
-  // Fundamental strategies (low risk)
-  { name: 'basic-arbitrage', type: 'fundamental', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'cross-market-arbitrage', type: 'fundamental', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'resolution-arbitrage', type: 'fundamental', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'settlement-arbitrage', type: 'fundamental', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'liquidity-arbitrage', type: 'fundamental', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'funding-rate-arbitrage', type: 'fundamental', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  
-  // Event-driven strategies (medium risk)
-  { name: 'temporal-arbitrage', type: 'event', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'news-sentiment', type: 'event', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'event-impact', type: 'event', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'debate-arbitrage', type: 'event', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'polling-arbitrage', type: 'event', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'calendar-arbitrage', type: 'event', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  
-  // Statistical strategies (medium-high risk)
-  { name: 'correlation-arbitrage', type: 'statistical', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'cointegration-arbitrage', type: 'statistical', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'mean-reversion', type: 'statistical', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'volatility-arbitrage', type: 'statistical', riskLevel: 'high', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'momentum-arbitrage', type: 'statistical', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'pairs-trading', type: 'statistical', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  
-  // Flow-based strategies (high risk)
-  { name: 'whale-tracker', type: 'flow', riskLevel: 'high', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'orderbook-scalper', type: 'flow', riskLevel: 'high', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'flow-imbalance', type: 'flow', riskLevel: 'high', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'latency-arbitrage', type: 'flow', riskLevel: 'high', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  
-  // Cross-platform strategies (varied risk)
-  { name: 'kalshi-arbitrage', type: 'cross-platform', riskLevel: 'low', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) },
-  { name: 'predictit-arbitrage', type: 'cross-platform', riskLevel: 'medium', scan: async () => [], validate: async () => true, execute: async () => ({ success: true }) }
-];
+const fundamental = require('./fundamental');
+const flow = require('./flow');
+const crossPlatform = require('./cross-platform');
+const multiOutcome = require('./multi-outcome');
+const { marketMakerStrategy } = require('./market-maker');
+const correlated = require('./correlated');
+const negRisk = require('./neg-risk');
+const volumeSpike = require('./volume-spike');
+const taMomentum = require('./ta-momentum');
+const liquiditySniper = require('./liquidity-sniper');
+const eventCatalyst = require('./event-catalyst');
+const smartMoney = require('./smart-money');
+const newsSentiment = require('./news-sentiment');
 
-module.exports = { StrategyRegistry, ALL_STRATEGIES };
+const ALL_STRATEGIES = [].concat(
+  multiOutcome,
+  fundamental,
+  crossPlatform,
+  [marketMakerStrategy],
+  flow,
+  correlated,
+  negRisk,
+  volumeSpike,
+  taMomentum,
+  liquiditySniper,
+  eventCatalyst,
+  smartMoney,
+  newsSentiment,
+);
+
+const STRATEGY_COUNT = ALL_STRATEGIES.length;
+
+module.exports = { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT, setWhaleTracker };

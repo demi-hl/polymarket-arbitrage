@@ -1,0 +1,215 @@
+{
+  "wallets": [
+    {
+      "address": "0xe90bec87d9ef430f27f9dcfe72c34b76967d5da2",
+      "username": "gmanas",
+      "xUsername": "",
+      "pnl": 1643650.563047087,
+      "volume": 29410042.366249003,
+      "rank": 1,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0xdc876e6873772d38716fda7f2452a78d426d7ab6",
+      "username": "432614799197",
+      "xUsername": "",
+      "pnl": 1313762.4400444254,
+      "volume": 17790174.679462995,
+      "rank": 2,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0xb90494d9a5d8f71f1930b2aa4b599f95c344c255",
+      "username": "lfc123",
+      "xUsername": "",
+      "pnl": 1089076.1111794028,
+      "volume": 5635333.631162999,
+      "rank": 3,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x07b8e44b90cc3e91b8d5fe60ea810d2534638e25",
+      "username": "joosangyoo",
+      "xUsername": "",
+      "pnl": 543063.8245537609,
+      "volume": 8540576.642982995,
+      "rank": 4,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x33acd201d6b02982b3a95b975b331bc225649334",
+      "username": "goooofy",
+      "xUsername": "",
+      "pnl": 511130.82494118705,
+      "volume": 2149752.325518,
+      "rank": 5,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x1caa6a7ad0c6916aef7b67946de2e57ad24846a0",
+      "username": "0x1caA6a7ad0c6916aeF7b67946De2e57Ad24846a0-1772054568088",
+      "xUsername": "",
+      "pnl": 494374.61850430805,
+      "volume": 1413816.311414,
+      "rank": 6,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x0a854897a06d4999e5b2dde5693609f1428ffe9d",
+      "username": "TheQuietRisk",
+      "xUsername": "",
+      "pnl": 486484.3195254532,
+      "volume": 283450,
+      "rank": 7,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x5ed3561e39d6c9a9622c6f84a782537df7f9b19e",
+      "username": "Vivaldi007",
+      "xUsername": "",
+      "pnl": 485481.41424865683,
+      "volume": 670786.24672,
+      "rank": 8,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3",
+      "username": "SecondWindCapital",
+      "xUsername": "",
+      "pnl": 484901.78304237605,
+      "volume": 616413.9237680002,
+      "rank": 9,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x03e8a544e97eeff5753bc1e90d46e5ef22af1697",
+      "username": "weflyhigh",
+      "xUsername": "",
+      "pnl": 482154.33958349883,
+      "volume": 3407685.851792,
+      "rank": 10,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x1979ae6b7e6534de9c4539d0c205e582ca637c9d",
+      "username": "0x1979ae6B7E6534dE9c4539D0c205E582cA637C9D-1769439463256",
+      "xUsername": "",
+      "pnl": 479353.03339826036,
+      "volume": 34299342.63441898,
+      "rank": 11,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x4dfd481c16d9995b809780fd8a9808e8689f6e4a",
+      "username": "Magamyman",
+      "xUsername": "",
+      "pnl": 467819.177347872,
+      "volume": 1798146.579361,
+      "rank": 12,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x514550b8f94f24e3bd5fca1c8af19e985fb71f46",
+      "username": "65154861",
+      "xUsername": "",
+      "pnl": 416973.7431369661,
+      "volume": 229131.95764999994,
+      "rank": 13,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x1d9af60c679cd0b577c3c4ccb4b1a4be4174426d",
+      "username": "predictorxyz",
+      "xUsername": "",
+      "pnl": 410402.00021338795,
+      "volume": 540336.1505170001,
+      "rank": 14,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x37d10ffb61998561c5f9fb941c42c952d8fb4e28",
+      "username": "flydartball",
+      "xUsername": "",
+      "pnl": 394020.9922764414,
+      "volume": 1224464.8613509997,
+      "rank": 15,
+      "addedAt": 1772280252324,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0xbad457dc633bbb7b6cbe09dd5867a5e8e597acd7",
+      "username": "Curseaaaaaaaa",
+      "xUsername": "",
+      "pnl": 705118.0149715962,
+      "volume": 17599.975000000002,
+      "rank": 5,
+      "addedAt": 1772302709889,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x019782cab5d844f02bafb71f512758be78579f3c",
+      "username": "majorexploiter",
+      "xUsername": "",
+      "pnl": 667499.4698491439,
+      "volume": 2464689.9630420003,
+      "rank": 6,
+      "addedAt": 1772302709889,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0xe20a1538293903b746ffe6c4ce2d5c3c0300e469",
+      "username": "gopatriots",
+      "xUsername": "",
+      "pnl": 577207.1041609315,
+      "volume": 200000,
+      "rank": 9,
+      "addedAt": 1772333400764,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x88c4919de76e526d55a32c1f8afb439dd1f1129a",
+      "username": "8934394839",
+      "xUsername": "",
+      "pnl": 455268.6493226575,
+      "volume": 0,
+      "rank": 15,
+      "addedAt": 1772333400764,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x507e52ef684ca2dd91f90a9d26d149dd3288beae",
+      "username": "GamblingIsAllYouNeed",
+      "xUsername": "",
+      "pnl": 477472.99440342747,
+      "volume": 406857.34333199996,
+      "rank": 15,
+      "addedAt": 1772337650871,
+      "source": "leaderboard"
+    },
+    {
+      "address": "0x3cc654af2b896648b10a477123dc5aaecbc19df6",
+      "username": "auggl00p",
+      "xUsername": "",
+      "pnl": 554163.2787182304,
+      "volume": 2185792.4952189997,
+      "rank": 11,
+      "addedAt": 1772392768753,
+      "source": "leaderboard"
+    }
+  ],
+  "lastUpdated": 1772394507740
+}

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('dotenv').config();
+
 const { Command } = require('commander');
 const chalk = require('chalk');
 const path = require('path');
@@ -10,6 +12,11 @@ const PolymarketScanner = require('./scanner');
 const PolymarketArbitrageBot = require('./bot');
 const WebSocketServer = require('./server/websocket');
 const createApiServer = require('./server/api');
+const { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT } = require('./strategies');
+const EdgeScorer = require('./lib/edge-scorer');
+const RiskManager = require('./lib/risk-manager');
+let oracleModule;
+try { oracleModule = require('./oracle'); } catch { oracleModule = null; }
 
 const program = new Command();
 
@@ -20,22 +27,30 @@ program
 
 program
   .option('-m, --mode <mode>', 'Trading mode: paper or live', 'paper')
-  .option('-e, --edge <percent>', 'Edge threshold percentage', '5')
+  .option('-e, --edge <percent>', 'Edge threshold percentage', process.env.MIN_EDGE || '5')
   .option('-c, --cash <amount>', 'Initial cash for paper trading', '10000');
 
 // SCAN COMMAND
 program
   .command('scan')
   .description('Scan Polymarket for arbitrage opportunities')
-  .option('-t, --threshold <percent>', 'Minimum edge threshold %', '5')
+  .option('-t, --threshold <percent>', 'Minimum edge threshold %', process.env.MIN_EDGE || '5')
   .option('-l, --liquidity <amount>', 'Minimum liquidity USD', '1000')
+  .option('-s, --sectors <list>', 'Sectors to include: politics, sports, crypto (comma-separated; default: all)', process.env.SECTORS || '')
   .option('-j, --json', 'Output as JSON')
   .action(async (options) => {
     try {
       const threshold = parseFloat(options.threshold) / 100;
       const minLiquidity = parseFloat(options.liquidity);
+      const sectors = options.sectors
+        ? options.sectors.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+        : undefined;
       
-      const scanner = new PolymarketScanner({ minLiquidity, edgeThreshold: threshold });
+      const scanner = new PolymarketScanner({
+        minLiquidity,
+        edgeThreshold: threshold,
+        ...(sectors && sectors.length ? { sectors } : {})
+      });
       const result = await scanner.scan({ threshold });
       
       if (options.json) {
@@ -46,6 +61,7 @@ program
       console.log(chalk.bold('\n📊 SCAN RESULTS'));
       console.log(chalk.gray(`Time: ${new Date(result.timestamp).toLocaleString()}`));
       console.log(chalk.gray(`Markets scanned: ${result.marketsScanned}`));
+      if (sectors?.length) console.log(chalk.gray(`Sectors: ${sectors.join(', ')}`));
       console.log(chalk.gray(`Opportunities found: ${result.opportunitiesFound}`));
       console.log(chalk.gray(`Threshold: ${(result.threshold * 100).toFixed(2)}%\n`));
 
@@ -80,67 +96,395 @@ program
 program
   .command('watch')
   .description('Watch for arbitrage opportunities and auto-execute')
-  .option('-i, --interval <seconds>', 'Scan interval in seconds', '30')
-  .option('-t, --threshold <percent>', 'Auto-execute threshold %', '5')
-  .option('-a, --auto', 'Auto-execute trades (paper mode only)', false)
+  .option('-i, --interval <seconds>', 'Scan interval in seconds',
+    process.env.SCAN_INTERVAL ? String(parseInt(process.env.SCAN_INTERVAL) / 1000) : '30')
+  .option('-t, --threshold <percent>', 'Auto-execute threshold %',
+    process.env.MIN_EDGE || '5')
+  .option('-s, --scan-threshold <percent>', 'Minimum edge % to show (lower = more opportunities)',
+    process.env.SCAN_EDGE || '1')
+  .option('-a, --auto', 'Auto-execute trades (paper mode only)',
+    process.env.AUTO_EXECUTE === 'true')
+  .option('-p, --position-size <amount>', 'Max position size in USD',
+    process.env.POSITION_SIZE || '1000')
+  .option('-s, --sectors <list>', 'Sectors: politics, sports, crypto (comma-separated; default: all)',
+    process.env.SECTORS || '')
   .action(async (options) => {
     const interval = parseInt(options.interval) * 1000;
+    const scanMinMsRaw = parseInt(process.env.SCAN_MIN_MS || interval, 10);
+    const scanMaxMsRaw = parseInt(process.env.SCAN_MAX_MS || Math.max(interval, interval * 2), 10);
+    const scanMinMs = Math.max(5000, Math.min(scanMinMsRaw, scanMaxMsRaw));
+    const scanMaxMs = Math.max(scanMinMs, scanMaxMsRaw);
+    const backoffOn429Ms = Math.max(0, parseInt(process.env.SCAN_BACKOFF_ON_429_MS || '120000', 10));
+    const scanMaxBackoffMs = Math.max(0, parseInt(process.env.SCAN_MAX_BACKOFF_MS || '600000', 10));
+    const scanCycleTimeoutMs = Math.max(10000, parseInt(process.env.SCAN_CYCLE_TIMEOUT_MS || '120000', 10));
+    const strategyRotationEnabled = process.env.STRATEGY_ROTATION === 'true';
+    const strategyBatchSize = Math.max(1, Math.min(STRATEGY_COUNT, parseInt(process.env.STRATEGY_BATCH_SIZE || '9', 10)));
     const threshold = parseFloat(options.threshold) / 100;
+    const scanThreshold = parseFloat(options.scanThreshold || process.env.SCAN_EDGE || '1') / 100;
     const autoExecute = options.auto;
+    const positionSize = parseFloat(options.positionSize);
+    const accountId = process.env.ACCOUNT_ID || 'default';
+    const sectors = options.sectors
+      ? options.sectors.split(',').map(s => s.trim().toLowerCase()).filter(Boolean)
+      : undefined;
     
-    const scanner = new PolymarketScanner({ edgeThreshold: threshold });
-    const bot = new PolymarketArbitrageBot({ mode: 'paper', edgeThreshold: threshold });
+    const bot = new PolymarketArbitrageBot({
+      mode: 'paper',
+      edgeThreshold: threshold,
+      scanThreshold,
+      maxPositionSize: positionSize,
+      sectors,
+      dataDir: accountId !== 'default'
+        ? path.join(__dirname, 'data', `account-${accountId}`)
+        : undefined
+    });
 
-    console.log(chalk.bold('👁️  POLYMARKET ARBITRAGE BOT - WATCH MODE\n'));
+    const registry = new StrategyRegistry(bot);
+    ALL_STRATEGIES.forEach(s => registry.register(s));
+
+    const edgeScorer = new EdgeScorer();
+    await edgeScorer.load();
+
+    const riskManager = new RiskManager(bot.portfolio);
+
+    // Start Oracle research daemon (runs news, X sentiment, whale tracking on a timer)
+    let oracleRunning = false;
+    let lastOracleRun = 0;
+    const ORACLE_INTERVAL = 10 * 60 * 1000; // 10 minutes
+    async function runOracleCycle() {
+      if (!oracleModule || oracleRunning) return;
+      oracleRunning = true;
+      try {
+        await oracleModule.runCycle();
+        lastOracleRun = Date.now();
+      } catch (err) {
+        console.error(chalk.red(`  Oracle error: ${err.message}`));
+      } finally {
+        oracleRunning = false;
+      }
+    }
+    // Fire first Oracle scan (non-blocking)
+    if (oracleModule) {
+      runOracleCycle();
+    }
+
+    const label = accountId !== 'default' ? ` [Account ${accountId}]` : '';
+    console.log(chalk.bold(`👁️  POLYMARKET BOT - WATCH MODE${label}\n`));
+    console.log(chalk.gray(`Strategies: ${STRATEGY_COUNT} loaded`));
+    console.log(chalk.gray(`ML Edge Scorer: loaded (${edgeScorer.trainCount} training samples)`));
+    console.log(chalk.gray(`Risk Manager: Kelly sizing + circuit breaker active`));
+    console.log(chalk.gray(`Oracle Daemon: ${oracleModule ? 'active (news + X sentiment + whale tracking)' : 'not loaded'}`));
+    console.log(chalk.yellow('Paper trading only — no real orders sent'));
     console.log(chalk.gray(`Mode: ${autoExecute ? 'AUTO-EXECUTE' : 'MONITOR ONLY'}`));
-    console.log(chalk.gray(`Threshold: ${(threshold * 100).toFixed(2)}%`));
-    console.log(chalk.gray(`Interval: ${options.interval}s`));
+    console.log(chalk.gray(`Execute threshold: ${(threshold * 100).toFixed(2)}% (only trades above this execute)`));
+    console.log(chalk.gray(`Scan threshold: ${(scanThreshold * 100).toFixed(2)}% (show opportunities above this)`));
+    const MAX_HOLD_TIME = Number(process.env.MAX_HOLD_MINUTES) ? Number(process.env.MAX_HOLD_MINUTES) * 60 * 1000 : 4 * 60 * 60 * 1000; // 4 hours — faster turnover
+    const TAKE_PROFIT = 0.003;   // 0.3% — tight take-profit for quick cash recycling
+    const STOP_LOSS = -0.03;     // 3% — cut losers fast
+    const TRAILING_DROP = 0.005; // 0.5% drop from peak → close to lock in gains
+    const GAS_COST = 0.04;
+
+    console.log(chalk.gray(`Scan cadence: ${(scanMinMs / 1000).toFixed(0)}-${(scanMaxMs / 1000).toFixed(0)}s jittered`));
+    console.log(chalk.gray(`Position Size: $${positionSize}`));
+    const holdDays = Math.round(MAX_HOLD_TIME / (24 * 60 * 60 * 1000));
+    console.log(chalk.gray(`Max hold: ${holdDays}d (close at market after this unless take-profit/stop-loss/resolved)`));
+    console.log(chalk.gray(`429 backoff: +${(backoffOn429Ms / 1000).toFixed(0)}s steps (max ${(scanMaxBackoffMs / 1000).toFixed(0)}s)`));
+    console.log(chalk.gray(`Scan timeout: ${(scanCycleTimeoutMs / 1000).toFixed(0)}s per cycle`));
+    if (strategyRotationEnabled) {
+      console.log(chalk.gray(`Strategy rotation: ON (${strategyBatchSize}/${STRATEGY_COUNT} per cycle)`));
+    }
+    if (sectors?.length) console.log(chalk.gray(`Sectors: ${sectors.join(', ')}`));
+    if (accountId !== 'default') console.log(chalk.gray(`Account: ${accountId}`));
+
+    const priceScanner = new PolymarketScanner({ timeout: 10000 });
+    priceScanner.connectWebSocket();
+    console.log(chalk.gray('CLOB WebSocket: connecting for real-time prices'));
     console.log(chalk.gray(`Press Ctrl+C to stop\n`));
 
     let scanCount = 0, opportunitiesFound = 0, tradesExecuted = 0;
+    const strategiesHit = new Map();
+    let strategyRotationIndex = 0;
+    let dynamicBackoffMs = 0;
+    let nextTimer = null;
+    let isStopping = false;
+
+    const randomBetween = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const setBackoff = (nextBackoffMs) => {
+      dynamicBackoffMs = Math.max(0, Math.min(scanMaxBackoffMs, nextBackoffMs));
+    };
+    const scheduleNextScan = () => {
+      if (isStopping) return;
+      const baseMs = randomBetween(scanMinMs, scanMaxMs);
+      const delayMs = baseMs + dynamicBackoffMs;
+      if (dynamicBackoffMs > 0) {
+        console.log(chalk.gray(`  Next scan in ${(delayMs / 1000).toFixed(0)}s (${(dynamicBackoffMs / 1000).toFixed(0)}s rate-limit backoff)`));
+      }
+      nextTimer = setTimeout(async () => {
+        await runScan();
+        scheduleNextScan();
+      }, delayMs);
+    };
+
+    const closeArbitrageTrade = async (trade) => {
+      const pos = bot.portfolio.positions[trade.marketId];
+      if (!pos || pos.status !== 'open') return false;
+
+      try {
+        const pData = await priceScanner.fetchMarketPrice(trade.marketId);
+        if (!pData) return false;
+
+        const SELL_SLIPPAGE = 0.003;
+        const yesVal = pos.yesShares * pData.yesPrice * (1 - SELL_SLIPPAGE);
+        const noVal = pos.noShares * pData.noPrice * (1 - SELL_SLIPPAGE);
+        const sellValue = yesVal + noVal - GAS_COST;
+        const profit = sellValue - pos.entryCost;
+
+        if (profit > 0 || pData.closed || pData.resolved) {
+          await bot.closePositionAtMarket(trade.marketId, pData.yesPrice, pData.noPrice);
+          trade.realizedPnl = profit;
+          trade.closedAt = new Date().toISOString();
+          trade.closeMethod = profit > 0 ? 'take-profit' : 'resolved';
+          return true;
+        }
+      } catch {}
+      return false;
+    };
+
+    const markPositionsToMarket = async () => {
+      const portfolio = bot.getPortfolio();
+      const openPositions = Object.values(portfolio.positions).filter(p => p.status === 'open');
+      if (openPositions.length === 0) return;
+
+      let currentPrices = {};
+      try {
+        const { fetchMarketsOnce } = require('./strategies/lib/with-scanner');
+        const allMarkets = await fetchMarketsOnce();
+        for (const m of allMarkets) {
+          let prices;
+          try {
+            prices = typeof m.outcomePrices === 'string' ? JSON.parse(m.outcomePrices) : m.outcomePrices;
+          } catch { continue; }
+          if (!prices || prices.length < 2) continue;
+          currentPrices[m.id] = {
+            yesPrice: parseFloat(prices[0]) || 0,
+            noPrice: parseFloat(prices[1]) || 0,
+            closed: !!m.closed,
+            resolved: !!m.resolved,
+          };
+        }
+      } catch { return; }
+
+      const now = Date.now();
+      let closed = 0;
+
+      for (const pos of openPositions) {
+        const prices = currentPrices[pos.marketId];
+        const age = now - new Date(pos.entryTime).getTime();
+
+        if (prices) {
+          pos.currentYesPrice = prices.yesPrice;
+          pos.currentNoPrice = prices.noPrice;
+          pos.lastPriceUpdate = now;
+        }
+
+        if (!prices && age < MAX_HOLD_TIME) continue;
+
+        if (prices) {
+          const SELL_SLIPPAGE = 0.003;
+          const yesValue = pos.yesShares * prices.yesPrice * (1 - SELL_SLIPPAGE);
+          const noValue = pos.noShares * prices.noPrice * (1 - SELL_SLIPPAGE);
+          const sellValue = yesValue + noValue - GAS_COST;
+          const pnlPct = (sellValue - pos.entryCost) / pos.entryCost;
+
+          if (typeof pos.peakPnlPct !== 'number' || pnlPct > pos.peakPnlPct) {
+            pos.peakPnlPct = pnlPct;
+          }
+          const trailingTriggered = pos.peakPnlPct > 0 && (pos.peakPnlPct - pnlPct) >= TRAILING_DROP;
+
+          const isBuyBoth = pos.direction === 'BUY_BOTH';
+          const priceSum = prices.yesPrice + prices.noPrice;
+          const arbConverged = isBuyBoth && priceSum >= 0.995;
+
+          const shouldClose =
+            pnlPct >= TAKE_PROFIT ||
+            pnlPct <= STOP_LOSS ||
+            trailingTriggered ||
+            age >= MAX_HOLD_TIME ||
+            prices.closed || prices.resolved ||
+            arbConverged;
+
+          if (shouldClose) {
+            try {
+              await bot.closePositionAtMarket(pos.marketId, prices.yesPrice, prices.noPrice);
+              const pnl = sellValue - pos.entryCost;
+              const pnlColor = pnl >= 0 ? chalk.green : chalk.red;
+              const reason = prices.closed || prices.resolved ? 'resolved'
+                : arbConverged ? 'arb-converged'
+                : pnlPct >= TAKE_PROFIT ? 'take-profit'
+                : trailingTriggered ? `trailing-stop (peak ${(pos.peakPnlPct * 100).toFixed(1)}%)`
+                : pnlPct <= STOP_LOSS ? 'stop-loss'
+                : 'max-hold';
+              console.log(pnlColor(`  Closed ${pos.question?.substring(0, 40)}... ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${(pnlPct * 100).toFixed(1)}%) [${reason}]`));
+              closed++;
+            } catch {}
+          }
+        } else if (age >= MAX_HOLD_TIME) {
+          try {
+            const estYes = pos.yesShares > 0 ? (pos.entryCost / 2) / pos.yesShares : 0.5;
+            const estNo = pos.noShares > 0 ? (pos.entryCost / 2) / pos.noShares : 0.5;
+            await bot.closePositionAtMarket(pos.marketId, estYes * 0.98, estNo * 0.98);
+            console.log(chalk.yellow(`  Force-closed ${pos.question?.substring(0, 40)}... (no price data)`));
+            closed++;
+          } catch {}
+        }
+      }
+      if (closed > 0) console.log(chalk.cyan(`  ${closed} position(s) closed on price movement`));
+      bot.updatePnL(currentPrices);
+      await bot.savePortfolio();
+    };
 
     const runScan = async () => {
       scanCount++;
       const timestamp = new Date().toLocaleTimeString();
-      
+
+      // Trigger Oracle daemon every 10 minutes (non-blocking)
+      if (oracleModule && Date.now() - lastOracleRun > ORACLE_INTERVAL) {
+        runOracleCycle();
+      }
+
       try {
-        process.stdout.write(chalk.gray(`[${timestamp}] Scan #${scanCount}... `));
-        
-        const opportunities = await scanner.quickScan(threshold);
-        
-        if (opportunities.length === 0) {
+        await markPositionsToMarket();
+
+        process.stdout.write(chalk.gray(`[${timestamp}] Scan #${scanCount} (${STRATEGY_COUNT} strategies)... `));
+
+        let scanFilters = {};
+        if (strategyRotationEnabled) {
+          const allNames = ALL_STRATEGIES.map(s => s.name);
+          const selected = [];
+          for (let i = 0; i < strategyBatchSize; i++) {
+            selected.push(allNames[(strategyRotationIndex + i) % allNames.length]);
+          }
+          strategyRotationIndex = (strategyRotationIndex + strategyBatchSize) % allNames.length;
+          scanFilters = { strategyNames: selected };
+          console.log(chalk.gray(`  Rotating strategies: ${selected.length} selected`));
+        }
+
+        const opportunities = await Promise.race([
+          registry.scanAll(scanFilters),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`Scan cycle timed out after ${Math.round(scanCycleTimeoutMs / 1000)}s`)), scanCycleTimeoutMs))
+        ]);
+        const scanMeta = registry.lastScanMeta || { failedStrategies: 0, rateLimitHits: 0 };
+        if (scanMeta.rateLimitHits > 0) {
+          const jitter = Math.floor(Math.random() * Math.max(1, backoffOn429Ms));
+          setBackoff(dynamicBackoffMs + backoffOn429Ms + jitter);
+          console.log(chalk.yellow(`  429s detected in ${scanMeta.rateLimitHits} strategy scan(s); applying backoff`));
+        } else if (dynamicBackoffMs > 0) {
+          // Gradually relax backoff once scans stop hitting rate limits.
+          setBackoff(dynamicBackoffMs - Math.floor(backoffOn429Ms / 2));
+        }
+
+        const seen = new Set();
+        const unique = [];
+        for (const opp of opportunities) {
+          if (opp.edgePercent < scanThreshold) continue;
+          if (seen.has(opp.marketId)) continue;
+          seen.add(opp.marketId);
+          unique.push(opp);
+        }
+
+        if (unique.length === 0) {
           console.log(chalk.gray('No opportunities'));
           return;
         }
 
-        opportunitiesFound += opportunities.length;
-        console.log(chalk.green(`${opportunities.length} opportunity(s) found!`));
+        // ML Edge Scorer: re-rank by predicted win probability
+        const ranked = edgeScorer.rerank(unique);
 
-        opportunities.forEach(opp => {
+        opportunitiesFound += ranked.length;
+        console.log(chalk.green(`${ranked.length} opportunity(s) found!`));
+
+        // Update risk manager with latest portfolio state
+        riskManager.update(bot.portfolio);
+        const riskStatus = riskManager.getStatus();
+        if (riskStatus.paused) {
+          console.log(chalk.red(`  ⚠ Risk: ${riskStatus.pauseReason} — skipping execution`));
+        }
+
+        ranked.forEach(opp => {
           const edgeColor = opp.edgePercent >= 0.10 ? chalk.green : chalk.yellow;
-          console.log(chalk.gray(`  └─ ${opp.question.substring(0, 50)}... `) + edgeColor(`${(opp.edgePercent * 100).toFixed(2)}% edge`));
+          const strat = opp.strategy || 'basic-arbitrage';
+          const hit = strategiesHit.get(strat) || 0;
+          strategiesHit.set(strat, hit + 1);
+          const mlTag = opp.mlScore != null ? ` ML:${(opp.mlScore * 100).toFixed(0)}%` : '';
+          console.log(chalk.gray(`  └─ [${strat}] ${(opp.question || '').substring(0, 40)}... `) + edgeColor(`${(opp.edgePercent * 100).toFixed(2)}% edge${mlTag}`));
         });
 
-        if (autoExecute) {
-          const result = await bot.autoExecute(opportunities, { minEdge: threshold });
+        if (autoExecute && !riskStatus.paused) {
+          // Apply risk manager sizing to each opportunity before execution
+          for (const opp of ranked) {
+            const riskCheck = riskManager.check(opp, opp.maxPosition || positionSize);
+            if (!riskCheck.allowed) {
+              opp._riskBlocked = riskCheck.reason;
+              continue;
+            }
+            opp.maxPosition = riskCheck.suggestedSize;
+          }
+
+          const executable = ranked.filter(o => !o._riskBlocked);
+          const result = await bot.autoExecute(executable, { minEdge: threshold, maxTradesPerCycle: 5 });
           tradesExecuted += result.executed.length;
-          if (result.executed.length > 0) console.log(chalk.green(`  ✅ Executed ${result.executed.length} trade(s)`));
-          if (result.skipped.length > 0) console.log(chalk.yellow(`  ⏭️ Skipped ${result.skipped.length}`));
+
+          for (const trade of result.executed) {
+            const locked = await closeArbitrageTrade(trade);
+            if (locked) {
+              console.log(chalk.green(`  Instant close: ${trade.realizedPnl >= 0 ? '+' : ''}$${(trade.realizedPnl || 0).toFixed(2)} on ${(trade.question || '').substring(0, 35)}... [${trade.closeMethod}]`));
+            } else {
+              console.log(chalk.blue(`  Opened: ${trade.direction} ${(trade.question || '').substring(0, 40)}... $${trade.totalCost.toFixed(2)}`));
+            }
+          }
+
+          if (result.skipped.length > 0) console.log(chalk.yellow(`  Skipped ${result.skipped.length}`));
+
+          // Train ML model on any newly closed trades
+          const closedTrades = bot.portfolio.trades.filter(t => t.realizedPnl != null);
+          if (closedTrades.length > edgeScorer.trainCount) {
+            const newClosed = closedTrades.slice(edgeScorer.trainCount);
+            for (const t of newClosed) {
+              await edgeScorer.train(t);
+              riskManager.recordClosedTrade(t.realizedPnl);
+            }
+            if (newClosed.length > 0) {
+              console.log(chalk.magenta(`  ML: trained on ${newClosed.length} new trade(s) (total: ${edgeScorer.trainCount})`));
+            }
+          }
         }
 
       } catch (error) {
         console.error(chalk.red(` Error: ${error.message}`));
+        if ((error.message || '').includes('429')) {
+          const jitter = Math.floor(Math.random() * Math.max(1, backoffOn429Ms));
+          setBackoff(dynamicBackoffMs + backoffOn429Ms + jitter);
+        }
       }
     };
 
     await runScan();
-    const intervalId = setInterval(runScan, interval);
+    scheduleNextScan();
 
     process.on('SIGINT', () => {
-      clearInterval(intervalId);
-      console.log(chalk.bold('\n\n📊 WATCH SUMMARY'));
+      isStopping = true;
+      if (nextTimer) clearTimeout(nextTimer);
+      console.log(chalk.bold(`\n\n📊 WATCH SUMMARY${label}`));
       console.log(chalk.gray(`Total scans: ${scanCount}`));
+      console.log(chalk.gray(`Strategies: ${STRATEGY_COUNT}`));
       console.log(chalk.gray(`Opportunities found: ${opportunitiesFound}`));
+      if (strategiesHit.size > 0) {
+        console.log(chalk.gray('By strategy:'));
+        for (const [strat, count] of [...strategiesHit.entries()].sort((a, b) => b[1] - a[1])) {
+          console.log(chalk.gray(`  ${strat}: ${count}`));
+        }
+      }
       if (autoExecute) console.log(chalk.gray(`Trades executed: ${tradesExecuted}`));
       console.log(chalk.yellow('\n👋 Stopped watching'));
       process.exit(0);
@@ -209,9 +553,8 @@ program
     // Serve static files
     app.use(express.static(distPath));
     
-    // API routes
-    const apiRouter = createApiServer();
-    app.use('/api', apiRouter);
+    // API routes (mount full app at root so /api/* routes match)
+    app.use(createApiServer());
     
     // Serve React app for all other routes
     app.get('*', (req, res) => {
@@ -366,26 +709,16 @@ program
   .command('strategies')
   .description('List all available strategies')
   .action(async () => {
-    console.log(chalk.bold('\n🧠 AVAILABLE STRATEGIES\n'));
-    
-    const strategies = [
-      { name: 'basic-arbitrage', type: 'fundamental', risk: 'low', desc: 'YES+NO sum arbitrage' },
-      { name: 'cross-market', type: 'fundamental', risk: 'low', desc: 'Polymarket vs Kalshi/PredictIt' },
-      { name: 'temporal-arbitrage', type: 'event', risk: 'medium', desc: 'Time-based mispricing' },
-      { name: 'correlation-arbitrage', type: 'statistical', risk: 'medium', desc: 'Related market mispricing' },
-      { name: 'whale-tracker', type: 'flow', risk: 'medium', desc: 'Follow large orders' },
-      { name: 'resolution-arbitrage', type: 'event', risk: 'low', desc: 'Resolution certainty edge' },
-      { name: 'orderbook-scalper', type: 'micro', risk: 'high', desc: 'Micro-spread scalping' },
-      { name: 'news-sentiment', type: 'event', risk: 'high', desc: 'News-driven opportunities' },
-    ];
-    
-    strategies.forEach((s, i) => {
-      const riskColor = s.risk === 'low' ? chalk.green : s.risk === 'medium' ? chalk.yellow : chalk.red;
-      console.log(`${i + 1}. ${chalk.bold(s.name)} ${chalk.gray(`(${s.type})`)}`);
-      console.log(`   Risk: ${riskColor(s.risk)} | ${s.desc}\n`);
+    const { ALL_STRATEGIES } = require('./strategies');
+    console.log(chalk.bold(`\n🧠 AVAILABLE STRATEGIES (${ALL_STRATEGIES.length} total)\n`));
+
+    ALL_STRATEGIES.forEach((s, i) => {
+      const riskColor = s.riskLevel === 'low' ? chalk.green : s.riskLevel === 'medium' ? chalk.yellow : chalk.red;
+      console.log(`${String(i + 1).padStart(2)}. ${chalk.bold(s.name)} ${chalk.gray(`(${s.type})`)}`);
+      console.log(`    Risk: ${riskColor(s.riskLevel)}\n`);
     });
-    
-    console.log(chalk.gray('Run with specific strategy: node polymarket.js scan --strategy <name>'));
+
+    console.log(chalk.gray('Scan uses all strategies; filter by type/risk in code or API.'));
   });
 
 // MULTI-ACCOUNT COMMANDS

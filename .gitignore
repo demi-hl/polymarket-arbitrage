@@ -1,0 +1,5 @@
+.vercel
+.env
+.kalshi-private.pem
+kalshi-private.pem
+kalshi-key-paste-here.pem

@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
-import useWebSocket from '../hooks/useWebSocket'
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
+import { toast } from 'sonner'
 import useApi from '../hooks/useApi'
 
 const TradingContext = createContext()
@@ -9,51 +9,96 @@ export function TradingProvider({ children }) {
   const [opportunities, setOpportunities] = useState([])
   const [trades, setTrades] = useState([])
   const [strategies, setStrategies] = useState([])
-  const [systemStatus, setSystemStatus] = useState({ connected: false })
+  const [systemStatus, setSystemStatus] = useState({ connected: true })
   const [loading, setLoading] = useState(true)
-  
-  const { ws, connected } = useWebSocket('ws://localhost:8082')
+  const [selectedAccount, setSelectedAccount] = useState('paper')
+  const [accountIds, setAccountIds] = useState([])
+  const prevTradeCount = useRef(0)
+  const initialLoad = useRef(true)
+
   const api = useApi()
 
   useEffect(() => {
-    const fetchData = async () => {
+    let cancelled = false
+
+    const fetchCore = async () => {
       try {
-        setLoading(true)
-        const [portfolioRes, strategiesRes] = await Promise.all([
-          api.get('/portfolio'),
-          api.get('/strategies'),
+        if (initialLoad.current) setLoading(true)
+
+        const [strategiesRes, accountsRes] = await Promise.all([
+          api.get('/strategies').catch(() => null),
+          api.get('/accounts').catch(() => null),
         ])
-        
-        if (portfolioRes.success) setPortfolio(portfolioRes.data)
-        if (strategiesRes.success) setStrategies(strategiesRes.data)
-        
-        const oppRes = await api.get('/opportunities?threshold=5')
-        if (oppRes.success) setOpportunities(oppRes.data.opportunities || [])
-        
-        const tradesRes = await api.get('/trades')
-        if (tradesRes.success) setTrades(tradesRes.data || [])
+
+        if (cancelled) return
+
+        if (strategiesRes?.success) setStrategies(strategiesRes.data)
+        const availableIds = (accountsRes?.success ? (accountsRes.data || []).map(a => a.id).filter(Boolean) : [])
+        setAccountIds(availableIds)
+
+        const effectiveAccount = availableIds.includes(selectedAccount)
+          ? selectedAccount
+          : (availableIds[0] || selectedAccount)
+        if (effectiveAccount !== selectedAccount) setSelectedAccount(effectiveAccount)
+
+        const portfolioRes = effectiveAccount
+          ? await api.get(`/accounts/${effectiveAccount}/portfolio`).catch(() => null)
+          : await api.get('/portfolio').catch(() => null)
+
+        if (portfolioRes?.success && portfolioRes.data) {
+          const newTrades = portfolioRes.data.trades || []
+          if (prevTradeCount.current > 0 && newTrades.length > prevTradeCount.current) {
+            const latest = newTrades[newTrades.length - 1]
+            if (latest) {
+              toast.success(
+                `Trade executed: ${(latest.question || '').substring(0, 40)}...`,
+                {
+                  description: `${latest.strategy || 'arbitrage'} · ${((latest.edgePercent || 0) * 100).toFixed(1)}% edge · $${(latest.totalCost || 0).toFixed(2)}`,
+                  duration: 5000,
+                }
+              )
+            }
+          }
+          prevTradeCount.current = newTrades.length
+          setPortfolio(portfolioRes.data)
+          setTrades(newTrades)
+          setSystemStatus({ connected: true })
+        } else {
+          setSystemStatus({ connected: false })
+        }
       } catch (err) {
-        console.error('Failed to fetch data:', err)
+        console.error('Failed to fetch core data:', err)
+        if (!cancelled) setSystemStatus({ connected: false })
       } finally {
-        setLoading(false)
+        if (!cancelled) {
+          setLoading(false)
+          initialLoad.current = false
+        }
       }
     }
-    
-    fetchData()
-    const interval = setInterval(fetchData, 30000)
-    return () => clearInterval(interval)
-  }, [])
 
-  useEffect(() => {
-    if (!ws) return
-    ws.onmessage = (event) => {
+    const fetchOpportunities = async () => {
       try {
-        const message = JSON.parse(event.data)
-        if (message.channel === 'opportunities') setOpportunities(message.data)
-        if (message.channel === 'trades') setTrades(prev => [message.data, ...prev])
-      } catch (err) {}
+        const oppRes = await api.get('/opportunities?threshold=5')
+        if (!cancelled && oppRes?.success) {
+          setOpportunities(oppRes.data?.opportunities || [])
+        }
+      } catch (err) {
+        // opportunities scan can be slow/fail — don't block UI
+      }
     }
-  }, [ws])
+
+    fetchCore()
+    fetchOpportunities()
+
+    const coreInterval = setInterval(fetchCore, 2000)
+    const oppInterval = setInterval(fetchOpportunities, 15000)
+    return () => {
+      cancelled = true
+      clearInterval(coreInterval)
+      clearInterval(oppInterval)
+    }
+  }, [selectedAccount])
 
   const executeTrade = useCallback(async (marketId, size) => {
     try {
@@ -71,7 +116,8 @@ export function TradingProvider({ children }) {
 
   const value = {
     portfolio, opportunities, trades, strategies,
-    systemStatus: { ...systemStatus, connected },
+    selectedAccount, setSelectedAccount, accountIds,
+    systemStatus,
     loading, executeTrade,
   }
 

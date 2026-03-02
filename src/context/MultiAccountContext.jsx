@@ -1,0 +1,167 @@
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
+import useApi from '../hooks/useApi'
+
+const MultiAccountContext = createContext()
+
+export function MultiAccountProvider({ children }) {
+  const [accounts, setAccounts] = useState({})
+  const [comparison, setComparison] = useState(null)
+  const [liveTrades, setLiveTrades] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [lastUpdate, setLastUpdate] = useState(null)
+  const prevTradeCount = useRef({})
+  const api = useApi()
+
+  useEffect(() => {
+    let mounted = true
+
+    const fetchComparison = async () => {
+      try {
+        const res = await api.get('/accounts/compare').catch(() => null)
+        if (!mounted) return
+        if (res?.success && res.data) {
+          let { accounts: accts, comparison: cmp, timestamp } = res.data
+          const compareIds = Object.keys(accts || {})
+          if (compareIds.length < 2) {
+            const accountsRes = await api.get('/accounts').catch(() => null)
+            const list = accountsRes?.success ? (accountsRes.data || []) : []
+            accts = {}
+            list.forEach(a => {
+              if (!a?.id) return
+              const portfolio = a.portfolio || {}
+              const trades = portfolio.trades || []
+              const closedTrades = trades.filter(t => t.realizedPnl != null)
+              const openTrades = trades.filter(t => t.realizedPnl == null)
+              const wins = closedTrades.filter(t => t.realizedPnl > 0)
+              const losses = closedTrades.filter(t => t.realizedPnl < 0)
+              const hasClosedData = closedTrades.length > 0
+              const pnl = a.pnl || portfolio.pnl || { realized: 0, unrealized: 0, total: 0 }
+              const totalValue = portfolio.totalValue || (portfolio.cash || 0) + (pnl.unrealized || 0)
+              const winRate = hasClosedData
+                ? parseFloat((wins.length / closedTrades.length * 100).toFixed(1))
+                : 0
+
+              const edgeSum = trades.reduce((s, t) => s + (t.edgePercent || 0), 0)
+              const avgEdge = trades.length > 0 ? ((edgeSum / trades.length) * 100).toFixed(2) : '0.00'
+              const allTrades = trades.length > 0 ? trades : (a.recentTrades || [])
+
+              const startingCapital = 10000
+              const events = []
+              for (const t of trades) {
+                const openTs = t.timestamp ? new Date(t.timestamp).getTime() : Date.now()
+                events.push({ ts: openTs, type: 'open', cost: t.totalCost || 0, realizedPnl: 0 })
+                if (t.realizedPnl != null) {
+                  const closeTs = t.closedAt ? new Date(t.closedAt).getTime() : openTs + 60000
+                  events.push({ ts: closeTs, type: 'close', cost: t.totalCost || 0, realizedPnl: t.realizedPnl })
+                }
+              }
+              events.sort((a, b) => a.ts - b.ts)
+
+              const firstTs = events.length > 0
+                ? Math.floor(events[0].ts / 1000) - 3600
+                : Math.floor(Date.now() / 1000) - 86400
+              const curve = [{ time: firstTs, value: startingCapital }]
+              let lastTime = firstTs
+              let cash = startingCapital
+              let invested = 0
+
+              for (const ev of events) {
+                if (ev.type === 'open') {
+                  cash -= ev.cost
+                  invested += ev.cost
+                } else {
+                  const payout = ev.cost + ev.realizedPnl
+                  cash += payout
+                  invested -= ev.cost
+                }
+                const equity = cash + invested
+                let ts = Math.floor(ev.ts / 1000)
+                if (ts <= lastTime) ts = lastTime + 1
+                lastTime = ts
+                curve.push({ time: ts, value: parseFloat(equity.toFixed(2)) })
+              }
+
+              const nowTs = Math.floor(Date.now() / 1000)
+              if (nowTs > lastTime) {
+                curve.push({ time: nowTs, value: totalValue || startingCapital })
+              }
+
+              accts[a.id] = {
+                id: a.id,
+                cash: portfolio.cash || 0,
+                totalValue,
+                totalReturn: parseFloat(a?.performance?.totalReturn || 0) || 0,
+                openPositions: portfolio.openPositions || 0,
+                closedPositions: portfolio.closedPositions || 0,
+                totalTrades: trades.length,
+                closedTradeCount: closedTrades.length,
+                openTradeCount: openTrades.length,
+                winCount: wins.length,
+                lossCount: losses.length,
+                winRate,
+                winRateIsEstimated: !hasClosedData,
+                avgEdge,
+                profitFactor: parseFloat(a?.performance?.profitFactor || 0) || 0,
+                pnl,
+                recentTrades: allTrades.slice(0, 50),
+                equityCurve: curve,
+              }
+            })
+            cmp = null
+            timestamp = new Date().toISOString()
+          }
+
+          // Merge real recent trades from both accounts (live trades from API)
+          if (accts) {
+            const merged = []
+            for (const [id, acct] of Object.entries(accts)) {
+              const list = acct.recentTrades || []
+              list.forEach(t => merged.push({ ...t, accountId: id }))
+            }
+            merged.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0))
+            setLiveTrades(merged.slice(0, 80))
+            for (const id of Object.keys(accts)) {
+              prevTradeCount.current[id] = accts[id].totalTrades || 0
+            }
+          }
+
+          setAccounts(accts || {})
+          setComparison(cmp || null)
+          setLastUpdate(timestamp)
+          setError(null)
+        }
+      } catch (err) {
+        if (mounted) setError(err.message)
+      } finally {
+        if (mounted) setLoading(false)
+      }
+    }
+
+    fetchComparison()
+    const interval = setInterval(fetchComparison, 2500)
+    return () => { mounted = false; clearInterval(interval) }
+  }, [])
+
+  const value = {
+    accounts,
+    comparison,
+    liveTrades,
+    loading,
+    error,
+    lastUpdate,
+    accountIds: Object.keys(accounts),
+  }
+
+  return (
+    <MultiAccountContext.Provider value={value}>
+      {children}
+    </MultiAccountContext.Provider>
+  )
+}
+
+export function useMultiAccount() {
+  const ctx = useContext(MultiAccountContext)
+  if (!ctx) throw new Error('useMultiAccount must be used within MultiAccountProvider')
+  return ctx
+}

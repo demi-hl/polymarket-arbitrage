@@ -17,7 +17,9 @@
     "discord:deploy": "node discord/deploy-commands.js",
     "discord:deploy-guild": "node discord/deploy-commands.js --guild",
     "discord:clear": "node discord/deploy-commands.js --clear",
-    "discord:example": "node discord/example-integration.js"
+    "discord:example": "node discord/example-integration.js",
+    "mm:start": "node -e \"const {MarketMaker}=require('./strategies/market-maker'); const mm=new MarketMaker(); mm.start(); console.log('Market maker running...');\"",
+    "learning:status": "node -e \"const DataStore=require('./learning/data-store'); const d=new DataStore(); d.init().then(()=>d.getStats()).then(s=>console.log(JSON.stringify(s,null,2)))\""
   },
   "dependencies": {
     "axios": "^1.6.0",
@@ -34,11 +36,14 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.16",
+    "framer-motion": "^12.34.3",
+    "lightweight-charts": "^5.1.0",
     "postcss": "^8.4.32",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "recharts": "^2.10.0",
+    "sonner": "^2.0.7",
     "tailwindcss": "^3.4.0",
     "vite": "^5.0.0"
   },

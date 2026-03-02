@@ -5,7 +5,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   build: {
-    outDir: '../dist',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   server: {
@@ -13,7 +13,7 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3001',
       '/ws': {
-        target: 'ws://localhost:8082',
+        target: 'ws://localhost:8080',
         ws: true,
       },
     },

@@ -11,6 +11,11 @@ export default function useApi() {
     if (body) options.body = JSON.stringify(body)
     
     const res = await fetch(`${API_BASE}${endpoint}`, options)
+    const contentType = res.headers.get('content-type') || ''
+    if (!contentType.includes('application/json')) {
+      const text = await res.text()
+      throw new Error(`API returned ${res.status} (expected JSON): ${text.slice(0, 80)}`)
+    }
     return res.json()
   }, [])
 
