@@ -79,6 +79,13 @@ function createApiServer(wsServer) {
   const botDataDir = accountId !== 'default'
     ? path.join(__dirname, '..', 'data', `account-${accountId}`)
     : undefined;
+  const OPPORTUNITY_TIMEOUT_MS = Math.max(4000, parseInt(process.env.OPPORTUNITY_TIMEOUT_MS || '12000', 10));
+  const OPPORTUNITY_CACHE_TTL_MS = Math.max(1000, parseInt(process.env.OPPORTUNITY_CACHE_TTL_MS || '15000', 10));
+  let _opportunityCache = {
+    ts: 0,
+    threshold: null,
+    data: { opportunities: [], marketsScanned: 0, stale: false },
+  };
 
   // Get portfolio
   api.get('/portfolio', async (req, res) => {
@@ -124,11 +131,46 @@ function createApiServer(wsServer) {
   api.get('/opportunities', async (req, res) => {
     try {
       const threshold = parseFloat(req.query.threshold) / 100 || 0.05;
-      const scanner = new PolymarketScanner({ edgeThreshold: threshold });
-      const result = await scanner.scan({ threshold });
-      
-      res.json({ success: true, data: result });
+      const now = Date.now();
+      if (
+        _opportunityCache.threshold === threshold &&
+        now - _opportunityCache.ts < OPPORTUNITY_CACHE_TTL_MS
+      ) {
+        return res.json({ success: true, data: _opportunityCache.data });
+      }
+
+      const scanner = new PolymarketScanner({
+        edgeThreshold: threshold,
+        timeout: Math.min(OPPORTUNITY_TIMEOUT_MS, 10000),
+      });
+
+      const timeoutError = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Opportunities scan timed out after ${OPPORTUNITY_TIMEOUT_MS}ms`)), OPPORTUNITY_TIMEOUT_MS)
+      );
+
+      const result = await Promise.race([
+        scanner.scan({ threshold }),
+        timeoutError,
+      ]);
+
+      _opportunityCache = {
+        ts: now,
+        threshold,
+        data: { ...(result || {}), stale: false },
+      };
+
+      res.json({ success: true, data: _opportunityCache.data });
     } catch (err) {
+      if (_opportunityCache.data?.opportunities) {
+        return res.json({
+          success: true,
+          data: {
+            ..._opportunityCache.data,
+            stale: true,
+            warning: err.message,
+          },
+        });
+      }
       res.status(500).json({ success: false, error: err.message });
     }
   });
