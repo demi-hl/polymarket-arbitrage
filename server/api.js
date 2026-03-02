@@ -464,6 +464,7 @@ function createApiServer(wsServer) {
   }
 
   const RUST_ENGINE_URL = process.env.LATENCY_ENGINE_URL || 'http://localhost:8900';
+  const STARTING_CAPITAL = toNumber(process.env.STARTING_CAPITAL, 10000);
   const RUST_CACHE_TTL_MS = 2000;
   let _rustSnapshotCache = { ts: 0, data: null };
 
@@ -518,11 +519,6 @@ function createApiServer(wsServer) {
   function computeMergedStats(portfolio, report, rust) {
     const nodePnl = report?.pnl || portfolio?.pnl || { realized: 0, unrealized: 0, total: 0 };
     const rustPnl = rust?.pnl || { realized: 0, unrealized: 0, total: 0 };
-    const mergedPnl = {
-      realized: toNumber(nodePnl.realized, 0) + toNumber(rustPnl.realized, 0),
-      unrealized: toNumber(nodePnl.unrealized, 0) + toNumber(rustPnl.unrealized, 0),
-      total: toNumber(nodePnl.total, 0) + toNumber(rustPnl.total, 0),
-    };
 
     const nodeTrades = portfolio?.trades || [];
     const rustTrades = rust?.recentTrades || [];
@@ -535,9 +531,33 @@ function createApiServer(wsServer) {
     const openCost = getOpenPositionCost(portfolio?.positions || {});
     const baseTotalValue = toNumber(portfolio?.cash, 0) + openCost + toNumber(nodePnl.unrealized, 0);
     const combinedTotalValue = baseTotalValue + toNumber(rustPnl.total, 0);
-
-    const startingCapital = 10000;
-    const totalReturn = ((combinedTotalValue - startingCapital) / startingCapital) * 100;
+    const allTimePnl = combinedTotalValue - STARTING_CAPITAL;
+    const mergedRealized = toNumber(nodePnl.realized, 0) + toNumber(rustPnl.realized, 0);
+    const mergedUnrealized = allTimePnl - mergedRealized;
+    const mergedPnl = {
+      realized: mergedRealized,
+      unrealized: mergedUnrealized,
+      total: allTimePnl,
+      components: {
+        node: {
+          realized: toNumber(nodePnl.realized, 0),
+          unrealized: toNumber(nodePnl.unrealized, 0),
+          total: toNumber(nodePnl.total, 0),
+        },
+        rust: {
+          realized: toNumber(rustPnl.realized, 0),
+          unrealized: toNumber(rustPnl.unrealized, 0),
+          total: toNumber(rustPnl.total, 0),
+        },
+      },
+      baseline: {
+        startingCapital: STARTING_CAPITAL,
+        allTimePnl,
+      },
+    };
+    const totalReturn = STARTING_CAPITAL > 0
+      ? ((combinedTotalValue - STARTING_CAPITAL) / STARTING_CAPITAL) * 100
+      : 0;
 
     return {
       mergedPnl,
