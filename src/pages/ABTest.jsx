@@ -115,7 +115,6 @@ export default function ABTest() {
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="mb-10"
         >
-          <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-2">Polymarket bot</p>
           <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-3">
             Paper <span className="text-gradient-minimal">Trading</span>
           </h1>
@@ -193,9 +192,6 @@ export default function ABTest() {
   return (
     <div className="mx-auto font-futuristic pb-16">
       <div className="mb-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-gray-500 mb-2">
-          Polymarket bot
-        </p>
         <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-3">
           Paper <span className="text-gradient-minimal">Trading</span>
         </h1>

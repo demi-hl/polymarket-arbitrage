@@ -124,7 +124,7 @@ export default function EquityCurve({ accounts = {} }) {
     return (
       <div className="h-full flex flex-col items-center justify-center py-12 card">
         <motion.div animate={{ opacity: [0.4, 0.7, 0.4] }} transition={{ repeat: Infinity, duration: 3 }}>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-2">Equity curve</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-2">Total value</p>
           <p className="text-xs text-gray-600">Appears after trades</p>
         </motion.div>
       </div>
@@ -138,12 +138,12 @@ export default function EquityCurve({ accounts = {} }) {
     <div className="card" style={{ padding: '20px 20px' }}>
       <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-gray-400 font-medium">Equity curve</p>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-gray-400 font-medium">Total value</p>
           <p className="text-[10px] text-gray-600 mt-0.5">{tradeCount} trade{tradeCount !== 1 ? 's' : ''} tracked</p>
         </div>
         <div className="flex items-center gap-4">
           {ids.map(id => {
-            const label = id === 'paper' ? 'Paper' : `Account ${id}`
+            const label = id === 'paper' ? 'Total Value' : `Account ${id}`
             return (
               <div key={id} className="flex items-center gap-2">
                 <div className="w-3 h-1 rounded-full" style={{ background: COLORS[id] || '#666', boxShadow: `0 0 6px ${COLORS[id] || '#666'}40` }} />

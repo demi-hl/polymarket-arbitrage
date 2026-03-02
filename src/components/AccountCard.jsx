@@ -107,8 +107,8 @@ export default function AccountCard({ accountId, data, isWinner = false }) {
 
       <div className="flex items-end justify-between mb-6">
         <div>
-          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Cash available</p>
-          <AnimatedNumber value={cash} prefix="$" decimals={2} className="text-3xl font-light font-mono text-white" />
+          <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Total value</p>
+          <AnimatedNumber value={totalValue} prefix="$" decimals={2} className="text-3xl font-light font-mono text-white" />
         </div>
         <div className="text-right">
           <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1.5">Deployed</p>
