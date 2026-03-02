@@ -11,6 +11,7 @@ const WhaleTracker = require('../integrations/whale-tracker');
 const DataStore = require('../learning/data-store');
 const EdgeModel = require('../learning/edge-model');
 const { MarketMaker } = require('../strategies/market-maker');
+const GPUClient = require('../lib/gpu-client');
 function createApiServer(wsServer) {
   const app = express();
   
@@ -29,14 +30,48 @@ function createApiServer(wsServer) {
   // API Routes
   const api = express.Router();
   
+  const _gpuClient = new GPUClient();
+
   // Status (running state, version)
-  api.get('/status', (req, res) => {
+  api.get('/status', async (req, res) => {
+    const gpuStatus = await _gpuClient.getStatus().catch(() => ({ available: false }));
     res.json({
       status: 'running',
-      version: '2.0.0',
+      version: '3.0.0',
       timestamp: new Date().toISOString(),
-      endpoints: ['/api/portfolio', '/api/opportunities', '/api/strategies', '/api/report', '/api/risk']
+      gpu: gpuStatus,
+      endpoints: ['/api/portfolio', '/api/opportunities', '/api/strategies', '/api/report', '/api/risk', '/api/gpu']
     });
+  });
+
+  // GPU worker status and controls
+  api.get('/gpu', async (req, res) => {
+    try {
+      const status = await _gpuClient.getStatus();
+      res.json({ success: true, data: status });
+    } catch (err) {
+      res.json({ success: true, data: { available: false, error: err.message } });
+    }
+  });
+
+  api.post('/gpu/backtest', async (req, res) => {
+    try {
+      const { trades, strategy } = req.body;
+      const result = await _gpuClient.auditStrategies(trades);
+      res.json({ success: true, data: result });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.post('/gpu/monte-carlo', async (req, res) => {
+    try {
+      const { positions, bankroll, n_paths, horizon_days } = req.body;
+      const result = await _gpuClient.monteCarloSimulation(positions, bankroll, n_paths, horizon_days);
+      res.json({ success: true, data: result });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
   });
   
   const accountId = process.env.ACCOUNT_ID || 'default';

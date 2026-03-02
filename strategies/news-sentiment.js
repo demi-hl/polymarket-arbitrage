@@ -21,6 +21,8 @@
 const { fetchMarketsOnce } = require('./lib/with-scanner');
 const fs = require('fs');
 const path = require('path');
+const GPUClient = require('../lib/gpu-client');
+const _gpu = new GPUClient();
 
 const THESIS_PATH = path.join(__dirname, '..', 'data', 'news-theses.json');
 const WHALE_SIGNALS_PATH = path.join(__dirname, '..', 'data', 'whale-signals.json');
@@ -230,7 +232,35 @@ const newsSentimentStrategy = {
       }
 
       opportunities.sort((a, b) => b.edgePercent - a.edgePercent);
-      return opportunities.slice(0, 10);
+      const top = opportunities.slice(0, 10);
+
+      // GPU LLM sentiment: refine direction and confidence using deep NLP
+      if (top.length > 0 && await _gpu.isAvailable()) {
+        try {
+          const items = top.map(o => ({
+            text: o.thesisNotes || o.question,
+            market_question: o.question,
+            depth: top.length <= 3 ? 'deep' : 'fast',
+          }));
+          const sentiments = await _gpu.analyzeSentimentBatch(items);
+          if (sentiments) {
+            for (let i = 0; i < top.length && i < sentiments.length; i++) {
+              const s = sentiments[i];
+              if (!s || s.error) continue;
+              const sv = s.sentiment_value || 0;
+              // Boost edge if GPU agrees with direction, penalize if it disagrees
+              const aligned = (top[i].direction === 'BUY_YES' && sv > 0) ||
+                              (top[i].direction === 'BUY_NO' && sv < 0);
+              const boost = aligned ? Math.abs(sv) * 0.02 : -Math.abs(sv) * 0.01;
+              top[i].edgePercent = Math.max(0, top[i].edgePercent + boost);
+              top[i].executableEdge = top[i].edgePercent;
+              top[i].gpuSentiment = s;
+            }
+          }
+        } catch (e) { /* GPU unavailable, continue with keyword-based */ }
+      }
+
+      return top;
     } catch (err) {
       console.error('[news-sentiment]', err.message);
       return [];

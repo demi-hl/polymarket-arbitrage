@@ -16,6 +16,7 @@ const { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT } = require('./strategi
 const EdgeScorer = require('./lib/edge-scorer');
 const RiskManager = require('./lib/risk-manager');
 const OrderbookImbalanceAnalyzer = require('./lib/orderbook-imbalance');
+const GPUClient = require('./lib/gpu-client');
 let oracleModule;
 try { oracleModule = require('./oracle'); } catch { oracleModule = null; }
 
@@ -146,6 +147,10 @@ program
     const edgeScorer = new EdgeScorer();
     await edgeScorer.load();
 
+    const gpu = new GPUClient();
+    const gpuHealth = await gpu.checkHealth();
+    const gpuAvailable = gpu.available;
+
     const riskManager = new RiskManager(bot.portfolio);
 
     // Start Oracle research daemon (runs news, X sentiment, whale tracking on a timer)
@@ -173,6 +178,7 @@ program
     console.log(chalk.bold(`👁️  POLYMARKET BOT - WATCH MODE${label}\n`));
     console.log(chalk.gray(`Strategies: ${STRATEGY_COUNT} loaded`));
     console.log(chalk.gray(`ML Edge Scorer: loaded (${edgeScorer.trainCount} training samples)`));
+    console.log(chalk.gray(`GPU Worker: ${gpuAvailable ? chalk.green('connected') + ' (' + gpu.baseUrl + ')' : chalk.yellow('offline — using local models')}`));
     console.log(chalk.gray(`Risk Manager: Kelly sizing + circuit breaker active`));
     console.log(chalk.gray(`Oracle Daemon: ${oracleModule ? 'active (news + X sentiment + whale tracking)' : 'not loaded'}`));
     console.log(chalk.yellow('Paper trading only — no real orders sent'));
@@ -437,8 +443,20 @@ program
         // ML Edge Scorer: re-rank by predicted win probability
         const mlRanked = edgeScorer.rerank(unique);
 
+        // GPU Deep Learning: if PC worker is available, overlay neural net predictions
+        let gpuRanked = mlRanked;
+        if (await gpu.isAvailable()) {
+          try {
+            const gpuPredictions = await gpu.predictEdge(mlRanked);
+            if (gpuPredictions) {
+              gpuRanked = gpuPredictions;
+              console.log(chalk.cyan(`  GPU: deep-learning rerank applied (${gpuPredictions.length} scored)`));
+            }
+          } catch (e) { /* GPU unavailable, continue with local */ }
+        }
+
         // Orderbook Flow Analysis: adjust edges based on bid/ask imbalance
-        const ranked = flowAnalyzer.enrichOpportunities(mlRanked);
+        const ranked = flowAnalyzer.enrichOpportunities(gpuRanked);
 
         opportunitiesFound += ranked.length;
         console.log(chalk.green(`${ranked.length} opportunity(s) found!`));
@@ -496,6 +514,8 @@ program
             }
             if (newClosed.length > 0) {
               console.log(chalk.magenta(`  ML: trained on ${newClosed.length} new trade(s) (total: ${edgeScorer.trainCount})`));
+              // Also train the GPU neural net if available
+              gpu.trainEdge(newClosed).catch(() => {});
             }
           }
 
