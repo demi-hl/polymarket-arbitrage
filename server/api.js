@@ -93,6 +93,8 @@ function createApiServer(wsServer) {
         success: true,
         data: {
           ...portfolio,
+          trades: merged.mergedTrades,
+          totalTrades: merged.mergedTrades.length,
           pnl: merged.mergedPnl,
           totalValue: merged.totalValue,
           totalReturn: merged.totalReturn,
@@ -110,7 +112,9 @@ function createApiServer(wsServer) {
       const bot = new PolymarketArbitrageBot({ mode: 'paper', dataDir: botDataDir });
       await bot.loadPortfolio();
       const report = await bot.generateReport();
-      res.json({ success: true, data: report.recentTrades });
+      const rust = await fetchRustSnapshot();
+      const merged = computeMergedStats(bot.getPortfolio(), report, rust);
+      res.json({ success: true, data: merged.mergedTrades.slice(0, 200) });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -151,8 +155,35 @@ function createApiServer(wsServer) {
     try {
       const bot = new PolymarketArbitrageBot({ mode: 'paper', dataDir: botDataDir });
       await bot.loadPortfolio();
+      const portfolio = bot.getPortfolio();
       const report = await bot.generateReport();
-      res.json({ success: true, data: report });
+      const rust = await fetchRustSnapshot();
+      const merged = computeMergedStats(portfolio, report, rust);
+      const hasClosed = merged.closedTrades.length > 0;
+      const winRate = hasClosed ? (merged.wins.length / merged.closedTrades.length) * 100 : 0;
+
+      res.json({
+        success: true,
+        data: {
+          ...report,
+          performance: {
+            ...(report.performance || {}),
+            totalTrades: merged.mergedTrades.length,
+            closedTrades: merged.closedTrades.length,
+            winningTrades: merged.wins.length,
+            losingTrades: merged.losses.length,
+            winRate: `${winRate.toFixed(1)}%`,
+          },
+          portfolio: {
+            ...(report.portfolio || {}),
+            totalValue: merged.totalValue,
+            totalReturn: merged.totalReturn.toFixed(2),
+          },
+          pnl: merged.mergedPnl,
+          recentTrades: merged.mergedTrades.slice(0, 80),
+          rust,
+        },
+      });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -638,7 +669,13 @@ function createApiServer(wsServer) {
         const winRate = hasClosed ? (merged.wins.length / merged.closedTrades.length * 100) : 0;
         accounts.push({
           id,
-          portfolio,
+          portfolio: {
+            ...portfolio,
+            trades: merged.mergedTrades,
+            totalTrades: merged.mergedTrades.length,
+            totalValue: merged.totalValue,
+            pnl: merged.mergedPnl,
+          },
           performance: {
             ...(report.performance || {}),
             totalTrades: merged.mergedTrades.length,
@@ -742,7 +779,22 @@ function createApiServer(wsServer) {
       const bot = loadAccountBot(req.params.id);
       await new Promise(r => setTimeout(r, 100));
       const portfolio = bot.getPortfolio();
-      res.json({ success: true, data: portfolio });
+      const report = await bot.generateReport();
+      const includeRust = req.params.id === SINGLE_ACCOUNT_ID || req.params.id === 'paper';
+      const rust = includeRust ? await fetchRustSnapshot() : null;
+      const merged = computeMergedStats(portfolio, report, rust);
+      res.json({
+        success: true,
+        data: {
+          ...portfolio,
+          trades: merged.mergedTrades,
+          totalTrades: merged.mergedTrades.length,
+          pnl: merged.mergedPnl,
+          totalValue: merged.totalValue,
+          totalReturn: merged.totalReturn,
+          rust: includeRust ? rust : { available: false },
+        },
+      });
     } catch (err) {
       const status = /disabled in single-account mode/i.test(err.message) ? 404 : 500;
       res.status(status).json({ success: false, error: err.message });
@@ -754,7 +806,10 @@ function createApiServer(wsServer) {
       const bot = loadAccountBot(req.params.id);
       await new Promise(r => setTimeout(r, 100));
       const report = await bot.generateReport();
-      res.json({ success: true, data: report.recentTrades });
+      const includeRust = req.params.id === SINGLE_ACCOUNT_ID || req.params.id === 'paper';
+      const rust = includeRust ? await fetchRustSnapshot() : null;
+      const merged = computeMergedStats(bot.getPortfolio(), report, rust);
+      res.json({ success: true, data: merged.mergedTrades.slice(0, 200) });
     } catch (err) {
       const status = /disabled in single-account mode/i.test(err.message) ? 404 : 500;
       res.status(status).json({ success: false, error: err.message });
