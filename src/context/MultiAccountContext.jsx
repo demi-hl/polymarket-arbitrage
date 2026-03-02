@@ -69,35 +69,24 @@ export function MultiAccountProvider({ children }) {
                 : 0
 
               const startingCapital = 10000
-              const events = []
-              for (const t of trades) {
-                const openTs = t.timestamp ? new Date(t.timestamp).getTime() : Date.now()
-                events.push({ ts: openTs, type: 'open', cost: t.totalCost || 0, realizedPnl: 0 })
-                if (t.realizedPnl != null) {
+              const closedEvents = trades
+                .filter(t => t.realizedPnl != null)
+                .map(t => {
+                  const openTs = t.timestamp ? new Date(t.timestamp).getTime() : Date.now()
                   const closeTs = t.closedAt ? new Date(t.closedAt).getTime() : openTs + 60000
-                  events.push({ ts: closeTs, type: 'close', cost: t.totalCost || 0, realizedPnl: t.realizedPnl })
-                }
-              }
-              events.sort((a, b) => a.ts - b.ts)
+                  return { ts: closeTs, realizedPnl: Number(t.realizedPnl || 0) }
+                })
+                .sort((a, b) => a.ts - b.ts)
 
-              const firstTs = events.length > 0
-                ? Math.floor(events[0].ts / 1000) - 3600
+              const firstTs = closedEvents.length > 0
+                ? Math.floor(closedEvents[0].ts / 1000) - 3600
                 : Math.floor(Date.now() / 1000) - 86400
               const curve = [{ time: firstTs, value: startingCapital }]
               let lastTime = firstTs
-              let cash = startingCapital
-              let invested = 0
+              let equity = startingCapital
 
-              for (const ev of events) {
-                if (ev.type === 'open') {
-                  cash -= ev.cost
-                  invested += ev.cost
-                } else {
-                  const payout = ev.cost + ev.realizedPnl
-                  cash += payout
-                  invested -= ev.cost
-                }
-                const equity = cash + invested
+              for (const ev of closedEvents) {
+                equity += ev.realizedPnl
                 let ts = Math.floor(ev.ts / 1000)
                 if (ts <= lastTime) ts = lastTime + 1
                 lastTime = ts
