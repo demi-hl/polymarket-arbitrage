@@ -140,7 +140,7 @@ export default function AccountCard({ accountId, data, isWinner = false }) {
       )}
 
       <div className="grid grid-cols-3 gap-x-6 gap-y-4">
-        <Stat label="Total value" value={totalValue} prefix="$" themeColor={theme.color} />
+        <Stat label="Total P&L" value={data.pnl?.total || 0} prefix={(data.pnl?.total || 0) >= 0 ? '+$' : '-$'} abs valueClass={(data.pnl?.total || 0) >= 0 ? 'text-profit' : 'text-loss'} />
         <Stat label="Realized P&L" value={data.pnl?.realized || 0} prefix={(data.pnl?.realized || 0) >= 0 ? '+$' : '-$'} abs valueClass={(data.pnl?.realized || 0) >= 0 ? 'text-profit' : 'text-loss'} />
         <Stat label="Unrealized P&L" value={data.pnl?.unrealized || 0} prefix={(data.pnl?.unrealized || 0) >= 0 ? '+$' : '-$'} abs valueClass={(data.pnl?.unrealized || 0) >= 0 ? 'text-profit' : 'text-loss'} />
         <Stat label="Live hit rate" value={hasLiveHitRate ? liveHitRate : 0} suffix={hasLiveHitRate ? '%' : ''} decimals={hasLiveHitRate ? 1 : 0} custom={hasLiveHitRate ? null : '—'} />
