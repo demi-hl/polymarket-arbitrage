@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const axios = require('axios');
 
 const PolymarketScanner = require('../scanner');
 const PolymarketArbitrageBot = require('../bot');
@@ -462,21 +463,163 @@ function createApiServer(wsServer) {
     }
   }
 
+  const RUST_ENGINE_URL = process.env.LATENCY_ENGINE_URL || 'http://localhost:8900';
+  const RUST_CACHE_TTL_MS = 2000;
+  let _rustSnapshotCache = { ts: 0, data: null };
+
+  function toNumber(val, fallback = 0) {
+    const n = Number(val);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function getOpenPositionCost(positions = {}) {
+    return Object.values(positions)
+      .filter(p => p?.status === 'open')
+      .reduce((sum, p) => sum + toNumber(p.entryCost, 0), 0);
+  }
+
+  function mapRustTrades(trades = []) {
+    return trades.map(t => {
+      const side = String(t.side || '').toLowerCase();
+      return {
+        id: `rust-${t.id}`,
+        rustTradeId: t.id,
+        timestamp: t.submitted_at || new Date().toISOString(),
+        closedAt: t.filled_at || t.submitted_at || new Date().toISOString(),
+        strategy: 'crypto-latency-arb',
+        question: `Rust Engine: ${String(t.asset || 'crypto').toUpperCase()} latency arb`,
+        direction: side === 'buy' ? 'BUY_YES' : 'BUY_NO',
+        status: t.status === 'filled' ? 'closed' : 'open',
+        fillMethod: 'rust-engine',
+        pricingSource: 'rust-engine',
+        totalCost: toNumber(t.cost, 0),
+        edgePercent: Math.abs(toNumber(t.divergence_at_entry, 0)),
+        expectedProfit: Math.abs(toNumber(t.divergence_at_entry, 0)) * toNumber(t.cost, 0),
+        realizedPnl: t.pnl != null ? toNumber(t.pnl, 0) : null,
+        executedBy: 'rust-engine',
+      };
+    });
+  }
+
+  function mergeTrades(nodeTrades = [], rustTrades = []) {
+    const key = t => `${t.id || ''}:${t.timestamp || ''}:${toNumber(t.totalCost, 0).toFixed(6)}`;
+    const out = [];
+    const seen = new Set();
+    for (const t of [...nodeTrades, ...rustTrades]) {
+      const k = key(t);
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(t);
+    }
+    out.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+    return out;
+  }
+
+  function computeMergedStats(portfolio, report, rust) {
+    const nodePnl = report?.pnl || portfolio?.pnl || { realized: 0, unrealized: 0, total: 0 };
+    const rustPnl = rust?.pnl || { realized: 0, unrealized: 0, total: 0 };
+    const mergedPnl = {
+      realized: toNumber(nodePnl.realized, 0) + toNumber(rustPnl.realized, 0),
+      unrealized: toNumber(nodePnl.unrealized, 0) + toNumber(rustPnl.unrealized, 0),
+      total: toNumber(nodePnl.total, 0) + toNumber(rustPnl.total, 0),
+    };
+
+    const nodeTrades = portfolio?.trades || [];
+    const rustTrades = rust?.recentTrades || [];
+    const mergedTrades = mergeTrades(nodeTrades, rustTrades);
+    const closedTrades = mergedTrades.filter(t => t.realizedPnl != null);
+    const openTrades = mergedTrades.filter(t => t.realizedPnl == null);
+    const wins = closedTrades.filter(t => toNumber(t.realizedPnl, 0) > 0);
+    const losses = closedTrades.filter(t => toNumber(t.realizedPnl, 0) < 0);
+
+    const openCost = getOpenPositionCost(portfolio?.positions || {});
+    const baseTotalValue = toNumber(portfolio?.cash, 0) + openCost + toNumber(nodePnl.unrealized, 0);
+    const combinedTotalValue = baseTotalValue + toNumber(rustPnl.total, 0);
+
+    const startingCapital = 10000;
+    const totalReturn = ((combinedTotalValue - startingCapital) / startingCapital) * 100;
+
+    return {
+      mergedPnl,
+      mergedTrades,
+      closedTrades,
+      openTrades,
+      wins,
+      losses,
+      totalValue: combinedTotalValue,
+      totalReturn,
+    };
+  }
+
+  async function fetchRustSnapshot() {
+    if (Date.now() - _rustSnapshotCache.ts < RUST_CACHE_TTL_MS && _rustSnapshotCache.data) {
+      return _rustSnapshotCache.data;
+    }
+    try {
+      const [statusRes, pnlRes, tradesRes] = await Promise.all([
+        axios.get(`${RUST_ENGINE_URL}/status`, { timeout: 1200 }),
+        axios.get(`${RUST_ENGINE_URL}/pnl`, { timeout: 1200 }),
+        axios.get(`${RUST_ENGINE_URL}/trades`, { timeout: 1200 }),
+      ]);
+      const status = statusRes.data || {};
+      const pnl = pnlRes.data || {};
+      const recentTrades = mapRustTrades(Array.isArray(tradesRes.data) ? tradesRes.data.slice(-200).reverse() : []);
+      const data = {
+        available: status.running === true,
+        status,
+        pnl: {
+          realized: toNumber(pnl.realized, 0),
+          unrealized: toNumber(pnl.unrealized, 0),
+          total: toNumber(pnl.total, 0),
+        },
+        recentTrades,
+        tradeCount: toNumber(status.trades_today, 0),
+      };
+      _rustSnapshotCache = { ts: Date.now(), data };
+      return data;
+    } catch {
+      const data = {
+        available: false,
+        status: null,
+        pnl: { realized: 0, unrealized: 0, total: 0 },
+        recentTrades: [],
+        tradeCount: 0,
+      };
+      _rustSnapshotCache = { ts: Date.now(), data };
+      return data;
+    }
+  }
+
   api.get('/accounts', async (req, res) => {
     try {
       const ids = discoverAccounts();
       const accounts = [];
+      const rust = await fetchRustSnapshot();
       for (const id of ids) {
         const bot = loadAccountBot(id);
         await new Promise(r => setTimeout(r, 100));
         const portfolio = bot.getPortfolio();
         const report = await bot.generateReport();
+        const includeRust = id === SINGLE_ACCOUNT_ID || id === 'paper';
+        const merged = computeMergedStats(portfolio, report, includeRust ? rust : null);
+        const hasClosed = merged.closedTrades.length > 0;
+        const winRate = hasClosed ? (merged.wins.length / merged.closedTrades.length * 100) : 0;
         accounts.push({
           id,
           portfolio,
-          performance: report.performance,
-          pnl: report.pnl,
-          recentTrades: report.recentTrades,
+          performance: {
+            ...(report.performance || {}),
+            totalTrades: merged.mergedTrades.length,
+            closedTrades: merged.closedTrades.length,
+            winningTrades: merged.wins.length,
+            losingTrades: merged.losses.length,
+            winRate: `${winRate.toFixed(1)}%`,
+            totalReturn: merged.totalReturn.toFixed(2),
+          },
+          pnl: merged.mergedPnl,
+          recentTrades: merged.mergedTrades.slice(0, 80),
+          totalValue: merged.totalValue,
+          rust: includeRust ? rust : { available: false },
         });
       }
       res.json({ success: true, data: accounts });
@@ -493,16 +636,18 @@ function createApiServer(wsServer) {
       }
 
       const accounts = {};
+      const rust = await fetchRustSnapshot();
       for (const id of ids) {
         const bot = loadAccountBot(id);
         await new Promise(r => setTimeout(r, 100));
         const portfolio = bot.getPortfolio();
         const report = await bot.generateReport();
-        const trades = portfolio.trades || [];
+        const includeRust = id === SINGLE_ACCOUNT_ID || id === 'paper';
+        const merged = computeMergedStats(portfolio, report, includeRust ? rust : null);
+        const trades = merged.mergedTrades;
         const edges = trades.map(t => t.edgePercent || 0).filter(e => e > 0);
         const avgEdge = edges.length > 0 ? edges.reduce((a, b) => a + b, 0) / edges.length : 0;
-
-        const totalValue = portfolio.totalValue || (portfolio.cash + (portfolio.pnl?.unrealized || 0));
+        const totalValue = merged.totalValue;
 
         const closedTrades = trades.filter(t => t.realizedPnl != null);
         const openTrades = trades.filter(t => t.realizedPnl == null);
@@ -517,7 +662,7 @@ function createApiServer(wsServer) {
           id,
           cash: portfolio.cash,
           totalValue,
-          totalReturn: parseFloat(report.portfolio.totalReturn) || 0,
+          totalReturn: merged.totalReturn,
           openPositions: portfolio.openPositions,
           closedPositions: portfolio.closedPositions,
           totalTrades: trades.length,
@@ -529,9 +674,10 @@ function createApiServer(wsServer) {
           winRateIsEstimated: !hasClosedData,
           avgEdge: (avgEdge * 100).toFixed(2),
           profitFactor: parseFloat(report.performance.profitFactor) || 0,
-          pnl: portfolio.pnl,
-          recentTrades: trades.slice(-50).reverse(),
-          equityCurve: buildEquityCurve(trades, portfolio.pnl, portfolio),
+          pnl: merged.mergedPnl,
+          recentTrades: trades.slice(0, 80),
+          equityCurve: buildEquityCurve(trades, merged.mergedPnl, portfolio),
+          rust: includeRust ? rust : { available: false },
         };
       }
 

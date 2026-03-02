@@ -37,7 +37,7 @@ export function MultiAccountProvider({ children }) {
               const losses = closedTrades.filter(t => t.realizedPnl < 0)
               const hasClosedData = closedTrades.length > 0
               const pnl = a.pnl || portfolio.pnl || { realized: 0, unrealized: 0, total: 0 }
-              const totalValue = portfolio.totalValue || (portfolio.cash || 0) + (pnl.unrealized || 0)
+              const totalValue = a.totalValue || portfolio.totalValue || (portfolio.cash || 0) + (pnl.unrealized || 0)
               const winRate = hasClosedData
                 ? parseFloat((wins.length / closedTrades.length * 100).toFixed(1))
                 : 0
@@ -94,18 +94,19 @@ export function MultiAccountProvider({ children }) {
                 totalReturn: parseFloat(a?.performance?.totalReturn || 0) || 0,
                 openPositions: portfolio.openPositions || 0,
                 closedPositions: portfolio.closedPositions || 0,
-                totalTrades: trades.length,
-                closedTradeCount: closedTrades.length,
-                openTradeCount: openTrades.length,
-                winCount: wins.length,
-                lossCount: losses.length,
-                winRate,
-                winRateIsEstimated: !hasClosedData,
+                totalTrades: a?.performance?.totalTrades ?? trades.length,
+                closedTradeCount: a?.performance?.closedTrades ?? closedTrades.length,
+                openTradeCount: (a?.performance?.totalTrades ?? trades.length) - (a?.performance?.closedTrades ?? closedTrades.length),
+                winCount: a?.performance?.winningTrades ?? wins.length,
+                lossCount: a?.performance?.losingTrades ?? losses.length,
+                winRate: parseFloat(a?.performance?.winRate || winRate) || 0,
+                winRateIsEstimated: !hasClosedData && !(a?.performance?.closedTrades > 0),
                 avgEdge,
                 profitFactor: parseFloat(a?.performance?.profitFactor || 0) || 0,
                 pnl,
-                recentTrades: allTrades.slice(0, 50),
+                recentTrades: (a.recentTrades || allTrades).slice(0, 80),
                 equityCurve: curve,
+                rust: a.rust || null,
               }
             })
             cmp = null
