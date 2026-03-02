@@ -158,6 +158,17 @@ program
 
     const riskManager = new RiskManager(bot.portfolio);
 
+    // Check Rust latency engine
+    let rustEngineStatus = null;
+    const rustEngineUrl = process.env.LATENCY_ENGINE_URL || 'http://localhost:8900';
+    try {
+      const axios = require('axios');
+      const { data } = await axios.get(`${rustEngineUrl}/health`, { timeout: 2000 });
+      if (data.status === 'ok') {
+        rustEngineStatus = data;
+      }
+    } catch {}
+
     // Wire whale tracker into strategy scoring
     let whaleTracker = null;
     if (WhaleTracker && setWhaleTracker) {
@@ -201,6 +212,7 @@ program
     console.log(chalk.gray(`Risk Manager: Kelly sizing + VaR + circuit breaker active`));
     console.log(chalk.gray(`Whale Tracker: ${whaleTracker ? chalk.green('active') + ` (${whaleTracker.trackedWallets.size} wallets)` : chalk.yellow('not loaded')}`));
     console.log(chalk.gray(`Oracle Daemon: ${oracleModule ? 'active (news + X sentiment + whale tracking)' : 'not loaded'}`));
+    console.log(chalk.gray(`Rust Latency Engine: ${rustEngineStatus ? chalk.green('connected') + ` (${rustEngineUrl}, ${rustEngineStatus.paper_mode ? 'paper' : 'LIVE'})` : chalk.yellow('offline — crypto latency arb disabled')}`));
     console.log(chalk.yellow('Paper trading only — no real orders sent'));
     console.log(chalk.gray(`Mode: ${autoExecute ? 'AUTO-EXECUTE' : 'MONITOR ONLY'}`));
     console.log(chalk.gray(`Execute threshold: ${(threshold * 100).toFixed(2)}% (only trades above this execute)`));

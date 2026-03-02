@@ -167,6 +167,7 @@ const eventCatalyst = require('./event-catalyst');
 const smartMoney = require('./smart-money');
 const newsSentiment = require('./news-sentiment');
 const resolutionFrontrun = require('./resolution-frontrun');
+const cryptoLatencyArb = require('./crypto-latency-arb');
 
 const ALL_STRATEGIES = [].concat(
   resolutionFrontrun,
@@ -183,6 +184,7 @@ const ALL_STRATEGIES = [].concat(
   eventCatalyst,
   smartMoney,
   newsSentiment,
+  cryptoLatencyArb,
 );
 
 const STRATEGY_COUNT = ALL_STRATEGIES.length;
