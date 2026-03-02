@@ -74,8 +74,7 @@ impl OrderSigner {
         neg_risk: bool,
     ) -> Result<SignedOrder> {
         let is_buy = side == "BUY";
-        let price_raw = (price * 100.0).round() as u64;
-        let size_raw = (size * 1_000_000.0).round() as u64; // USDC 6 decimals
+        let size_raw = (size * 1_000_000.0).round() as u64;
 
         let (maker_amount, taker_amount) = if is_buy {
             let cost = (size * price * 1_000_000.0).round() as u64;
@@ -201,8 +200,12 @@ pub struct SignedOrder {
 
 fn signature_to_bytes(sig: &Signature) -> Vec<u8> {
     let mut bytes = Vec::with_capacity(65);
-    bytes.extend_from_slice(&sig.r.to_fixed_bytes());
-    bytes.extend_from_slice(&sig.s.to_fixed_bytes());
+    let mut r_bytes = [0u8; 32];
+    sig.r.to_big_endian(&mut r_bytes);
+    bytes.extend_from_slice(&r_bytes);
+    let mut s_bytes = [0u8; 32];
+    sig.s.to_big_endian(&mut s_bytes);
+    bytes.extend_from_slice(&s_bytes);
     bytes.push(sig.v as u8);
     bytes
 }

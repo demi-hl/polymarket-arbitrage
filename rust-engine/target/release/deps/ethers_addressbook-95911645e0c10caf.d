@@ -1,0 +1,9 @@
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/release/deps/ethers_addressbook-95911645e0c10caf.d: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/../README.md /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/./contracts/contracts.json
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/release/deps/libethers_addressbook-95911645e0c10caf.rlib: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/../README.md /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/./contracts/contracts.json
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/release/deps/libethers_addressbook-95911645e0c10caf.rmeta: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/../README.md /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/./contracts/contracts.json
+
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/lib.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/../README.md:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/ethers-addressbook-2.0.14/src/./contracts/contracts.json:

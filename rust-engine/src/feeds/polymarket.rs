@@ -97,8 +97,7 @@ impl PolymarketFeed {
     }
 
     async fn connect_and_stream(&self, token_ids: &[String]) -> Result<()> {
-        let url = url::Url::parse(&self.ws_url)?;
-        let (ws_stream, _) = connect_async(url).await?;
+        let (ws_stream, _) = connect_async(&self.ws_url).await?;
         info!("Polymarket WS connected, subscribing to {} tokens", token_ids.len());
 
         let (mut write, mut read) = ws_stream.split();

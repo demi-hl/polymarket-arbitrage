@@ -70,8 +70,7 @@ impl BinanceFeed {
     }
 
     async fn connect_and_stream(&self) -> Result<()> {
-        let url = url::Url::parse(&self.ws_url)?;
-        let (ws_stream, _) = connect_async(url).await?;
+        let (ws_stream, _) = connect_async(&self.ws_url).await?;
         info!("Binance WS connected");
 
         let (_, mut read) = ws_stream.split();

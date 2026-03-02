@@ -92,7 +92,6 @@ impl TradingViewFeed {
         let ema_20 = Self::ema(&closes, 20);
         let ema_50 = Self::ema(&closes, 50);
 
-        let last = *closes.last().unwrap();
         let rsi = Self::rsi(&closes, 14);
         let atr = Self::atr(&body, 14);
 
