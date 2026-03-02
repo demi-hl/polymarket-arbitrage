@@ -245,6 +245,11 @@ class PolymarketArbitrageBot extends EventEmitter {
   }
 
   async execute(opportunity, options = {}) {
+    // Rust engine trades are already executed — just record them
+    if (opportunity.rustEngine) {
+      return this.recordRustEngineTrade(opportunity);
+    }
+
     const size = options.size || opportunity.maxPosition;
     
     if (opportunity.edgePercent < this.edgeThreshold) {
@@ -259,6 +264,71 @@ class PolymarketArbitrageBot extends EventEmitter {
     } else {
       return this.executeLive(opportunity, size);
     }
+  }
+
+  async recordRustEngineTrade(opportunity) {
+    const timestamp = new Date().toISOString();
+    const size = opportunity.maxPosition || 25;
+    const yesPrice = opportunity.yesPrice || 0.5;
+    const noPrice = opportunity.noPrice || 0.5;
+    const isYes = opportunity.direction === 'BUY_YES';
+
+    const trade = {
+      id: `rust-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
+      timestamp,
+      marketId: opportunity.marketId,
+      question: opportunity.question,
+      strategy: 'crypto-latency-arb',
+      mode: 'paper',
+      direction: opportunity.direction,
+      pricingSource: 'rust-engine',
+      fillMethod: 'rust-engine',
+      yesPrice, noPrice,
+      yesShares: isYes ? size / yesPrice : 0,
+      noShares: !isYes ? size / noPrice : 0,
+      yesSize: isYes ? size : 0,
+      noSize: !isYes ? size : 0,
+      totalCost: size,
+      yesSlippage: 0, noSlippage: 0,
+      grossEdge: opportunity.edgePercent,
+      executableEdge: opportunity.edgePercent,
+      slippageCost: 0, spreadCost: 0,
+      netEdge: opportunity.edgePercent,
+      edgePercent: opportunity.edgePercent,
+      expectedReturn: size * (1 + opportunity.edgePercent),
+      expectedProfit: size * opportunity.edgePercent,
+      status: 'filled', filledAt: timestamp,
+    };
+
+    if (opportunity.alreadyExecuted && opportunity.rustPnl != null) {
+      trade.realizedPnl = opportunity.rustPnl;
+      trade.closedAt = timestamp;
+      trade.closeMethod = 'rust-instant';
+    } else {
+      this.portfolio.cash -= size;
+      this.portfolio.positions[opportunity.marketId] = {
+        marketId: opportunity.marketId,
+        question: opportunity.question,
+        yesShares: trade.yesShares,
+        noShares: trade.noShares,
+        entryYesPrice: yesPrice,
+        entryNoPrice: noPrice,
+        entryCost: size,
+        entryTime: timestamp,
+        direction: opportunity.direction,
+        strategy: 'crypto-latency-arb',
+        holdUntilResolution: false,
+        clobTokenIds: opportunity.clobTokenIds || [],
+        status: 'open',
+        rustEngine: true,
+      };
+    }
+
+    this.portfolio.trades.push(trade);
+    this.updatePnL();
+    await this.savePortfolio();
+    this.emit('trade:executed', { trade, portfolio: this.portfolio });
+    return trade;
   }
 
   async autoExecute(opportunities, options = {}) {
@@ -285,6 +355,13 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     for (const opp of ranked) {
       try {
+        if (opp.rustEngine) {
+          const trade = await this.execute(opp);
+          executed.push(trade);
+          const pnlTag = trade.realizedPnl != null ? ` PnL: $${trade.realizedPnl.toFixed(2)}` : '';
+          console.log(`⚡ Rust: ${opp.question.substring(0, 50)}... | Div: ${(opp.edgePercent * 100).toFixed(3)}%${pnlTag}`);
+          continue;
+        }
         if (executed.length >= maxTradesPerCycle) {
           skipped.push({ opportunity: opp, reason: 'Max trades per cycle reached' });
           continue;

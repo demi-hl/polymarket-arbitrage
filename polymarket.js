@@ -331,6 +331,9 @@ program
           pos.lastPriceUpdate = now;
         }
 
+        // Rust engine manages its own positions — skip Node.js P&L management
+        if (pos.rustEngine) continue;
+
         const isHoldToResolution = pos.holdUntilResolution === true ||
           pos.strategy === 'multi-outcome-arb' ||
           pos.strategy === 'correlated-market-arb' ||
@@ -464,7 +467,7 @@ program
         const seen = new Set();
         const unique = [];
         for (const opp of opportunities) {
-          if (opp.edgePercent < scanThreshold) continue;
+          if (!opp.bypassThreshold && opp.edgePercent < scanThreshold) continue;
           if (seen.has(opp.marketId)) continue;
           seen.add(opp.marketId);
           unique.push(opp);
