@@ -16,6 +16,9 @@
  * has been steadily climbing and resolution is near.
  */
 const { fetchMarketsOnce } = require('./lib/with-scanner');
+const EventCalendar = require('../lib/event-calendar');
+
+const calendar = new EventCalendar();
 
 const eventCatalystStrategy = {
   name: 'event-catalyst',
@@ -35,6 +38,10 @@ const eventCatalystStrategy = {
       const markets = await fetchMarketsOnce();
       const now = Date.now();
       const opportunities = [];
+
+      // Pre-fetch event calendar for resolution boost
+      let calendarEvents = [];
+      try { calendarEvents = await calendar.fetchUpcomingEvents(); } catch {}
 
       for (const market of markets) {
         if (market.active === false || market.closed) continue;
@@ -59,16 +66,24 @@ const eventCatalystStrategy = {
         const highSide = Math.max(yesPrice, noPrice);
         const lowSide = Math.min(yesPrice, noPrice);
 
-        // Zone 1: "Nearly certain" — 85-96% with hours left
-        if (highSide >= 0.85 && highSide <= 0.96 && hoursLeft <= 48) {
+        // Zone 1: "Nearly certain" — 88-96% with hours left
+        if (highSide >= 0.88 && highSide <= 0.96 && hoursLeft <= 48) {
           const discount = 1.0 - highSide;
           const annualized = (discount / (hoursLeft / 8760)) * 100;
           const timeDecayBonus = Math.max(0, (48 - hoursLeft) / 48) * 0.01;
-          const rawEdge = discount + timeDecayBonus;
-          const netEdge = Math.max(0, rawEdge - 0.004);
+          let calendarBoost = 0;
+          let calendarReason = '';
+          try {
+            const boost = calendar.getResolutionBoost(market.question, market.endDate);
+            calendarBoost = boost.boost || 0;
+            calendarReason = boost.reason || '';
+          } catch {}
 
-          if (netEdge < 0.005) continue;
-          if ((market.liquidity || 0) < 3000) continue;
+          const rawEdge = discount + timeDecayBonus + calendarBoost;
+          const netEdge = Math.max(0, rawEdge - 0.005);
+
+          if (netEdge < 0.02) continue;
+          if ((market.liquidity || 0) < 5000) continue;
 
           const direction = yesPrice >= noPrice ? 'BUY_YES' : 'BUY_NO';
 
@@ -96,19 +111,21 @@ const eventCatalystStrategy = {
             hoursLeft: Math.round(hoursLeft),
             annualizedReturn: parseFloat(annualized.toFixed(0)),
             discount: parseFloat(discount.toFixed(4)),
+            calendarBoost,
+            calendarReason,
           });
           continue;
         }
 
-        // Zone 2: "Conviction building" — 70-85%, resolution within 24h
-        if (highSide >= 0.70 && highSide < 0.85 && hoursLeft <= 24) {
+        // Zone 2: "Conviction building" — 75-88%, resolution within 12h
+        if (highSide >= 0.75 && highSide < 0.88 && hoursLeft <= 12) {
           const conviction = highSide;
-          const urgency = 1 - (hoursLeft / 24);
-          const rawEdge = (conviction - 0.70) * urgency * 0.15;
-          const netEdge = Math.max(0, rawEdge - 0.005);
+          const urgency = 1 - (hoursLeft / 12);
+          const rawEdge = (conviction - 0.75) * urgency * 0.2;
+          const netEdge = Math.max(0, rawEdge - 0.006);
 
-          if (netEdge < 0.005) continue;
-          if ((market.liquidity || 0) < 5000) continue;
+          if (netEdge < 0.02) continue;
+          if ((market.liquidity || 0) < 8000) continue;
 
           const direction = yesPrice >= noPrice ? 'BUY_YES' : 'BUY_NO';
 
@@ -149,7 +166,7 @@ const eventCatalystStrategy = {
   },
 
   async validate(opp) {
-    return opp && opp.edgePercent >= 0.005 && opp.hoursLeft > 0;
+    return opp && opp.edgePercent >= 0.02 && opp.hoursLeft > 0;
   },
 
   async execute(bot, opp) {

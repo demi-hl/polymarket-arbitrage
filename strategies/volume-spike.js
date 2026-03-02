@@ -106,7 +106,7 @@ const volumeSpikeDetector = {
 
           const edge = absPriceMove * 0.3;
           const netEdge = Math.max(0, edge - 0.005);
-          if (netEdge < 0.005) continue;
+          if (netEdge < 0.02) continue;
 
           const direction = priceMove > 0 ? 'BUY_YES' : 'BUY_NO';
 
@@ -148,7 +148,7 @@ const volumeSpikeDetector = {
 
 
   async validate(opp) {
-    return opp && opp.edgePercent >= 0.005 && opp.volumeRatio >= 3;
+    return opp && opp.edgePercent >= 0.02 && opp.volumeRatio >= 3;
   },
 
   async execute(bot, opp) {

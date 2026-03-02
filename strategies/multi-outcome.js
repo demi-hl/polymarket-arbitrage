@@ -1,9 +1,15 @@
 /**
  * Multi-outcome event arbitrage strategy.
  * Scans events with 3+ outcomes where the YES price sum deviates from 100%.
- * - UNDERPRICED (sum < 100%): buy YES on cheapest outcomes → guaranteed payout at resolution.
- * - OVERPRICED  (sum > 100%): buy NO on most-overpriced outcomes.
- * Filters out non-mutually-exclusive events (e.g. "what price will X hit").
+ *
+ * CRITICAL FIX: This strategy now marks trades as holdUntilResolution = true.
+ * The bot's exit logic will NOT close these at market on stop-loss or max-hold.
+ * Instead, they are held until the market resolves and one outcome pays $1.00.
+ *
+ * Only enters when:
+ *   - Sum deviation >= 3% (net edge after costs)
+ *   - ALL legs have sufficient liquidity (>= $500 per leg)
+ *   - Net edge per leg >= 2% after gas + slippage + spread
  */
 const axios = require('axios');
 const { fetchMarketsOnce } = require('./lib/with-scanner');
@@ -103,7 +109,7 @@ function analyzeEvent(event) {
   const deviation = yesSum - 1.0;
   const absDeviation = Math.abs(deviation);
 
-  if (absDeviation < 0.005) return null;
+  if (absDeviation < 0.03) return null;
   if (yesSum > 1.15 || yesSum < 0.85) return null;
 
   const direction = deviation < 0 ? 'UNDERPRICED' : 'OVERPRICED';
@@ -127,28 +133,28 @@ function analyzeEvent(event) {
   };
 }
 
-function buildOpportunities(analysis, maxLegs = 5) {
+function buildOpportunities(analysis, maxLegs = 4) {
   const { direction, outcomes, absDeviation, eventTitle, totalLiquidity, deviationPct } = analysis;
   const opportunities = [];
 
   const legs = outcomes.slice(0, maxLegs);
   const minLegLiquidity = Math.min(...legs.map(l => l.liquidity));
-  if (minLegLiquidity < 200) return [];
+  if (minLegLiquidity < 500) return [];
 
   const gasCostPerLeg = 0.08;
   const totalGas = gasCostPerLeg * legs.length;
+
+  const perLegEdge = absDeviation / legs.length;
+  const gasAsPct = totalGas / (legs.reduce((s, l) => s + (direction === 'UNDERPRICED' ? l.yesPrice : l.noPrice), 0) * 100);
+  const netEdgePerLeg = Math.max(0, perLegEdge - gasAsPct - 0.003);
+
+  if (netEdgePerLeg < 0.02) return [];
 
   for (const leg of legs) {
     const side = direction === 'UNDERPRICED' ? 'BUY_YES' : 'BUY_NO';
     const entryPrice = side === 'BUY_YES' ? leg.yesPrice : leg.noPrice;
 
-    const perLegEdge = absDeviation / legs.length;
-    const gasAsPct = gasCostPerLeg / (entryPrice * 100);
-    const netEdge = Math.max(0, perLegEdge - gasAsPct - 0.002);
-
-    if (netEdge < 0.003) continue;
-
-    const maxPos = Math.min(leg.liquidity * 0.015, 150);
+    const maxPos = Math.min(leg.liquidity * 0.01, 100);
 
     opportunities.push({
       marketId: leg.marketId,
@@ -160,17 +166,18 @@ function buildOpportunities(analysis, maxLegs = 5) {
       noPrice: leg.noPrice,
       sum: leg.yesPrice + leg.noPrice,
       edge: perLegEdge,
-      edgePercent: netEdge,
-      executableEdge: netEdge,
+      edgePercent: netEdgePerLeg,
+      executableEdge: netEdgePerLeg,
       liquidity: leg.liquidity,
       volume: 0,
       conditionId: leg.conditionId,
       endDate: leg.endDate,
       direction: side,
       maxPosition: maxPos,
-      expectedReturn: netEdge,
-      confidence: Math.min(absDeviation * 10, 1),
+      expectedReturn: netEdgePerLeg,
+      confidence: Math.min(absDeviation * 5, 0.9),
       strategy: 'multi-outcome-arb',
+      holdUntilResolution: true,
       multiOutcome: true,
       eventDeviationPct: deviationPct,
       legCount: legs.length,
@@ -184,7 +191,7 @@ function buildOpportunities(analysis, maxLegs = 5) {
 const multiOutcomeArb = {
   name: 'multi-outcome-arb',
   type: 'fundamental',
-  riskLevel: 'low',
+  riskLevel: 'medium',
 
   async scan(bot) {
     try {
@@ -194,13 +201,13 @@ const multiOutcomeArb = {
       for (const event of events) {
         const analysis = analyzeEvent(event);
         if (!analysis) continue;
-        if (analysis.absDeviation < 0.008) continue;
+        if (analysis.absDeviation < 0.03) continue;
         const opps = buildOpportunities(analysis);
         allOpps.push(...opps);
       }
 
       allOpps.sort((a, b) => b.edgePercent - a.edgePercent);
-      return allOpps.slice(0, 20);
+      return allOpps.slice(0, 10);
     } catch (err) {
       console.error('[multi-outcome-arb]', err.message);
       return [];
@@ -208,7 +215,7 @@ const multiOutcomeArb = {
   },
 
   async validate(opp) {
-    return opp && opp.edgePercent > 0.003 && opp.liquidity >= 200;
+    return opp && opp.edgePercent >= 0.02 && opp.liquidity >= 500;
   },
 
   async execute(bot, opp) {

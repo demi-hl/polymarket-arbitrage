@@ -1,17 +1,5 @@
 {
-  "weights": {
-    "bias": -0.16761087381441225,
-    "edge": 0.03759466586715629,
-    "logLiquidity": 0.1,
-    "logVolume": 0.1,
-    "hoursToExpiry": -0.1776108738144123,
-    "spreadCost": -2.00022366932691,
-    "isMultiOutcome": 0.18674924054648215,
-    "isCrossPlatform": 0.40198200111457283,
-    "isTA": 0.1,
-    "isArb": -0.025388565045748344,
-    "confidence": 0.4161945630927941
-  },
-  "trainCount": 105,
-  "updatedAt": "2026-03-01T19:52:39.986Z"
+  "weights": {},
+  "trainCount": 0,
+  "lastTrainedAt": null
 }

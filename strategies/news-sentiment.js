@@ -183,16 +183,16 @@ const newsSentimentStrategy = {
           if (direction === 'context') continue;
 
           if (direction === 'BUY_YES') {
-            edge = (1 - prices.yes) * thesis.confidence * 0.08;
+            edge = (1 - prices.yes) * thesis.confidence * 0.12;
           } else if (direction === 'BUY_NO') {
-            edge = (1 - prices.no) * thesis.confidence * 0.08;
+            edge = (1 - prices.no) * thesis.confidence * 0.12;
           } else {
             continue;
           }
 
-          const netEdge = Math.max(0, edge - 0.004);
-          if (netEdge < 0.005) continue;
-          if ((market.liquidity || 0) < 3000) continue;
+          const netEdge = Math.max(0, edge - 0.006);
+          if (netEdge < 0.02) continue;
+          if ((market.liquidity || 0) < 5000) continue;
 
           const oracleBoost = boostConfidenceFromOracle(
             { conditionId: market.conditionId, direction, category: market.category || market.eventTitle },
@@ -217,7 +217,7 @@ const newsSentimentStrategy = {
             conditionId: market.conditionId,
             endDate: market.endDate,
             direction,
-            maxPosition: Math.min((market.liquidity || 0) * 0.01, 200),
+            maxPosition: Math.min((market.liquidity || 0) * 0.008, 150),
             expectedReturn: netEdge,
             confidence: thesis.confidence,
             strategy: 'news-sentiment',
@@ -238,7 +238,7 @@ const newsSentimentStrategy = {
   },
 
   async validate(opp) {
-    return opp && opp.edgePercent >= 0.005 && opp.thesisId;
+    return opp && opp.edgePercent >= 0.02 && opp.thesisId;
   },
 
   async execute(bot, opp) {

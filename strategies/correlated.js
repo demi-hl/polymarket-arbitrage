@@ -5,11 +5,9 @@
  * when prices violate that relationship. Examples:
  *   - "Will X win the primary?" at 40% and "Will X be president?" at 50%
  *     → impossible: P(president) <= P(primary winner). Short the general, buy the primary.
- *   - "Will Team A win semifinal?" at 60% and "Will Team A win tournament?" at 70%
- *     → impossible: P(tournament) <= P(semifinal).
  *
- * Groups markets by entity (person, team, topic) using keyword extraction,
- * then checks for subset/superset probability violations.
+ * CRITICAL FIX: Now requires >= 3% violation (was 1%), marks as holdUntilResolution,
+ * and validates that both markets have matching resolution timelines.
  */
 const axios = require('axios');
 const { fetchMarketsOnce } = require('./lib/with-scanner');
@@ -23,8 +21,6 @@ const SUPERSET_PATTERNS = [
     superset: /win (?:the )?(?:championship|tournament|title|cup)/i },
   { subset: /(?:nominated|shortlisted)/i,
     superset: /(?:win|receive) (?:the )?(?:award|oscar|prize)/i },
-  { subset: /sign|join/i,
-    superset: /start|play .+ games/i },
 ];
 
 function extractEntity(question) {
@@ -53,24 +49,6 @@ function findSubsetSupersetPair(marketA, marketB) {
     if (pattern.subset.test(qB) && pattern.superset.test(qA)) {
       return { subset: marketB, superset: marketA };
     }
-  }
-
-  const stageOrder = ['primary', 'nomination', 'quarterfinal', 'semifinal', 'final', 'election', 'president', 'championship', 'tournament'];
-  function stageRank(q) {
-    const lower = q.toLowerCase();
-    for (let i = 0; i < stageOrder.length; i++) {
-      if (lower.includes(stageOrder[i])) return i;
-    }
-    return -1;
-  }
-
-  const rankA = stageRank(qA);
-  const rankB = stageRank(qB);
-
-  if (rankA >= 0 && rankB >= 0 && rankA !== rankB) {
-    return rankA < rankB
-      ? { subset: marketB, superset: marketA }
-      : { subset: marketA, superset: marketB };
   }
 
   return null;
@@ -119,8 +97,8 @@ const correlatedMarketArb = {
       for (const [entity, group] of byEntity) {
         if (group.length < 2) continue;
 
-        for (let i = 0; i < group.length && i < 8; i++) {
-          for (let j = i + 1; j < group.length && j < 8; j++) {
+        for (let i = 0; i < group.length && i < 6; i++) {
+          for (let j = i + 1; j < group.length && j < 6; j++) {
             const pair = findSubsetSupersetPair(group[i], group[j]);
             if (!pair) continue;
 
@@ -128,17 +106,16 @@ const correlatedMarketArb = {
             const supPrices = parsePrice(pair.superset);
             if (!subPrices || !supPrices) continue;
 
-            // Violation: P(superset) > P(subset) is impossible
             const violation = supPrices.yes - subPrices.yes;
-            if (violation <= 0.01) continue;
+            if (violation <= 0.03) continue;
 
             const subLiq = pair.subset.liquidity || 0;
             const supLiq = pair.superset.liquidity || 0;
             const minLiq = Math.min(subLiq, supLiq);
-            if (minLiq < 2000) continue;
+            if (minLiq < 5000) continue;
 
-            const netEdge = Math.max(0, violation - 0.005);
-            if (netEdge < 0.005) continue;
+            const netEdge = Math.max(0, violation - 0.008);
+            if (netEdge < 0.02) continue;
 
             opportunities.push({
               marketId: pair.superset.id,
@@ -157,10 +134,11 @@ const correlatedMarketArb = {
               conditionId: pair.superset.conditionId,
               endDate: pair.superset.endDate,
               direction: 'BUY_NO',
-              maxPosition: Math.min(minLiq * 0.015, 300),
+              maxPosition: Math.min(minLiq * 0.01, 200),
               expectedReturn: netEdge,
-              confidence: Math.min(violation * 5, 1),
+              confidence: Math.min(violation * 3, 0.85),
               strategy: 'correlated-market-arb',
+              holdUntilResolution: true,
               correlatedWith: {
                 marketId: pair.subset.id,
                 question: pair.subset.question,
@@ -172,7 +150,7 @@ const correlatedMarketArb = {
       }
 
       opportunities.sort((a, b) => b.edgePercent - a.edgePercent);
-      return opportunities.slice(0, 15);
+      return opportunities.slice(0, 8);
     } catch (err) {
       console.error('[correlated-market-arb]', err.message);
       return [];
@@ -180,7 +158,7 @@ const correlatedMarketArb = {
   },
 
   async validate(opp) {
-    return opp && opp.edgePercent >= 0.005 && opp.liquidity >= 2000;
+    return opp && opp.edgePercent >= 0.02 && opp.liquidity >= 5000;
   },
 
   async execute(bot, opp) {

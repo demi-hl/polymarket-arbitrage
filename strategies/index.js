@@ -166,8 +166,10 @@ const liquiditySniper = require('./liquidity-sniper');
 const eventCatalyst = require('./event-catalyst');
 const smartMoney = require('./smart-money');
 const newsSentiment = require('./news-sentiment');
+const resolutionFrontrun = require('./resolution-frontrun');
 
 const ALL_STRATEGIES = [].concat(
+  resolutionFrontrun,
   multiOutcome,
   fundamental,
   crossPlatform,

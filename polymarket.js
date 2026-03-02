@@ -15,6 +15,7 @@ const createApiServer = require('./server/api');
 const { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT } = require('./strategies');
 const EdgeScorer = require('./lib/edge-scorer');
 const RiskManager = require('./lib/risk-manager');
+const OrderbookImbalanceAnalyzer = require('./lib/orderbook-imbalance');
 let oracleModule;
 try { oracleModule = require('./oracle'); } catch { oracleModule = null; }
 
@@ -99,9 +100,9 @@ program
   .option('-i, --interval <seconds>', 'Scan interval in seconds',
     process.env.SCAN_INTERVAL ? String(parseInt(process.env.SCAN_INTERVAL) / 1000) : '30')
   .option('-t, --threshold <percent>', 'Auto-execute threshold %',
-    process.env.MIN_EDGE || '5')
+    process.env.MIN_EDGE || '2')
   .option('-s, --scan-threshold <percent>', 'Minimum edge % to show (lower = more opportunities)',
-    process.env.SCAN_EDGE || '1')
+    process.env.SCAN_EDGE || '1.5')
   .option('-a, --auto', 'Auto-execute trades (paper mode only)',
     process.env.AUTO_EXECUTE === 'true')
   .option('-p, --position-size <amount>', 'Max position size in USD',
@@ -178,16 +179,19 @@ program
     console.log(chalk.gray(`Mode: ${autoExecute ? 'AUTO-EXECUTE' : 'MONITOR ONLY'}`));
     console.log(chalk.gray(`Execute threshold: ${(threshold * 100).toFixed(2)}% (only trades above this execute)`));
     console.log(chalk.gray(`Scan threshold: ${(scanThreshold * 100).toFixed(2)}% (show opportunities above this)`));
-    const MAX_HOLD_TIME = Number(process.env.MAX_HOLD_MINUTES) ? Number(process.env.MAX_HOLD_MINUTES) * 60 * 1000 : 4 * 60 * 60 * 1000; // 4 hours — faster turnover
-    const TAKE_PROFIT = 0.003;   // 0.3% — tight take-profit for quick cash recycling
-    const STOP_LOSS = -0.03;     // 3% — cut losers fast
-    const TRAILING_DROP = 0.005; // 0.5% drop from peak → close to lock in gains
+    const MAX_HOLD_TIME_DIRECTIONAL = Number(process.env.MAX_HOLD_MINUTES) ? Number(process.env.MAX_HOLD_MINUTES) * 60 * 1000 : 24 * 60 * 60 * 1000; // 24h for directional
+    const MAX_HOLD_TIME_RESOLUTION = 30 * 24 * 60 * 60 * 1000; // 30 days for hold-until-resolution
+    const TAKE_PROFIT_DIRECTIONAL = 0.02;  // 2% — meaningful take-profit
+    const TAKE_PROFIT_ARB = 0.005;         // 0.5% — arb profits are smaller but real
+    const STOP_LOSS_DIRECTIONAL = -0.08;   // 8% — give directional bets room to breathe
+    const STOP_LOSS_ARB = -0.15;           // 15% — arbs should rarely hit this; if they do, something is wrong
+    const TRAILING_DROP = 0.03;            // 3% drop from peak → lock in gains
     const GAS_COST = 0.04;
 
     console.log(chalk.gray(`Scan cadence: ${(scanMinMs / 1000).toFixed(0)}-${(scanMaxMs / 1000).toFixed(0)}s jittered`));
     console.log(chalk.gray(`Position Size: $${positionSize}`));
-    const holdDays = Math.round(MAX_HOLD_TIME / (24 * 60 * 60 * 1000));
-    console.log(chalk.gray(`Max hold: ${holdDays}d (close at market after this unless take-profit/stop-loss/resolved)`));
+    console.log(chalk.gray(`Directional: TP ${(TAKE_PROFIT_DIRECTIONAL*100).toFixed(0)}% / SL ${(STOP_LOSS_DIRECTIONAL*100).toFixed(0)}% / Max hold 24h`));
+    console.log(chalk.gray(`Arb/Resolution: TP ${(TAKE_PROFIT_ARB*100).toFixed(1)}% / SL ${(STOP_LOSS_ARB*100).toFixed(0)}% / Hold until resolved (30d max)`));
     console.log(chalk.gray(`429 backoff: +${(backoffOn429Ms / 1000).toFixed(0)}s steps (max ${(scanMaxBackoffMs / 1000).toFixed(0)}s)`));
     console.log(chalk.gray(`Scan timeout: ${(scanCycleTimeoutMs / 1000).toFixed(0)}s per cycle`));
     if (strategyRotationEnabled) {
@@ -198,7 +202,8 @@ program
 
     const priceScanner = new PolymarketScanner({ timeout: 10000 });
     priceScanner.connectWebSocket();
-    console.log(chalk.gray('CLOB WebSocket: connecting for real-time prices'));
+    const flowAnalyzer = new OrderbookImbalanceAnalyzer(priceScanner.clob);
+    console.log(chalk.gray('CLOB WebSocket: connecting for real-time prices + orderbook flow analysis'));
     console.log(chalk.gray(`Press Ctrl+C to stop\n`));
 
     let scanCount = 0, opportunitiesFound = 0, tradesExecuted = 0;
@@ -287,9 +292,31 @@ program
           pos.lastPriceUpdate = now;
         }
 
-        if (!prices && age < MAX_HOLD_TIME) continue;
+        const isHoldToResolution = pos.holdUntilResolution === true ||
+          pos.strategy === 'multi-outcome-arb' ||
+          pos.strategy === 'correlated-market-arb' ||
+          pos.direction === 'BUY_BOTH';
+
+        const maxHold = isHoldToResolution ? MAX_HOLD_TIME_RESOLUTION : MAX_HOLD_TIME_DIRECTIONAL;
+        const takeProfit = isHoldToResolution ? TAKE_PROFIT_ARB : TAKE_PROFIT_DIRECTIONAL;
+        const stopLoss = isHoldToResolution ? STOP_LOSS_ARB : STOP_LOSS_DIRECTIONAL;
+
+        if (!prices && age < maxHold) continue;
 
         if (prices) {
+          if (prices.closed || prices.resolved) {
+            try {
+              await bot.closePositionAtMarket(pos.marketId, prices.yesPrice, prices.noPrice);
+              const SELL_SLIPPAGE = 0.003;
+              const sellValue = (pos.yesShares * prices.yesPrice * (1 - SELL_SLIPPAGE)) + (pos.noShares * prices.noPrice * (1 - SELL_SLIPPAGE)) - GAS_COST;
+              const pnl = sellValue - pos.entryCost;
+              const pnlColor = pnl >= 0 ? chalk.green : chalk.red;
+              console.log(pnlColor(`  Closed ${pos.question?.substring(0, 40)}... ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} [resolved]`));
+              closed++;
+            } catch {}
+            continue;
+          }
+
           const SELL_SLIPPAGE = 0.003;
           const yesValue = pos.yesShares * prices.yesPrice * (1 - SELL_SLIPPAGE);
           const noValue = pos.noShares * prices.noPrice * (1 - SELL_SLIPPAGE);
@@ -299,36 +326,45 @@ program
           if (typeof pos.peakPnlPct !== 'number' || pnlPct > pos.peakPnlPct) {
             pos.peakPnlPct = pnlPct;
           }
-          const trailingTriggered = pos.peakPnlPct > 0 && (pos.peakPnlPct - pnlPct) >= TRAILING_DROP;
+          const trailingTriggered = pos.peakPnlPct > 0.01 && (pos.peakPnlPct - pnlPct) >= TRAILING_DROP;
 
           const isBuyBoth = pos.direction === 'BUY_BOTH';
           const priceSum = prices.yesPrice + prices.noPrice;
           const arbConverged = isBuyBoth && priceSum >= 0.995;
 
-          const shouldClose =
-            pnlPct >= TAKE_PROFIT ||
-            pnlPct <= STOP_LOSS ||
-            trailingTriggered ||
-            age >= MAX_HOLD_TIME ||
-            prices.closed || prices.resolved ||
-            arbConverged;
+          let shouldClose = false;
+          let reason = '';
+
+          if (arbConverged) {
+            shouldClose = true;
+            reason = 'arb-converged';
+          } else if (pnlPct >= takeProfit) {
+            shouldClose = true;
+            reason = 'take-profit';
+          } else if (trailingTriggered) {
+            shouldClose = true;
+            reason = `trailing-stop (peak ${(pos.peakPnlPct * 100).toFixed(1)}%)`;
+          } else if (pnlPct <= stopLoss) {
+            shouldClose = true;
+            reason = 'stop-loss';
+          } else if (!isHoldToResolution && age >= maxHold) {
+            shouldClose = true;
+            reason = 'max-hold';
+          } else if (isHoldToResolution && age >= maxHold) {
+            shouldClose = true;
+            reason = 'max-hold-resolution';
+          }
 
           if (shouldClose) {
             try {
               await bot.closePositionAtMarket(pos.marketId, prices.yesPrice, prices.noPrice);
               const pnl = sellValue - pos.entryCost;
               const pnlColor = pnl >= 0 ? chalk.green : chalk.red;
-              const reason = prices.closed || prices.resolved ? 'resolved'
-                : arbConverged ? 'arb-converged'
-                : pnlPct >= TAKE_PROFIT ? 'take-profit'
-                : trailingTriggered ? `trailing-stop (peak ${(pos.peakPnlPct * 100).toFixed(1)}%)`
-                : pnlPct <= STOP_LOSS ? 'stop-loss'
-                : 'max-hold';
               console.log(pnlColor(`  Closed ${pos.question?.substring(0, 40)}... ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)} (${(pnlPct * 100).toFixed(1)}%) [${reason}]`));
               closed++;
             } catch {}
           }
-        } else if (age >= MAX_HOLD_TIME) {
+        } else if (age >= maxHold) {
           try {
             const estYes = pos.yesShares > 0 ? (pos.entryCost / 2) / pos.yesShares : 0.5;
             const estNo = pos.noShares > 0 ? (pos.entryCost / 2) / pos.noShares : 0.5;
@@ -399,7 +435,10 @@ program
         }
 
         // ML Edge Scorer: re-rank by predicted win probability
-        const ranked = edgeScorer.rerank(unique);
+        const mlRanked = edgeScorer.rerank(unique);
+
+        // Orderbook Flow Analysis: adjust edges based on bid/ask imbalance
+        const ranked = flowAnalyzer.enrichOpportunities(mlRanked);
 
         opportunitiesFound += ranked.length;
         console.log(chalk.green(`${ranked.length} opportunity(s) found!`));
@@ -417,7 +456,8 @@ program
           const hit = strategiesHit.get(strat) || 0;
           strategiesHit.set(strat, hit + 1);
           const mlTag = opp.mlScore != null ? ` ML:${(opp.mlScore * 100).toFixed(0)}%` : '';
-          console.log(chalk.gray(`  └─ [${strat}] ${(opp.question || '').substring(0, 40)}... `) + edgeColor(`${(opp.edgePercent * 100).toFixed(2)}% edge${mlTag}`));
+          const flowTag = opp.flowSignal && opp.flowSignal !== 'neutral' ? ` Flow:${opp.flowSignal}` : '';
+          console.log(chalk.gray(`  └─ [${strat}] ${(opp.question || '').substring(0, 40)}... `) + edgeColor(`${(opp.edgePercent * 100).toFixed(2)}% edge${mlTag}${flowTag}`));
         });
 
         if (autoExecute && !riskStatus.paused) {
@@ -452,10 +492,17 @@ program
             const newClosed = closedTrades.slice(edgeScorer.trainCount);
             for (const t of newClosed) {
               await edgeScorer.train(t);
-              riskManager.recordClosedTrade(t.realizedPnl);
+              riskManager.recordClosedTrade(t.realizedPnl, t.strategy);
             }
             if (newClosed.length > 0) {
               console.log(chalk.magenta(`  ML: trained on ${newClosed.length} new trade(s) (total: ${edgeScorer.trainCount})`));
+            }
+          }
+
+          const riskStatusPost = riskManager.getStatus();
+          if (riskStatusPost.pausedStrategies && riskStatusPost.pausedStrategies.length > 0) {
+            for (const ps of riskStatusPost.pausedStrategies) {
+              console.log(chalk.red(`  ⚠ Strategy auto-paused: ${ps.name} (${ps.winRate} win rate over ${ps.trades} trades)`));
             }
           }
         }

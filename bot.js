@@ -13,7 +13,7 @@ class PolymarketArbitrageBot extends EventEmitter {
     super();
     
     this.mode = config.mode || 'paper';
-    this.edgeThreshold = config.edgeThreshold || 0.05;
+    this.edgeThreshold = config.edgeThreshold || 0.02;
     this.scanThreshold = config.scanThreshold;
     this.maxPositionSize = config.maxPositionSize || 1000;
     /** @type {string[]|undefined} - Sectors to scan: politics, sports, crypto */
@@ -86,6 +86,24 @@ class PolymarketArbitrageBot extends EventEmitter {
     return Math.min(slippage, 0.10);
   }
 
+  /**
+   * Use real CLOB orderbook depth when available to simulate realistic fills.
+   * Returns { fillPrice, slippage, partial, method } where method is 'clob' or 'model'.
+   */
+  simulateFill(tokenId, side, amount, liquidity) {
+    const depth = this.clob.depthAtPrice(tokenId, side, amount);
+    if (depth && depth.fillPrice != null && !depth.partial) {
+      return { ...depth, method: 'clob' };
+    }
+    if (depth && depth.partial && depth.filled > amount * 0.5) {
+      const modelSlip = this.calculateSlippage(amount - depth.filled, liquidity);
+      const blendedSlippage = (depth.slippage || 0) * 0.7 + modelSlip * 0.3;
+      return { fillPrice: depth.fillPrice, slippage: blendedSlippage, partial: false, method: 'clob-partial' };
+    }
+    const slippage = this.calculateSlippage(amount, liquidity);
+    return { fillPrice: null, slippage, partial: false, method: 'model' };
+  }
+
   calculateMaxPosition(liquidity) {
     return Math.min((liquidity || 0) * this.maxLiquidityPct, this.maxPositionSize);
   }
@@ -99,7 +117,7 @@ class PolymarketArbitrageBot extends EventEmitter {
     const liquidityCap = this.calculateMaxPosition(opportunity.liquidity);
 
     const edge = opportunity.executableEdge ?? opportunity.edgePercent ?? 0;
-    const edgeMultiplier = Math.min(Math.max(edge / this.edgeThreshold, 0.5), 3.0);
+    const edgeMultiplier = Math.min(Math.max(edge / this.edgeThreshold, 0.5), 2.0);
     const dynamicSize = size * edgeMultiplier;
 
     const positionSize = Math.min(dynamicSize, opportunity.maxPosition, this.maxPositionSize, liquidityCap);
@@ -110,50 +128,62 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     const dir = opportunity.direction || 'BUY_BOTH';
     const isDirectional = dir === 'BUY_YES' || dir === 'BUY_NO';
+    const tokens = opportunity.clobTokenIds || [];
 
     let yesSize, noSize, yesSlippage, noSlippage;
+    let fillMethod = 'model';
 
     if (isDirectional) {
-      const sideSlippage = this.calculateSlippage(positionSize, opportunity.liquidity, null);
+      const tokenId = dir === 'BUY_YES' ? tokens[0] : tokens[1];
+      const fill = tokenId
+        ? this.simulateFill(tokenId, 'buy', positionSize, opportunity.liquidity)
+        : { slippage: this.calculateSlippage(positionSize, opportunity.liquidity), method: 'model' };
+      fillMethod = fill.method;
+
       if (dir === 'BUY_YES') {
         yesSize = positionSize;
         noSize = 0;
-        yesSlippage = sideSlippage;
+        yesSlippage = fill.slippage;
         noSlippage = 0;
       } else {
         yesSize = 0;
         noSize = positionSize;
         yesSlippage = 0;
-        noSlippage = sideSlippage;
+        noSlippage = fill.slippage;
       }
     } else {
       const halfSize = positionSize / 2;
-      const yesClobDepth = opportunity.clobYesDepth
-        ? this.clob.depthAtPrice(opportunity.clobTokenIds?.[0], 'buy', halfSize)
-        : null;
-      const noClobDepth = opportunity.clobNoDepth
-        ? this.clob.depthAtPrice(opportunity.clobTokenIds?.[1], 'buy', halfSize)
-        : null;
-      yesSlippage = this.calculateSlippage(halfSize, opportunity.liquidity, yesClobDepth);
-      noSlippage = this.calculateSlippage(halfSize, opportunity.liquidity, noClobDepth);
+      const yesFill = tokens[0]
+        ? this.simulateFill(tokens[0], 'buy', halfSize, opportunity.liquidity)
+        : { slippage: this.calculateSlippage(halfSize, opportunity.liquidity), method: 'model' };
+      const noFill = tokens[1]
+        ? this.simulateFill(tokens[1], 'buy', halfSize, opportunity.liquidity)
+        : { slippage: this.calculateSlippage(halfSize, opportunity.liquidity), method: 'model' };
+      yesSlippage = yesFill.slippage;
+      noSlippage = noFill.slippage;
       yesSize = halfSize;
       noSize = halfSize;
+      fillMethod = yesFill.method === 'clob' || noFill.method === 'clob' ? 'clob' : 'model';
     }
 
     const avgSlippage = isDirectional
       ? (yesSlippage || noSlippage)
       : (yesSlippage + noSlippage) / 2;
 
+    // Limit order improvement: if placing at mid instead of market, reduce slippage by ~40%
+    const limitOrderDiscount = fillMethod === 'clob' ? 0.4 : 0.25;
+    const effectiveSlippage = avgSlippage * (1 - limitOrderDiscount);
+
     const effectiveEdge = opportunity.executableEdge ?? opportunity.edgePercent;
-    let totalCostPct = this.estimateTotalCost(effectiveEdge, avgSlippage);
+    let totalCostPct = this.estimateTotalCost(effectiveEdge, effectiveSlippage);
     const netEdge = effectiveEdge - totalCostPct;
 
     if (netEdge <= 0) {
       throw new Error(`Edge ${(effectiveEdge * 100).toFixed(2)}% wiped by costs ${(totalCostPct * 100).toFixed(2)}%`);
     }
 
-    const yesPrice = opportunity.yesPrice * (1 + yesSlippage);
-    const noPrice = opportunity.noPrice * (1 + noSlippage);
+    const yesPrice = opportunity.yesPrice * (1 + yesSlippage * (1 - limitOrderDiscount));
+    const noPrice = opportunity.noPrice * (1 + noSlippage * (1 - limitOrderDiscount));
 
     const yesShares = yesSize > 0 ? yesSize / yesPrice : 0;
     const noShares = noSize > 0 ? noSize / noPrice : 0;
@@ -171,11 +201,12 @@ class PolymarketArbitrageBot extends EventEmitter {
       mode: 'paper',
       direction: opportunity.direction,
       pricingSource: opportunity.pricingSource || 'gamma',
+      fillMethod,
       yesPrice, noPrice, yesShares, noShares, yesSize, noSize, totalCost,
       yesSlippage, noSlippage,
       grossEdge: opportunity.edgePercent,
       executableEdge: effectiveEdge,
-      slippageCost: avgSlippage,
+      slippageCost: effectiveSlippage,
       spreadCost: this.fees.polymarketSpread,
       netEdge,
       edgePercent: netEdge,
@@ -195,6 +226,7 @@ class PolymarketArbitrageBot extends EventEmitter {
       entryTime: timestamp,
       direction: opportunity.direction || 'BUY_BOTH',
       strategy: opportunity.strategy || 'basic-arbitrage',
+      holdUntilResolution: opportunity.holdUntilResolution || false,
       clobTokenIds: opportunity.clobTokenIds || [],
       status: 'open'
     };
@@ -234,7 +266,24 @@ class PolymarketArbitrageBot extends EventEmitter {
     const maxTradesPerCycle = options.maxTradesPerCycle || 3;
     const executed = [], skipped = [], failed = [];
 
-    for (const opp of opportunities) {
+    // Position recycling: sort by edge * confidence to allocate capital to best opportunities first
+    const ranked = [...opportunities].sort((a, b) => {
+      const scoreA = (a.executableEdge || a.edgePercent || 0) * (a.confidence || 0.5);
+      const scoreB = (b.executableEdge || b.edgePercent || 0) * (b.confidence || 0.5);
+      return scoreB - scoreA;
+    });
+
+    // Calculate available capital budget for this cycle
+    const openPositionCost = Object.values(this.portfolio.positions)
+      .filter(p => p.status === 'open')
+      .reduce((s, p) => s + (p.entryCost || 0), 0);
+    const totalEquity = this.portfolio.cash + openPositionCost;
+    const maxDeployPct = 0.5; // deploy at most 50% of equity
+    const availableBudget = Math.max(0, totalEquity * maxDeployPct - openPositionCost);
+
+    let budgetUsed = 0;
+
+    for (const opp of ranked) {
       try {
         if (executed.length >= maxTradesPerCycle) {
           skipped.push({ opportunity: opp, reason: 'Max trades per cycle reached' });
@@ -252,10 +301,16 @@ class PolymarketArbitrageBot extends EventEmitter {
           skipped.push({ opportunity: opp, reason: 'Insufficient cash' });
           continue;
         }
+        const oppSize = opp.maxPosition || 100;
+        if (budgetUsed + oppSize > availableBudget) {
+          skipped.push({ opportunity: opp, reason: 'Cycle capital budget exhausted' });
+          continue;
+        }
 
         const trade = await this.execute(opp);
         executed.push(trade);
-        console.log(`✅ Executed: ${opp.question.substring(0, 50)}... | Edge: ${(opp.edgePercent * 100).toFixed(2)}%`);
+        budgetUsed += trade.totalCost;
+        console.log(`✅ Executed: ${opp.question.substring(0, 50)}... | Edge: ${(opp.edgePercent * 100).toFixed(2)}% | Fill: ${trade.fillMethod}`);
       } catch (error) {
         failed.push({ opportunity: opp, error: error.message });
         console.error(`❌ Failed: ${error.message}`);

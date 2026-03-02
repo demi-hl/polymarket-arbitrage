@@ -88,7 +88,7 @@ const liquiditySniper = {
           const rawEdge = edgeFromSpread + edgeFromImbalance;
           const netEdge = Math.max(0, rawEdge - 0.004);
 
-          if (netEdge < 0.005) continue;
+          if (netEdge < 0.02) continue;
 
           opportunities.push({
             marketId: market.id,
@@ -129,7 +129,7 @@ const liquiditySniper = {
   },
 
   async validate(opp) {
-    return opp && opp.edgePercent >= 0.005 && opp.spread >= 0.02;
+    return opp && opp.edgePercent >= 0.02 && opp.spread >= 0.02;
   },
 
   async execute(bot, opp) {

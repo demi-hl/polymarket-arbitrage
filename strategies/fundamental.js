@@ -77,7 +77,7 @@ const resolutionArbitrage = {
       };
     }).sort((a, b) => b.annualizedReturn - a.annualizedReturn);
   },
-  async validate(opp) { return opp && opp.edgePercent >= 0.005; },
+  async validate(opp) { return opp && opp.edgePercent >= 0.02; },
   async execute(bot, opp) { return bot.execute(opp, { size: opp.maxPosition }); }
 };
 

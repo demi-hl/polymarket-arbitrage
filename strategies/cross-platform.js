@@ -6,30 +6,40 @@
 const { getOpportunities, toBotOpportunity, fetchMarketsOnce } = require('./lib/with-scanner');
 const { KalshiScanner } = require('../integrations/kalshi');
 const { PredictItScanner } = require('../integrations/predictit');
+const { ManifoldScanner } = require('../integrations/manifold');
+const { MetaculusScanner } = require('../integrations/metaculus');
 const { matchMarkets } = require('../integrations/matcher');
 
 const kalshi = new KalshiScanner();
 const predictit = new PredictItScanner();
+const manifold = new ManifoldScanner();
+const metaculus = new MetaculusScanner();
 
-let _externalCache = { kalshi: null, predictit: null, time: 0 };
+let _externalCache = { kalshi: null, predictit: null, manifold: null, metaculus: null, time: 0 };
 const EXTERNAL_TTL = 90000;
 
-const REALISTIC_SPREAD_COST = 0.005;  // 0.5% average spread/slippage
-const KALSHI_FEE_EQUIVALENT = 0.007;  // Kalshi fee priced into their odds
-const PREDICTIT_FEE_DRAG = 0.015;     // PredictIt's 10% profit fee + withdrawal drag on effective price
+const REALISTIC_SPREAD_COST = 0.005;
+const KALSHI_FEE_EQUIVALENT = 0.007;
+const PREDICTIT_FEE_DRAG = 0.015;
+const MANIFOLD_FEE_DRAG = 0.003;   // Manifold has low fees
+const METACULUS_FEE_DRAG = 0.005;   // No real trading, but price uncertainty
 
 async function fetchExternalMarkets() {
   const now = Date.now();
   if (_externalCache.kalshi && now - _externalCache.time < EXTERNAL_TTL) {
     return _externalCache;
   }
-  const [kalshiMarkets, predictitMarkets] = await Promise.allSettled([
+  const [kalshiMarkets, predictitMarkets, manifoldMarkets, metaculusMarkets] = await Promise.allSettled([
     kalshi.fetchMarkets(),
     predictit.fetchMarkets(),
+    manifold.fetchMarkets(),
+    metaculus.fetchMarkets(),
   ]);
   _externalCache = {
     kalshi: kalshiMarkets.status === 'fulfilled' ? kalshiMarkets.value : [],
     predictit: predictitMarkets.status === 'fulfilled' ? predictitMarkets.value : [],
+    manifold: manifoldMarkets.status === 'fulfilled' ? manifoldMarkets.value : [],
+    metaculus: metaculusMarkets.status === 'fulfilled' ? metaculusMarkets.value : [],
     time: Date.now(),
   };
   return _externalCache;
@@ -44,6 +54,8 @@ function crossPlatformOpportunity(match, source) {
   let feeDrag = REALISTIC_SPREAD_COST;
   if (source === 'kalshi') feeDrag += KALSHI_FEE_EQUIVALENT;
   if (source === 'predictit') feeDrag += PREDICTIT_FEE_DRAG;
+  if (source === 'manifold') feeDrag += MANIFOLD_FEE_DRAG;
+  if (source === 'metaculus') feeDrag += METACULUS_FEE_DRAG;
 
   const grossEdge = match.edgePercent;
   const netEdge = Math.max(0, grossEdge - feeDrag);
@@ -74,7 +86,7 @@ function crossPlatformOpportunity(match, source) {
   };
 }
 
-const MIN_NET_EDGE = 0.005; // 0.5% minimum net edge after fees to even consider
+const MIN_NET_EDGE = 0.02; // 2% minimum net edge after fees to even consider
 
 const kalshiArbitrage = {
   name: 'kalshi-arbitrage',
@@ -158,6 +170,8 @@ const threeWayArbitrage = {
       const allExternal = [
         ...(external.kalshi || []),
         ...(external.predictit || []),
+        ...(external.manifold || []),
+        ...(external.metaculus || []),
       ];
       if (allExternal.length === 0) return [];
 
@@ -182,6 +196,74 @@ const threeWayArbitrage = {
         .filter(o => o.edgePercent >= MIN_NET_EDGE);
     } catch (err) {
       console.error('[three-way-arbitrage]', err.message);
+      return [];
+    }
+  },
+  async validate(opp) {
+    return opp && opp.edgePercent >= MIN_NET_EDGE && opp.matchScore >= 0.55 && opp.maxPosition >= 5;
+  },
+  async execute(bot, opp) { return bot.execute(opp, {}); },
+};
+
+const manifoldArbitrage = {
+  name: 'manifold-arbitrage',
+  type: 'cross-platform',
+  riskLevel: 'medium',
+  async scan(bot) {
+    const minEdge = bot.scanThreshold ?? bot.edgeThreshold ?? 0.02;
+    try {
+      const [polyMarkets, external] = await Promise.all([
+        fetchMarketsOnce(),
+        fetchExternalMarkets(),
+      ]);
+      const mfList = external.manifold || [];
+      if (mfList.length === 0) return [];
+
+      const matches = matchMarkets(polyMarkets, mfList, {
+        minSimilarity: 0.60,
+        minEdge,
+        maxEdge: 0.15,
+        minLiquidity: 3000,
+      });
+      return matches
+        .map(m => crossPlatformOpportunity(m, 'manifold'))
+        .filter(o => o.edgePercent >= MIN_NET_EDGE);
+    } catch (err) {
+      console.error('[manifold-arbitrage]', err.message);
+      return [];
+    }
+  },
+  async validate(opp) {
+    return opp && opp.edgePercent >= MIN_NET_EDGE && opp.matchScore >= 0.55 && opp.maxPosition >= 5;
+  },
+  async execute(bot, opp) { return bot.execute(opp, {}); },
+};
+
+const metaculusArbitrage = {
+  name: 'metaculus-arbitrage',
+  type: 'cross-platform',
+  riskLevel: 'medium',
+  async scan(bot) {
+    const minEdge = bot.scanThreshold ?? bot.edgeThreshold ?? 0.02;
+    try {
+      const [polyMarkets, external] = await Promise.all([
+        fetchMarketsOnce(),
+        fetchExternalMarkets(),
+      ]);
+      const mcList = external.metaculus || [];
+      if (mcList.length === 0) return [];
+
+      const matches = matchMarkets(polyMarkets, mcList, {
+        minSimilarity: 0.55,
+        minEdge: minEdge * 1.5, // Higher threshold since Metaculus prices are community predictions, not market prices
+        maxEdge: 0.20,
+        minLiquidity: 5000,
+      });
+      return matches
+        .map(m => crossPlatformOpportunity(m, 'metaculus'))
+        .filter(o => o.edgePercent >= MIN_NET_EDGE);
+    } catch (err) {
+      console.error('[metaculus-arbitrage]', err.message);
       return [];
     }
   },
@@ -219,6 +301,8 @@ const valueBetting = {
 module.exports = [
   kalshiArbitrage,
   predictitArbitrage,
+  manifoldArbitrage,
+  metaculusArbitrage,
   threeWayArbitrage,
   valueBetting,
 ];

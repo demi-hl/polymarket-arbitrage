@@ -130,7 +130,7 @@ const taMomentumStrategy = {
 
           if (!direction || edge < 0.005) continue;
           const netEdge = Math.max(0, edge - 0.003);
-          if (netEdge < 0.005) continue;
+          if (netEdge < 0.02) continue;
 
           opportunities.push({
             marketId: market.id,
@@ -172,7 +172,7 @@ const taMomentumStrategy = {
   },
 
   async validate(opp) {
-    return opp && opp.edgePercent >= 0.005 && opp.liquidity >= 5000;
+    return opp && opp.edgePercent >= 0.02 && opp.liquidity >= 5000;
   },
 
   async execute(bot, opp) {
