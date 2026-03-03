@@ -29,12 +29,12 @@ class PolymarketArbitrageBot extends EventEmitter {
     };
 
     this.slippageModel = {
-      baseSlippage: 0.001,
+      baseSlippage: 0.003,
       liquidityFactor: 0.5
     };
 
     this.fees = {
-      polymarket: 0.00,
+      polymarket: 0.005,
       polymarketSpread: 0.001,
       kalshiFee: 0.02,
       predictitFee: 0.10,
