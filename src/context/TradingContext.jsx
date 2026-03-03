@@ -14,7 +14,7 @@ export function TradingProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [selectedAccount, setSelectedAccount] = useState('paper')
   const [accountIds, setAccountIds] = useState([])
-  const prevTradeCount = useRef(0)
+  const seenTradeIds = useRef(new Set())
   const initialLoad = useRef(true)
 
   const api = useApi()
@@ -48,19 +48,29 @@ export function TradingProvider({ children }) {
 
         if (portfolioRes?.success && portfolioRes.data) {
           const newTrades = portfolioRes.data.trades || []
-          if (prevTradeCount.current > 0 && newTrades.length > prevTradeCount.current) {
-            const latest = newTrades[newTrades.length - 1]
-            if (latest) {
+          // Trades are sorted newest-first. Track IDs to avoid duplicate or stale toasts.
+          if (initialLoad.current && seenTradeIds.current.size === 0) {
+            newTrades.slice(0, 200).forEach(t => {
+              if (t?.id) seenTradeIds.current.add(t.id)
+            })
+          } else {
+            const newestUnseen = newTrades.find(t => t?.id && !seenTradeIds.current.has(t.id))
+            if (newestUnseen) {
               toast.success(
-                `Trade executed: ${(latest.question || '').substring(0, 40)}...`,
+                `Trade executed: ${(newestUnseen.question || '').substring(0, 40)}...`,
                 {
-                  description: `${latest.strategy || 'arbitrage'} · ${((latest.edgePercent || 0) * 100).toFixed(1)}% edge · $${(latest.totalCost || 0).toFixed(2)}`,
+                  description: `${newestUnseen.strategy || 'arbitrage'} · ${((newestUnseen.edgePercent || 0) * 100).toFixed(1)}% edge · $${(newestUnseen.totalCost || 0).toFixed(2)}`,
                   duration: 5000,
                 }
               )
             }
+            newTrades.slice(0, 200).forEach(t => {
+              if (t?.id) seenTradeIds.current.add(t.id)
+            })
+            if (seenTradeIds.current.size > 2000) {
+              seenTradeIds.current = new Set(newTrades.slice(0, 300).map(t => t.id).filter(Boolean))
+            }
           }
-          prevTradeCount.current = newTrades.length
           setPortfolio(portfolioRes.data)
           setTrades(newTrades)
           setSystemStatus({ connected: true })

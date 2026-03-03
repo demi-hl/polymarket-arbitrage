@@ -298,7 +298,7 @@ export default function Overview() {
             </div>
           </div>
           <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
-            {filteredRecentTrades.slice(-12).reverse().map((trade, i) => {
+            {filteredRecentTrades.slice(0, 12).map((trade, i) => {
               const hasRealized = trade.realizedPnl != null
               const pnl = hasRealized ? trade.realizedPnl : (trade.expectedProfit || 0)
               return (
