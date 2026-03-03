@@ -138,6 +138,61 @@ export default function Overview() {
             </span>
           )}
         </div>
+        <div
+          className="mt-4 rounded-xl p-3 sm:p-4 border"
+          style={{
+            background: 'rgba(255,255,255,0.02)',
+            borderColor: realism?.projection?.riskFlag === 'green'
+              ? 'rgba(16,185,129,0.24)'
+              : realism?.projection?.riskFlag === 'yellow'
+                ? 'rgba(245,158,11,0.28)'
+                : 'rgba(239,68,68,0.28)',
+          }}
+        >
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-[10px] uppercase tracking-wider">
+            <span className="text-gray-500">Live-adjusted projection</span>
+            <span
+              className="text-[10px] px-2 py-0.5 rounded-full border font-mono"
+              style={{
+                color: realism?.projection?.confidence === 'high' ? '#10b981' : realism?.projection?.confidence === 'medium' ? '#f59e0b' : '#9ca3af',
+                borderColor: realism?.projection?.confidence === 'high' ? 'rgba(16,185,129,0.28)' : realism?.projection?.confidence === 'medium' ? 'rgba(245,158,11,0.3)' : 'rgba(156,163,175,0.25)',
+                background: 'rgba(255,255,255,0.02)',
+              }}
+            >
+              {realism?.projection?.available ? `${realism.projection.confidence} confidence` : 'warming up'}
+            </span>
+            {realism?.projection?.sampleSize > 0 && (
+              <span className="text-gray-600 font-mono">n={realism.projection.sampleSize}</span>
+            )}
+          </div>
+          {realism?.projection?.available ? (
+            <div className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+              <div className="rounded-lg px-3 py-2 bg-black/20 border border-white/[0.05]">
+                <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Est live win rate</p>
+                <p className="font-mono text-white">
+                  {realism.projection.estimatedWinRateLow}% - {realism.projection.estimatedWinRateHigh}%
+                </p>
+              </div>
+              <div className="rounded-lg px-3 py-2 bg-black/20 border border-white/[0.05]">
+                <p className="text-[10px] uppercase tracking-wider text-gray-500 mb-1">Projected net PnL/trade</p>
+                <p className={`font-mono ${realism.projection.projectedNetPnlPerTrade >= 0 ? 'text-profit' : 'text-loss'}`}>
+                  {realism.projection.projectedNetPnlPerTrade >= 0 ? '+' : ''}
+                  ${realism.projection.projectedNetPnlPerTrade}
+                  <span className="text-gray-500 text-[10px] ml-2">
+                    ({realism.projection.projectedNetPnlPerTradeLow >= 0 ? '+' : ''}{realism.projection.projectedNetPnlPerTradeLow}
+                    {' '}to{' '}
+                    {realism.projection.projectedNetPnlPerTradeHigh >= 0 ? '+' : ''}{realism.projection.projectedNetPnlPerTradeHigh})
+                  </span>
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-2.5 text-[11px] text-gray-500">Need more comparable Rust paper samples before we can estimate live performance.</p>
+          )}
+          {realism?.projection?.note && (
+            <p className="mt-2 text-[11px] text-gray-500">{realism.projection.note}</p>
+          )}
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
