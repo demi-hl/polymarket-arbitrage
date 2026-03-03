@@ -154,6 +154,10 @@ pub struct Trade {
     pub hold_ms: Option<u64>,
     pub entry_slippage_bps: Option<f64>,
     pub exit_slippage_bps: Option<f64>,
+    pub shadow_entry_price: Option<f64>,
+    pub shadow_exit_price: Option<f64>,
+    pub shadow_pnl: Option<f64>,
+    pub shadow_slippage_bps: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]

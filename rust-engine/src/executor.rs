@@ -110,6 +110,10 @@ impl OrderExecutor {
             hold_ms: None,
             entry_slippage_bps: None,
             exit_slippage_bps: None,
+            shadow_entry_price: None,
+            shadow_exit_price: None,
+            shadow_pnl: None,
+            shadow_slippage_bps: None,
         };
 
         self.risk.record_trade(&trade);
@@ -202,6 +206,32 @@ impl OrderExecutor {
             0.99,
         );
 
+        // "Shadow-live" benchmark path: deterministic, lower-noise execution estimate.
+        // This gives us a stable comparator to score paper realism drift.
+        let shadow_entry_bps = Self::clamp(
+            paper.base_slippage_bps * 0.7
+                + spread_bps * 0.35
+                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms * 0.8,
+            0.0,
+            paper.max_spread_bps * 1.2,
+        );
+        let shadow_exit_bps = Self::clamp(
+            paper.base_slippage_bps * 0.6 + spread_bps * 0.3,
+            0.0,
+            paper.max_spread_bps * 1.2,
+        );
+        let shadow_entry_price = Self::clamp(
+            trade.price * (1.0 + dir * shadow_entry_bps / 10_000.0),
+            0.01,
+            0.99,
+        );
+        let shadow_move = trade.divergence_at_entry.abs() * 0.65;
+        let shadow_exit_price = Self::clamp(
+            shadow_entry_price * (1.0 + dir * shadow_move - dir * shadow_exit_bps / 10_000.0),
+            0.01,
+            0.99,
+        );
+
         let filled_notional = trade.size * fill_ratio;
         let shares = if entry_price > 0.0 {
             filled_notional / entry_price
@@ -211,6 +241,13 @@ impl OrderExecutor {
         let gross_pnl = (exit_price - entry_price) * shares * dir;
         let fees_paid = filled_notional * (paper.entry_fee_bps + paper.exit_fee_bps) / 10_000.0;
         let net_pnl = gross_pnl - fees_paid;
+        let shadow_shares = if shadow_entry_price > 0.0 {
+            filled_notional / shadow_entry_price
+        } else {
+            0.0
+        };
+        let shadow_gross = (shadow_exit_price - shadow_entry_price) * shadow_shares * dir;
+        let shadow_pnl = shadow_gross - fees_paid;
 
         trade.price = entry_price;
         trade.size = filled_notional;
@@ -224,6 +261,10 @@ impl OrderExecutor {
         trade.hold_ms = Some(hold_ms);
         trade.entry_slippage_bps = Some(entry_slippage_bps);
         trade.exit_slippage_bps = Some(exit_slippage_bps);
+        trade.shadow_entry_price = Some(shadow_entry_price);
+        trade.shadow_exit_price = Some(shadow_exit_price);
+        trade.shadow_pnl = Some(shadow_pnl);
+        trade.shadow_slippage_bps = Some(shadow_entry_bps);
 
         self.risk.record_fill(&trade, net_pnl);
 
