@@ -152,6 +152,16 @@ impl Config {
                 config.risk.daily_loss_cap_pct = pct;
             }
         }
+        if let Ok(v) = std::env::var("TRENDING_SIZE_PCT") {
+            if let Ok(pct) = v.parse() {
+                config.risk.trending_size_pct = pct;
+            }
+        }
+        if let Ok(v) = std::env::var("SIDEWAYS_SIZE_PCT") {
+            if let Ok(pct) = v.parse() {
+                config.risk.sideways_size_pct = pct;
+            }
+        }
         if let Ok(v) = std::env::var("PAPER_ENTRY_FEE_BPS") {
             if let Ok(x) = v.parse() {
                 config.paper.entry_fee_bps = x;
