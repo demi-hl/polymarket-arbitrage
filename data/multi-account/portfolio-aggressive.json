@@ -1,0 +1,19 @@
+{
+  "accountId": "aggressive",
+  "cash": 10000,
+  "initialBalance": 10000,
+  "positions": {},
+  "trades": [],
+  "dailyStats": {
+    "date": "2026-03-03",
+    "trades": 0,
+    "pnl": 0,
+    "losses": 0
+  },
+  "pnl": {
+    "realized": 0,
+    "unrealized": 0,
+    "total": 0
+  },
+  "resetAt": "2026-03-03T03:57:56.994Z"
+}
