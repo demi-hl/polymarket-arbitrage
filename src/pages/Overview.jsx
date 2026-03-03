@@ -25,6 +25,23 @@ function useOracleData() {
   return data
 }
 
+function useRealismData() {
+  const [data, setData] = useState(null)
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/realism')
+        const json = await res.json()
+        if (json.success) setData(json.data)
+      } catch {}
+    }
+    load()
+    const t = setInterval(load, 15000)
+    return () => clearInterval(t)
+  }, [])
+  return data
+}
+
 function isRustTrade(trade) {
   return trade?.fillMethod === 'rust-engine'
     || trade?.executedBy === 'rust-engine'
@@ -35,6 +52,7 @@ function isRustTrade(trade) {
 export default function Overview() {
   const { portfolio, opportunities, trades, loading } = useTrading()
   const oracle = useOracleData()
+  const realism = useRealismData()
   const [tradeFilter, setTradeFilter] = useState('all')
 
   if (loading) {
@@ -102,6 +120,24 @@ export default function Overview() {
         <p className="text-[13px] text-gray-500 mt-2.5 tracking-wide font-light">
           20 strategies · Deep learning · GPU sentiment · Oracle daemon · Whale tracking · Kelly sizing
         </p>
+        <div className="mt-3 flex items-center gap-3">
+          <span className="text-[10px] uppercase tracking-wider text-gray-500">Shadow-live realism</span>
+          <span
+            className="text-[11px] font-mono px-2 py-0.5 rounded-full border"
+            style={{
+              color: realism?.score >= 80 ? '#10b981' : realism?.score >= 65 ? '#f59e0b' : '#ef4444',
+              borderColor: realism?.score >= 80 ? 'rgba(16,185,129,0.3)' : realism?.score >= 65 ? 'rgba(245,158,11,0.35)' : 'rgba(239,68,68,0.35)',
+              background: realism?.score >= 80 ? 'rgba(16,185,129,0.08)' : realism?.score >= 65 ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
+            }}
+          >
+            {realism?.score != null ? `${realism.score}/100 (${realism.grade})` : 'warming up'}
+          </span>
+          {realism?.sampleSize > 0 && (
+            <span className="text-[10px] text-gray-600 font-mono">
+              n={realism.sampleSize} · MAE ${realism.maeUsd}
+            </span>
+          )}
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">

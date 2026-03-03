@@ -603,6 +603,15 @@ function createApiServer(wsServer) {
         expectedProfit: Math.abs(toNumber(t.divergence_at_entry, 0)) * toNumber(t.cost, 0),
         realizedPnl: t.pnl != null ? toNumber(t.pnl, 0) : null,
         executedBy: 'rust-engine',
+        fillRatio: toNumber(t.fill_ratio, 1),
+        feesPaid: toNumber(t.fees_paid, 0),
+        holdMs: toNumber(t.hold_ms, 0),
+        entrySlippageBps: toNumber(t.entry_slippage_bps, 0),
+        exitSlippageBps: toNumber(t.exit_slippage_bps, 0),
+        shadowPnl: t.shadow_pnl != null ? toNumber(t.shadow_pnl, 0) : null,
+        shadowEntryPrice: t.shadow_entry_price != null ? toNumber(t.shadow_entry_price, 0) : null,
+        shadowExitPrice: t.shadow_exit_price != null ? toNumber(t.shadow_exit_price, 0) : null,
+        shadowSlippageBps: t.shadow_slippage_bps != null ? toNumber(t.shadow_slippage_bps, 0) : null,
       };
     });
   }
@@ -706,6 +715,69 @@ function createApiServer(wsServer) {
     };
   }
 
+  function computeRealismMetrics(rustTrades = []) {
+    const sample = rustTrades
+      .filter(t => t.realizedPnl != null && t.shadowPnl != null)
+      .slice(0, 200);
+    if (sample.length === 0) {
+      return {
+        score: null,
+        grade: 'N/A',
+        sampleSize: 0,
+        maeUsd: 0,
+        biasUsd: 0,
+        mapePct: 0,
+        avgFillRatio: 0,
+        avgEntrySlippageBps: 0,
+        avgShadowSlippageBps: 0,
+        warning: 'No comparable rust trade samples yet.',
+      };
+    }
+
+    const absErrors = sample.map(t => Math.abs(toNumber(t.realizedPnl, 0) - toNumber(t.shadowPnl, 0)));
+    const signedErrors = sample.map(t => toNumber(t.realizedPnl, 0) - toNumber(t.shadowPnl, 0));
+    const pctErrors = sample.map(t => {
+      const denom = Math.max(0.01, Math.abs(toNumber(t.shadowPnl, 0)));
+      return Math.abs((toNumber(t.realizedPnl, 0) - toNumber(t.shadowPnl, 0)) / denom) * 100;
+    });
+    const avg = arr => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+
+    const maeUsd = avg(absErrors);
+    const biasUsd = avg(signedErrors);
+    const mapePct = avg(pctErrors);
+    const avgFillRatio = avg(sample.map(t => toNumber(t.fillRatio, 1)));
+    const avgEntrySlippageBps = avg(sample.map(t => toNumber(t.entrySlippageBps, 0)));
+    const avgShadowSlippageBps = avg(sample.map(t => toNumber(t.shadowSlippageBps, 0)));
+    const slippageDrift = Math.abs(avgEntrySlippageBps - avgShadowSlippageBps);
+
+    // 100 is perfect paper/live alignment. Penalize error, bias and fill-quality drift.
+    let score = 100
+      - Math.min(45, maeUsd * 6.5)
+      - Math.min(25, Math.abs(biasUsd) * 6.0)
+      - Math.min(20, slippageDrift * 0.8)
+      - Math.min(10, Math.max(0, 1 - avgFillRatio) * 100 * 0.4);
+    score = Math.max(0, Math.min(100, score));
+
+    const grade = score >= 90 ? 'A'
+      : score >= 80 ? 'B'
+      : score >= 70 ? 'C'
+      : score >= 60 ? 'D'
+      : 'F';
+
+    return {
+      score: Number(score.toFixed(1)),
+      grade,
+      sampleSize: sample.length,
+      maeUsd: Number(maeUsd.toFixed(3)),
+      biasUsd: Number(biasUsd.toFixed(3)),
+      mapePct: Number(mapePct.toFixed(2)),
+      avgFillRatio: Number(avgFillRatio.toFixed(3)),
+      avgEntrySlippageBps: Number(avgEntrySlippageBps.toFixed(2)),
+      avgShadowSlippageBps: Number(avgShadowSlippageBps.toFixed(2)),
+      warning: sample.length < 25 ? 'Low sample size; realism score will stabilize with more trades.' : null,
+    };
+  }
+
   async function fetchRustSnapshot() {
     if (Date.now() - _rustSnapshotCache.ts < RUST_CACHE_TTL_MS && _rustSnapshotCache.data) {
       return _rustSnapshotCache.data;
@@ -784,6 +856,24 @@ function createApiServer(wsServer) {
         });
       }
       res.json({ success: true, data: accounts });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.get('/realism', async (req, res) => {
+    try {
+      const rust = await fetchRustSnapshot();
+      const realism = computeRealismMetrics(rust?.recentTrades || []);
+      res.json({
+        success: true,
+        data: {
+          available: !!rust?.available,
+          paperMode: rust?.status?.paper_mode !== false,
+          timestamp: new Date().toISOString(),
+          ...realism,
+        },
+      });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
