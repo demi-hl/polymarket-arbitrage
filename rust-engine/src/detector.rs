@@ -88,10 +88,21 @@ impl DivergenceDetector {
             let divergence = actual_prob - implied_prob;
             let abs_divergence = divergence.abs();
 
-            // Trend-adaptive threshold
+            // Trend-adaptive threshold with book-depth adjustment (#6)
             let symbol = contract.asset.binance_symbol();
             let trend = tradingview.get_trend(symbol);
-            let threshold = trend.divergence_threshold();
+            let base_threshold = trend.divergence_threshold();
+
+            // Dynamic threshold: thin books need higher edge to overcome slippage
+            let book_depth = book.bid_size + book.ask_size;
+            let depth_penalty = if book_depth < 50.0 {
+                0.05 // very thin book: +5% threshold
+            } else if book_depth < 200.0 {
+                0.02 // thin book: +2%
+            } else {
+                0.0 // liquid book: no penalty
+            };
+            let threshold = base_threshold + depth_penalty;
 
             if abs_divergence < threshold {
                 continue;

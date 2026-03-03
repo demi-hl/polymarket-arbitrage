@@ -116,11 +116,12 @@ impl TrendState {
         matches!(self, Self::StrongUp | Self::StrongDown)
     }
 
+    /// Base divergence threshold. May be adjusted upward by book depth in detector.
     pub fn divergence_threshold(&self) -> f64 {
         match self {
-            Self::StrongUp | Self::StrongDown => 0.08,
-            Self::WeakUp | Self::WeakDown => 0.10,
-            Self::Sideways => 0.15,
+            Self::StrongUp | Self::StrongDown => 0.18,
+            Self::WeakUp | Self::WeakDown => 0.20,
+            Self::Sideways => 0.25,
         }
     }
 

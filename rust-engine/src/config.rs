@@ -31,6 +31,7 @@ pub struct RiskConfig {
     pub consecutive_loss_pause_secs: u64,
     pub trending_size_pct: f64,
     pub sideways_size_pct: f64,
+    pub min_trade_size: f64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -81,11 +82,12 @@ impl Default for Config {
                 consecutive_loss_pause_secs: 600,
                 trending_size_pct: 0.008,
                 sideways_size_pct: 0.003,
+                min_trade_size: 10.0,
             },
             detection: DetectionConfig {
-                base_threshold: 0.10,
-                trending_threshold: 0.08,
-                sideways_threshold: 0.15,
+                base_threshold: 0.20,
+                trending_threshold: 0.18,
+                sideways_threshold: 0.25,
                 min_sources_agree: 1,
                 priority_expiry_minutes: vec![15, 60, 240],
             },
@@ -160,6 +162,11 @@ impl Config {
         if let Ok(v) = std::env::var("SIDEWAYS_SIZE_PCT") {
             if let Ok(pct) = v.parse() {
                 config.risk.sideways_size_pct = pct;
+            }
+        }
+        if let Ok(v) = std::env::var("MIN_TRADE_SIZE") {
+            if let Ok(x) = v.parse() {
+                config.risk.min_trade_size = x;
             }
         }
         if let Ok(v) = std::env::var("PAPER_ENTRY_FEE_BPS") {
