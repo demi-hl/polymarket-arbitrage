@@ -135,9 +135,16 @@ impl DivergenceDetector {
                 * (sources_agreeing as f64 / 3.0).min(1.0)
                 * expiry_weight;
 
-            // Suggested size based on trend
+            // Suggested size based on trend, edge magnitude, and asset
             let base_size = self.config.risk.max_per_trade_pct * self.config.risk.capital;
-            let suggested_size = base_size * trend.position_size_multiplier() * confidence;
+            // Size up on high-edge trades: 2x at 20%+ divergence
+            let edge_multiplier = if abs_divergence >= 0.20 { 2.0 } else { 1.0 };
+            // BTC gets 1.5x allocation (best historical performance)
+            let asset_multiplier = match contract.asset {
+                crate::models::CryptoAsset::BTC => 1.5,
+                _ => 1.0,
+            };
+            let suggested_size = base_size * trend.position_size_multiplier() * confidence * edge_multiplier * asset_multiplier;
 
             self.signal_count += 1;
             let signal = Signal {

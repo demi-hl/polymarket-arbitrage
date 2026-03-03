@@ -118,9 +118,9 @@ impl TrendState {
 
     pub fn divergence_threshold(&self) -> f64 {
         match self {
-            Self::StrongUp | Self::StrongDown => 0.015,
-            Self::WeakUp | Self::WeakDown => 0.020,
-            Self::Sideways => 0.030,
+            Self::StrongUp | Self::StrongDown => 0.08,
+            Self::WeakUp | Self::WeakDown => 0.10,
+            Self::Sideways => 0.15,
         }
     }
 
