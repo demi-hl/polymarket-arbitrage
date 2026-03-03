@@ -54,7 +54,8 @@ export default function EquityCurve({ accounts = {} }) {
     chartInstance.current = chart
 
     for (const id of ids) {
-      const curve = accounts[id]?.equityCurve || [{ time: Math.floor(Date.now() / 1000), value: 10000 }]
+      const curve = accounts[id]?.equityCurve
+      if (!curve || curve.length === 0) continue
       const data = curve.map((pt) => ({
         time: typeof pt.time === 'number' && pt.time > 1000000000 ? pt.time : Math.floor(Date.now() / 1000),
         value: pt.value,

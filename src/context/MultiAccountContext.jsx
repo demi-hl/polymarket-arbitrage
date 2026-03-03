@@ -68,7 +68,11 @@ export function MultiAccountProvider({ children }) {
                 ? (wins.length + openWinCount) / realisticDenominator * 100
                 : 0
 
-              const startingCapital = 10000
+              // Derive starting capital from realized P&L: current value minus all realized gains
+              const totalRealizedPnl = trades
+                .filter(t => t.realizedPnl != null)
+                .reduce((s, t) => s + Number(t.realizedPnl || 0), 0)
+              const startingCapital = totalValue > 0 ? totalValue - totalRealizedPnl - (pnl.unrealized || 0) : totalValue
               const closedEvents = trades
                 .filter(t => t.realizedPnl != null)
                 .map(t => {
@@ -95,7 +99,7 @@ export function MultiAccountProvider({ children }) {
 
               const nowTs = Math.floor(Date.now() / 1000)
               if (nowTs > lastTime) {
-                curve.push({ time: nowTs, value: totalValue || startingCapital })
+                curve.push({ time: nowTs, value: totalValue })
               }
 
               accts[a.id] = {
