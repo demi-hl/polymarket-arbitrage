@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useTrading } from '../context/TradingContext'
+import { useMultiAccount } from '../context/MultiAccountContext'
 import { TrendingUp, TrendingDown, Activity, Clock } from '../components/Icons'
 import AnimatedNumber from '../components/AnimatedNumber'
 
@@ -51,11 +52,42 @@ function isRustTrade(trade) {
 
 export default function Overview() {
   const { portfolio, opportunities, opportunitiesMeta, trades, strategies, loading } = useTrading()
+  const { accounts, liveTrades, loading: multiLoading } = useMultiAccount()
   const oracle = useOracleData()
   const realism = useRealismData()
   const [tradeFilter, setTradeFilter] = useState('all')
 
-  if (loading) {
+  // Merge multi-account data so Overview reflects all engines (Node + Rust)
+  const multiAcct = (() => {
+    const ids = Object.keys(accounts || {})
+    if (ids.length === 0) return null
+    const all = Object.values(accounts)
+    return {
+      cash: all.reduce((s, a) => s + (a?.cash || 0), 0),
+      totalValue: all.reduce((s, a) => s + (a?.totalValue || 0), 0),
+      pnl: {
+        realized: all.reduce((s, a) => s + (a?.pnl?.realized || 0), 0),
+        unrealized: all.reduce((s, a) => s + (a?.pnl?.unrealized || 0), 0),
+        total: all.reduce((s, a) => s + (a?.pnl?.total || 0), 0),
+      },
+      totalTrades: all.reduce((s, a) => s + (a?.totalTrades || 0), 0),
+      closedTradeCount: all.reduce((s, a) => s + (a?.closedTradeCount || 0), 0),
+      openTradeCount: all.reduce((s, a) => s + (a?.openTradeCount || 0), 0),
+      winCount: all.reduce((s, a) => s + (a?.winCount || 0), 0),
+      lossCount: all.reduce((s, a) => s + (a?.lossCount || 0), 0),
+    }
+  })()
+
+  // Use multi-account data when available (has trades), fall back to TradingContext
+  const effectivePortfolio = multiAcct && multiAcct.totalTrades > 0 ? {
+    ...portfolio,
+    cash: multiAcct.cash,
+    totalValue: multiAcct.totalValue,
+    pnl: multiAcct.pnl,
+    trades: liveTrades || portfolio?.trades || [],
+  } : portfolio
+
+  if (loading && multiLoading) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-12 w-80" />
@@ -70,23 +102,30 @@ export default function Overview() {
     )
   }
 
-  const realizedPnl = portfolio?.pnl?.realized || 0
-  const unrealizedPnl = portfolio?.pnl?.unrealized || 0
-  const totalPnl = portfolio?.pnl?.total || 0
-  const allTrades = portfolio?.trades || []
-  const closedTrades = allTrades.filter(t => t.realizedPnl != null)
-  const openTrades = allTrades.filter(t => t.realizedPnl == null)
-  const wins = closedTrades.filter(t => t.realizedPnl > 0)
-  const losses = closedTrades.filter(t => t.realizedPnl < 0)
-  const winRate = closedTrades.length > 0 ? (wins.length / closedTrades.length) * 100 : 0
-  const cash = portfolio?.cash || 0
-  const totalValue = portfolio?.totalValue || cash
+  const p = effectivePortfolio
+  const realizedPnl = p?.pnl?.realized || 0
+  const unrealizedPnl = p?.pnl?.unrealized || 0
+  const totalPnl = p?.pnl?.total || 0
+  const allTrades = p?.trades || []
+  const closedTrades = multiAcct ? Array.from({ length: multiAcct.closedTradeCount || 0 }) : allTrades.filter(t => t.realizedPnl != null)
+  const openTrades = multiAcct ? Array.from({ length: multiAcct.openTradeCount || 0 }) : allTrades.filter(t => t.realizedPnl == null)
+  const wins = multiAcct ? Array.from({ length: multiAcct.winCount || 0 }) : closedTrades.filter(t => t.realizedPnl > 0)
+  const losses = multiAcct ? Array.from({ length: multiAcct.lossCount || 0 }) : closedTrades.filter(t => t.realizedPnl < 0)
+  const winRate = (multiAcct?.closedTradeCount || closedTrades.length) > 0
+    ? ((multiAcct?.winCount || wins.length) / (multiAcct?.closedTradeCount || closedTrades.length)) * 100
+    : 0
+  const cash = p?.cash || 0
+  const totalValue = p?.totalValue || cash
   const invested = Math.max(0, totalValue - cash)
-  const avgWin = wins.length > 0 ? wins.reduce((s, t) => s + t.realizedPnl, 0) / wins.length : 0
-  const avgLoss = losses.length > 0 ? losses.reduce((s, t) => s + t.realizedPnl, 0) / losses.length : 0
+  // Compute stats from real trade objects (liveTrades has actual data)
+  const realClosedTrades = (liveTrades || allTrades).filter(t => t?.realizedPnl != null)
+  const realWins = realClosedTrades.filter(t => t.realizedPnl > 0)
+  const realLosses = realClosedTrades.filter(t => t.realizedPnl < 0)
+  const avgWin = realWins.length > 0 ? realWins.reduce((s, t) => s + t.realizedPnl, 0) / realWins.length : 0
+  const avgLoss = realLosses.length > 0 ? realLosses.reduce((s, t) => s + t.realizedPnl, 0) / realLosses.length : 0
   const profitFactor = Math.abs(avgLoss) > 0 ? (avgWin / Math.abs(avgLoss)) : 0
-  const bestTrade = closedTrades.length > 0 ? Math.max(...closedTrades.map(t => t.realizedPnl)) : 0
-  const worstTrade = closedTrades.length > 0 ? Math.min(...closedTrades.map(t => t.realizedPnl)) : 0
+  const bestTrade = realClosedTrades.length > 0 ? Math.max(...realClosedTrades.map(t => t.realizedPnl)) : 0
+  const worstTrade = realClosedTrades.length > 0 ? Math.min(...realClosedTrades.map(t => t.realizedPnl)) : 0
 
   const strategyBreakdown = {}
   // Seed from the /strategies API so all registered strategies appear
@@ -96,7 +135,7 @@ export default function Overview() {
       strategyBreakdown[name] = { count: 0, pnl: 0, wins: 0, active: s?.enabled !== false }
     }
   })
-  allTrades.forEach(t => {
+  ;(liveTrades || allTrades).forEach(t => {
     const s = t.strategy || 'unknown'
     if (!strategyBreakdown[s]) strategyBreakdown[s] = { count: 0, pnl: 0, wins: 0, active: true }
     strategyBreakdown[s].count++
@@ -108,7 +147,7 @@ export default function Overview() {
   const topStrategies = Object.entries(strategyBreakdown)
     .sort((a, b) => b[1].count - a[1].count || (b[1].active ? 1 : 0) - (a[1].active ? 1 : 0))
     .slice(0, 10)
-  const filteredRecentTrades = (trades || []).filter(trade => {
+  const filteredRecentTrades = (liveTrades || trades || []).filter(trade => {
     if (tradeFilter === 'rust') return isRustTrade(trade)
     if (tradeFilter === 'node') return !isRustTrade(trade)
     return true
