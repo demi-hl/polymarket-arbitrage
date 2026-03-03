@@ -26,27 +26,19 @@ function useAnimatedNumber(value, duration = 600) {
 }
 
 const THEMES = {
-  A: { color: '#f59e0b', label: 'Paper A', sub: 'Paper account' },
-  B: { color: '#00d4ff', label: 'Paper B', sub: 'Paper account' },
+  A: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
+  B: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
   paper: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
 }
 
 export default function ABTest() {
-  const { accounts, comparison, liveTrades, loading, error, lastUpdate, accountIds } = useMultiAccount()
+  const { accounts, liveTrades, loading, error, lastUpdate, accountIds } = useMultiAccount()
   const [clock, setClock] = useState(new Date())
-  const [selectedDetail, setSelectedDetail] = useState('paper')
-  const animatedCombined = useAnimatedNumber(parseFloat(comparison?.combinedValue || 0))
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
-
-  useEffect(() => {
-    if (accountIds.length > 0 && !accountIds.includes(selectedDetail)) {
-      setSelectedDetail(accountIds[0])
-    }
-  }, [accountIds, selectedDetail])
 
   if (loading) {
     return (
@@ -84,25 +76,37 @@ export default function ABTest() {
       <div className="min-h-full flex flex-col items-center justify-center font-futuristic px-6">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-4">Polymarket bot</p>
         <p className="text-sm text-gray-400 text-center max-w-sm">{error}</p>
-        <p className="text-[10px] text-gray-600 mt-4 uppercase tracking-widest">Start watch with ACCOUNT_ID=A and B</p>
+        <p className="text-[10px] text-gray-600 mt-4 uppercase tracking-widest">Start the bot to begin trading</p>
       </div>
     )
   }
 
-  const acctA = accounts['A']
-  const acctB = accounts['B']
-  const winner = comparison?.winner
-  const isLive = accountIds.length >= 2
-  const combined = comparison?.combinedValue ? parseFloat(comparison.combinedValue) : (acctA?.totalValue || 0) + (acctB?.totalValue || 0)
-
-  const selectedAcct = accounts[selectedDetail]
-  const selectedTrades = (liveTrades || []).filter(t => t.accountId === selectedDetail)
-  const theme = THEMES[selectedDetail] || { color: '#6b7280', label: `Account ${selectedDetail}`, sub: '' }
-
-  if (!isLive && accountIds.length === 1) {
-    const id = accountIds[0]
-    const acct = accounts[id]
-    const acctTheme = THEMES[id] || { color: '#6b7280', label: `Account ${id}`, sub: 'Single account' }
+  // Always use single-account view — merge all account data into one
+  {
+    // Pick the best account: prefer 'paper', then first available
+    const id = accounts['paper'] ? 'paper' : accountIds[0] || 'paper'
+    // Merge all accounts into a single combined view if multiple exist
+    let acct = accounts[id]
+    if (accountIds.length > 1 && !accounts['paper']) {
+      // Combine A+B into single view
+      const all = Object.values(accounts)
+      acct = {
+        ...all[0],
+        cash: all.reduce((s, a) => s + (a?.cash || 0), 0),
+        totalValue: all.reduce((s, a) => s + (a?.totalValue || 0), 0),
+        totalTrades: all.reduce((s, a) => s + (a?.totalTrades || 0), 0),
+        closedTradeCount: all.reduce((s, a) => s + (a?.closedTradeCount || 0), 0),
+        openTradeCount: all.reduce((s, a) => s + (a?.openTradeCount || 0), 0),
+        winCount: all.reduce((s, a) => s + (a?.winCount || 0), 0),
+        lossCount: all.reduce((s, a) => s + (a?.lossCount || 0), 0),
+        pnl: {
+          realized: all.reduce((s, a) => s + (a?.pnl?.realized || 0), 0),
+          unrealized: all.reduce((s, a) => s + (a?.pnl?.unrealized || 0), 0),
+          total: all.reduce((s, a) => s + (a?.pnl?.total || 0), 0),
+        },
+      }
+    }
+    const acctTheme = THEMES[id] || { color: '#10b981', label: 'Paper Trading', sub: '' }
     const oneCash = acct?.cash || 0
     const oneInvested = Math.max(0, (acct?.totalValue || 0) - oneCash)
     const oneTradeCount = acct?.totalTrades || 0
@@ -178,142 +182,16 @@ export default function ABTest() {
         {acct ? (
           <div className="space-y-6">
             <AccountDetailStats data={acct} theme={acctTheme} />
-            <AccountTradeTable trades={selectedTrades} theme={acctTheme} />
+            <AccountTradeTable trades={liveTrades || []} theme={acctTheme} />
           </div>
         ) : (
           <div className="border border-white/[0.04] rounded-lg p-12 text-center">
-            <p className="text-sm text-gray-500">No data for account {id}</p>
+            <p className="text-sm text-gray-500">No data yet — waiting for trades</p>
           </div>
         )}
       </div>
     )
   }
-
-  return (
-    <div className="mx-auto font-futuristic pb-16">
-      <div className="mb-10">
-        <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-white mb-3">
-          Paper <span className="text-gradient-minimal">Trading</span>
-        </h1>
-        <p className="text-base text-gray-500 font-light tracking-wide">
-          Live paper-trading monitor &middot; Real trades, real time
-        </p>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-[11px] uppercase tracking-widest text-gray-500 mb-10 pb-6 border-b border-white/[0.04]">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-1.5 h-1.5 rounded-full"
-            style={{
-              background: isLive ? '#10b981' : '#6b7280',
-              boxShadow: isLive ? '0 0 6px rgba(16,185,129,0.4)' : 'none',
-            }}
-          />
-          {isLive ? 'Live' : 'Standby'}
-        </div>
-        <span className="font-mono tabular-nums text-gray-600">
-          {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-        </span>
-        <span className="font-mono text-gray-600">
-          ${typeof combined === 'number' ? combined.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-        </span>
-        {lastUpdate && (
-          <span className="text-[10px] text-gray-600 font-mono">
-            Updated {new Date(lastUpdate).toLocaleTimeString()}
-          </span>
-        )}
-      </div>
-
-      {comparison && acctA && acctB && (
-        <div className="flex items-center justify-between py-4 mb-8 border-b border-white/[0.04]">
-          <p className="text-xs text-gray-400 uppercase tracking-wider">
-            {winner === 'tie' ? 'Strategies tied' : `Account ${winner} leading`}
-            {winner !== 'tie' && comparison.valueDiff > 0 && (
-              <span className="font-mono text-gray-500 ml-2">+${parseFloat(comparison.valueDiff || 0).toFixed(2)}</span>
-            )}
-          </p>
-          <p className="text-sm font-mono text-gray-400">
-            Combined <span className="text-white font-medium">${animatedCombined.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-          </p>
-        </div>
-      )}
-
-      <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-        <AccountCard accountId="A" data={acctA} isWinner={winner === 'A'} />
-        <AccountCard accountId="B" data={acctB} isWinner={winner === 'B'} />
-        <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-trader-900 border border-white/[0.06] items-center justify-center text-[10px] font-semibold uppercase tracking-wider text-gray-500">
-          Live
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-        <div className="lg:col-span-2">
-          <EquityCurve accounts={accounts} />
-        </div>
-        <div>
-          <LiveTradeFeed trades={liveTrades} />
-        </div>
-      </div>
-
-      {/* ── Account Detail Toggle ── */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500">Account Detail</p>
-          <div className="flex rounded-lg bg-trader-800/60 border border-white/[0.04] p-1 relative">
-            {(accountIds?.length ? accountIds : ['A', 'B']).map((id) => (
-              <button
-                key={id}
-                onClick={() => setSelectedDetail(id)}
-                className="relative px-5 py-2 rounded-md text-sm font-medium transition-colors z-10 cursor-pointer"
-                style={{ color: selectedDetail === id ? '#fff' : 'rgba(255,255,255,0.35)' }}
-              >
-                {selectedDetail === id && (
-                  <motion.div
-                    layoutId="ab-detail-pill"
-                    className="absolute inset-0 rounded-md"
-                    style={{ background: THEMES[id].color + '30', borderColor: THEMES[id].color + '40', borderWidth: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-2">
-                  <span
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: (THEMES[id]?.color || '#6b7280') }}
-                  />
-                  {(THEMES[id]?.label || `Account ${id}`)}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedDetail}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {selectedAcct ? (
-              <div className="space-y-6">
-                <AccountDetailStats data={selectedAcct} theme={theme} />
-                <AccountTradeTable trades={selectedTrades} theme={theme} />
-              </div>
-            ) : (
-              <div className="border border-white/[0.04] rounded-lg p-12 text-center">
-                <p className="text-sm text-gray-500">No data for Account {selectedDetail}</p>
-              </div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {acctA && acctB && (
-        <ComparisonTable a={acctA} b={acctB} />
-      )}
-    </div>
-  )
 }
 
 function AccountDetailStats({ data, theme }) {
