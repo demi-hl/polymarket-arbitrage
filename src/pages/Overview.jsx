@@ -87,7 +87,7 @@ export default function Overview() {
     trades: liveTrades || portfolio?.trades || [],
   } : portfolio
 
-  if (loading && multiLoading) {
+  if (loading && !multiAcct) {
     return (
       <div className="space-y-8">
         <Skeleton className="h-12 w-80" />
