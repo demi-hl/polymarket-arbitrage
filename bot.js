@@ -28,13 +28,16 @@ class PolymarketArbitrageBot extends EventEmitter {
       pnl: { realized: 0, unrealized: 0, total: 0 }
     };
 
+    /** @type {import('./learning/edge-model')|null} */
+    this.edgeModel = config.edgeModel || null;
+
     this.slippageModel = {
-      baseSlippage: 0.003,
+      baseSlippage: 0.003,   // 30 bps — realistic for $50-100 orders on typical Polymarket books
       liquidityFactor: 0.5
     };
 
     this.fees = {
-      polymarket: 0.005,
+      polymarket: 0.005,     // 0.5% taker fee (50 bps) per Polymarket CLOB
       polymarketSpread: 0.001,
       kalshiFee: 0.02,
       predictitFee: 0.10,
@@ -170,7 +173,7 @@ class PolymarketArbitrageBot extends EventEmitter {
       ? (yesSlippage || noSlippage)
       : (yesSlippage + noSlippage) / 2;
 
-    // Limit order improvement: if placing at mid instead of market, reduce slippage by ~40%
+    // Limit order improvement: thin books mean limits often don't fill at desired price
     const limitOrderDiscount = fillMethod === 'clob' ? 0.15 : 0.10;
     const effectiveSlippage = avgSlippage * (1 - limitOrderDiscount);
 
@@ -252,8 +255,9 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     const size = options.size || opportunity.maxPosition;
     
-    if (opportunity.edgePercent < this.edgeThreshold) {
-      throw new Error(`Edge ${(opportunity.edgePercent * 100).toFixed(2)}% below threshold`);
+    const threshold = this.edgeModel?.getOptimalThreshold(opportunity.strategy) || this.edgeThreshold;
+    if (opportunity.edgePercent < threshold) {
+      throw new Error(`Edge ${(opportunity.edgePercent * 100).toFixed(2)}% below threshold ${(threshold * 100).toFixed(2)}%`);
     }
     if (size > this.portfolio.cash) {
       throw new Error(`Insufficient funds: $${this.portfolio.cash.toFixed(2)} available`);
@@ -402,6 +406,7 @@ class PolymarketArbitrageBot extends EventEmitter {
         const yesBook = yesToken ? this.clob.getCachedBook(yesToken) : null;
         const noBook = noToken ? this.clob.getCachedBook(noToken) : null;
 
+        // Use bestBid for conservative M2M (what you'd actually get selling)
         currentYes = yesBook?.bestBid
           ?? pos.currentYesPrice
           ?? pos.entryYesPrice ?? 0.5;
@@ -427,7 +432,7 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     const winningShares = outcome === 'yes' ? position.yesShares : position.noShares;
     const grossPayout = winningShares * 1;
-    const exitFee = grossPayout * this.fees.polymarket;
+    const exitFee = grossPayout * this.fees.polymarket; // 0.5% taker fee on exit
     const payout = grossPayout - exitFee;
     const realizedPnl = payout - position.entryCost;
 
@@ -459,13 +464,13 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     const GAS_COST = 0.04;
     const SELL_SLIPPAGE = 0.003;
-    const TAKER_FEE = this.fees.polymarket;
+    const TAKER_FEE = this.fees.polymarket; // 0.5%
 
     const yesExitPrice = currentYesPrice * (1 - SELL_SLIPPAGE);
     const noExitPrice = currentNoPrice * (1 - SELL_SLIPPAGE);
     const sellValue = (position.yesShares * yesExitPrice) + (position.noShares * noExitPrice);
-    const takerFee = sellValue * TAKER_FEE;
-    const payout = sellValue - GAS_COST - takerFee;
+    const exitFee = sellValue * TAKER_FEE;
+    const payout = sellValue - GAS_COST - exitFee;
     const realizedPnl = payout - position.entryCost;
 
     position.status = 'closed';
@@ -475,6 +480,7 @@ class PolymarketArbitrageBot extends EventEmitter {
     position.exitNoPrice = currentNoPrice;
     position.payout = payout;
     position.gasCost = GAS_COST;
+    position.exitFee = exitFee;
     position.sellSlippage = SELL_SLIPPAGE;
     position.realizedPnl = realizedPnl;
 

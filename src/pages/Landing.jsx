@@ -107,10 +107,10 @@ export default function Landing() {
           className="mb-3 space-y-1"
         >
           <p className="text-[13px] text-gray-500 font-light tracking-wide max-w-md mx-auto leading-relaxed">
-            20 strategies · Deep learning edge scoring · GPU-powered sentiment
+            31 strategies · Whale flow detection · Crypto latency engine
           </p>
           <p className="text-[13px] text-gray-500 font-light tracking-wide max-w-md mx-auto leading-relaxed">
-            Whale tracking · UMA oracle frontrunning · Orderbook CNN
+            Real-time orderflow · Cross-platform arbitrage · GPU sentiment
           </p>
         </motion.div>
 

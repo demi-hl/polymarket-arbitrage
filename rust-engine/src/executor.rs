@@ -8,8 +8,6 @@ use std::sync::Arc;
 use std::time::Instant;
 use tracing::{error, info, warn};
 
-const TRADES_FILE: &str = "data/rust-trades.json";
-
 use crate::config::Config;
 use crate::models::*;
 use crate::risk::RiskManager;
@@ -25,6 +23,15 @@ struct ClobOrderResponse {
     status: Option<String>,
 }
 
+/// Recorded latency for a single trade execution.
+#[derive(Debug, Clone, serde::Serialize)]
+pub struct LatencyRecord {
+    /// Microseconds from signal timestamp to order submission start
+    pub signal_latency_us: u64,
+    /// Microseconds for the full execution round-trip
+    pub execution_latency_us: u64,
+}
+
 pub struct OrderExecutor {
     client: Client,
     signer: Option<Arc<OrderSigner>>,
@@ -32,6 +39,7 @@ pub struct OrderExecutor {
     config: Config,
     trades: Arc<Mutex<Vec<Trade>>>,
     trade_count: Arc<Mutex<u64>>,
+    latency_history: Arc<Mutex<Vec<LatencyRecord>>>,
 }
 
 impl OrderExecutor {
@@ -54,51 +62,45 @@ impl OrderExecutor {
             config,
             trades: Arc::new(Mutex::new(Vec::new())),
             trade_count: Arc::new(Mutex::new(0)),
+            latency_history: Arc::new(Mutex::new(Vec::new())),
         }
     }
 
-    /// Load trades from disk on startup
-    pub fn load_trades(&self) {
-        let path = std::path::Path::new(TRADES_FILE);
-        if !path.exists() {
-            info!("No saved trades file found, starting fresh");
-            return;
-        }
-        match std::fs::read_to_string(path) {
-            Ok(data) => match serde_json::from_str::<Vec<Trade>>(&data) {
-                Ok(saved) => {
-                    let count = saved.len();
-                    let mut trades = self.trades.lock();
-                    *trades = saved;
-                    let mut tc = self.trade_count.lock();
-                    *tc = count as u64;
-                    info!("Loaded {count} trades from disk");
-                }
-                Err(e) => warn!("Failed to parse trades file: {e}"),
-            },
-            Err(e) => warn!("Failed to read trades file: {e}"),
-        }
-    }
-
-    /// Save trades to disk
-    pub fn save_trades(&self) {
-        let trades = self.trades.lock();
-        let path = std::path::Path::new(TRADES_FILE);
-        if let Some(parent) = path.parent() {
-            let _ = std::fs::create_dir_all(parent);
-        }
-        match serde_json::to_string(&*trades) {
-            Ok(json) => {
-                if let Err(e) = std::fs::write(path, json) {
-                    error!("Failed to write trades file: {e}");
-                }
-            }
-            Err(e) => error!("Failed to serialize trades: {e}"),
-        }
-    }
+    const TRADES_FILE: &'static str = "data/rust-trades.json";
 
     pub fn get_trades(&self) -> Vec<Trade> {
         self.trades.lock().clone()
+    }
+
+    pub fn load_trades(&self) {
+        match std::fs::read_to_string(Self::TRADES_FILE) {
+            Ok(data) => {
+                match serde_json::from_str::<Vec<Trade>>(&data) {
+                    Ok(saved) => {
+                        let count = saved.len() as u64;
+                        *self.trades.lock() = saved;
+                        *self.trade_count.lock() = count;
+                        info!("Loaded {} persisted trades from disk", count);
+                    }
+                    Err(e) => warn!("Failed to parse trades file: {}", e),
+                }
+            }
+            Err(_) => info!("No persisted trades found, starting fresh"),
+        }
+    }
+
+    fn save_trades(&self) {
+        let trades = self.trades.lock();
+        if let Ok(json) = serde_json::to_string(&*trades) {
+            let _ = std::fs::create_dir_all("data");
+            if let Err(e) = std::fs::write(Self::TRADES_FILE, json) {
+                warn!("Failed to persist trades: {}", e);
+            }
+        }
+    }
+
+    pub fn get_latency_history(&self) -> Vec<LatencyRecord> {
+        self.latency_history.lock().clone()
     }
 
     pub fn get_pnl(&self) -> (f64, f64) {
@@ -115,6 +117,13 @@ impl OrderExecutor {
             .context("Signal blocked by risk manager")?;
 
         let start = Instant::now();
+
+        // Compute signal-to-submission latency (signal.timestamp -> now)
+        let now_utc = Utc::now();
+        let signal_latency_us = now_utc
+            .signed_duration_since(signal.timestamp)
+            .num_microseconds()
+            .map(|us| us.max(0) as u64);
 
         let trade_id = {
             let mut count = self.trade_count.lock();
@@ -156,30 +165,48 @@ impl OrderExecutor {
             shadow_exit_price: None,
             shadow_pnl: None,
             shadow_slippage_bps: None,
+            signal_latency_us,
+            execution_latency_us: None, // filled after execution completes
         };
 
         self.risk.record_trade(&trade);
 
-        if self.config.paper_mode {
-            return self.paper_execute(trade, start).await;
+        let mut result = if self.config.paper_mode {
+            self.paper_execute(trade, start).await
+        } else {
+            let signer = self
+                .signer
+                .as_ref()
+                .context("No signer configured for live trading")?;
+
+            let signed = signer
+                .sign_order(
+                    &signal.contract.token_id,
+                    side_str,
+                    price,
+                    size,
+                    false,
+                )
+                .await?;
+
+            self.submit_to_clob(trade, signed, start).await
+        };
+
+        // Record end-to-end execution latency
+        if let Ok(ref mut trade) = result {
+            let execution_us = start.elapsed().as_micros() as u64;
+            trade.execution_latency_us = Some(execution_us);
+
+            // Store latency record for analytics
+            if let Some(sig_us) = trade.signal_latency_us {
+                self.latency_history.lock().push(LatencyRecord {
+                    signal_latency_us: sig_us,
+                    execution_latency_us: execution_us,
+                });
+            }
         }
 
-        let signer = self
-            .signer
-            .as_ref()
-            .context("No signer configured for live trading")?;
-
-        let signed = signer
-            .sign_order(
-                &signal.contract.token_id,
-                side_str,
-                price,
-                size,
-                false,
-            )
-            .await?;
-
-        self.submit_to_clob(trade, signed, start).await
+        result
     }
 
     async fn paper_execute(&self, mut trade: Trade, start: Instant) -> Result<Trade> {
@@ -192,20 +219,9 @@ impl OrderExecutor {
             + trade.divergence_at_entry.abs() * 10_000.0 * 0.6;
         let spread_bps = Self::clamp(base_spread_bps, paper.base_spread_bps, paper.max_spread_bps);
 
-        // Maker order simulation (#5): post limit at mid, 0% entry fee, but
-        // 30% chance of non-fill (maker orders aren't guaranteed to fill).
-        // Exit is still taker (50bps fee).
-        let maker_nonfill_prob = 0.30;
-        let is_maker_entry = rng.gen::<f64>() >= maker_nonfill_prob; // 70% fill rate for makers
-
-        if !is_maker_entry {
-            // Maker order didn't fill — skip this trade
-            trade.status = TradeStatus::Cancelled;
-            trade.pnl = Some(0.0);
-            trade.fill_ratio = Some(0.0);
-            self.trades.lock().push(trade.clone());
-            return Ok(trade);
-        }
+        // Market impact: larger orders move the price more
+        // $10 order = ~0 bps impact, $50 = ~10 bps, $100 = ~25 bps
+        let market_impact_bps = (trade.size / 10.0).sqrt() * 5.0;
 
         let fill_ratio = if rng.gen::<f64>() < paper.partial_fill_probability {
             rng.gen_range(paper.min_partial_fill_ratio..=1.0)
@@ -217,6 +233,7 @@ impl OrderExecutor {
             trade.pnl = Some(0.0);
             trade.fill_ratio = Some(fill_ratio);
             self.trades.lock().push(trade.clone());
+            self.save_trades();
             return Ok(trade);
         }
 
@@ -225,11 +242,13 @@ impl OrderExecutor {
         // Maker entry: much lower slippage (posting at mid, not crossing spread)
         let jitter_entry_bps = rng.gen_range(-paper.slippage_jitter_bps..=paper.slippage_jitter_bps);
         let entry_slippage_bps = Self::clamp(
-            paper.base_slippage_bps * 0.3  // maker gets much better fills
-                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms * 0.5
+            paper.base_slippage_bps
+                + spread_bps * 0.5
+                + market_impact_bps
+                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms
                 + jitter_entry_bps,
             0.0,
-            paper.max_spread_bps * 0.5,
+            paper.max_spread_bps * 2.0,
         );
 
         let entry_price = Self::clamp(
@@ -286,9 +305,9 @@ impl OrderExecutor {
             0.01,
             0.99,
         );
-        // Shadow convergence uses same adversarial model (40% adverse) but with
-        // a separate roll — shadow is the "what if less friction" path, not "always wins"
-        let shadow_convergence = if rng.gen::<f64>() < 0.4 {
+        // Shadow path: use same adversarial model as main path
+        let shadow_convergence = if rng.gen::<f64>() < 0.40 {
+            // 40% of the time, market moves against us
             rng.gen_range(paper.min_convergence_ratio..0.0_f64)
         } else {
             rng.gen_range(0.0_f64..=paper.max_convergence_ratio)
@@ -352,6 +371,7 @@ impl OrderExecutor {
         );
 
         self.trades.lock().push(trade.clone());
+        self.save_trades();
         Ok(trade)
     }
 
@@ -421,6 +441,212 @@ impl OrderExecutor {
         }
 
         self.trades.lock().push(trade.clone());
+        self.save_trades();
+        Ok(trade)
+    }
+
+    /// Execute a two-leg correlated arbitrage trade.
+    ///
+    /// Leg 1: BUY the underpriced token (buy_token)
+    /// Leg 2: SELL the overpriced token (sell_token)
+    ///
+    /// Both legs are recorded as separate Trade entries tagged with the
+    /// correlation signal id. In paper mode we use simplified paper fills.
+    pub async fn execute_correlation(&self, signal: &CorrelationSignal) -> Result<Vec<Trade>> {
+        let start = Instant::now();
+        let now_utc = Utc::now();
+
+        let signal_latency_us = now_utc
+            .signed_duration_since(signal.timestamp)
+            .num_microseconds()
+            .map(|us| us.max(0) as u64);
+
+        let size = signal.suggested_size;
+        if size < 1.0 {
+            anyhow::bail!("Correlation signal size too small: {size}");
+        }
+
+        // Resolve which token IDs correspond to buy/sell
+        let (buy_token_id, buy_price) = if signal.buy_token == "a" {
+            (signal.pair.market_a_token.clone(), signal.price_a)
+        } else {
+            (signal.pair.market_b_token.clone(), signal.price_b)
+        };
+
+        let (sell_token_id, sell_price) = if signal.sell_token == "a" {
+            (signal.pair.market_a_token.clone(), signal.price_a)
+        } else {
+            (signal.pair.market_b_token.clone(), signal.price_b)
+        };
+
+        let mut trades = Vec::with_capacity(2);
+
+        // Leg 1: BUY underpriced token
+        let buy_trade = self.build_corr_trade(
+            &signal.id,
+            &buy_token_id,
+            TradeSide::Buy,
+            buy_price + 0.001, // aggressive limit
+            size,
+            signal.violation,
+            signal_latency_us,
+        );
+
+        // Leg 2: SELL overpriced token (buy NO = sell YES)
+        let sell_trade = self.build_corr_trade(
+            &signal.id,
+            &sell_token_id,
+            TradeSide::Sell,
+            sell_price - 0.001,
+            size,
+            signal.violation,
+            signal_latency_us,
+        );
+
+        if self.config.paper_mode {
+            let filled_buy = self.paper_corr_execute(buy_trade, start, signal.violation).await?;
+            let filled_sell = self.paper_corr_execute(sell_trade, start, signal.violation).await?;
+            trades.push(filled_buy);
+            trades.push(filled_sell);
+        } else {
+            let signer = self
+                .signer
+                .as_ref()
+                .context("No signer configured for live trading")?;
+
+            // Submit both legs concurrently for speed
+            let signed_buy = signer
+                .sign_order(&buy_token_id, "BUY", buy_price + 0.001, size, false)
+                .await?;
+            let signed_sell = signer
+                .sign_order(&sell_token_id, "SELL", sell_price - 0.001, size, false)
+                .await?;
+
+            let (result_buy, result_sell) = tokio::join!(
+                self.submit_to_clob(buy_trade, signed_buy, start),
+                self.submit_to_clob(sell_trade, signed_sell, start),
+            );
+
+            trades.push(result_buy?);
+            trades.push(result_sell?);
+        }
+
+        // Record latencies
+        let execution_us = start.elapsed().as_micros() as u64;
+        for trade in &mut trades {
+            trade.execution_latency_us = Some(execution_us);
+            if let Some(sig_us) = trade.signal_latency_us {
+                self.latency_history.lock().push(LatencyRecord {
+                    signal_latency_us: sig_us,
+                    execution_latency_us: execution_us,
+                });
+            }
+        }
+
+        Ok(trades)
+    }
+
+    fn build_corr_trade(
+        &self,
+        signal_id: &str,
+        token_id: &str,
+        side: TradeSide,
+        price: f64,
+        size: f64,
+        violation: f64,
+        signal_latency_us: Option<u64>,
+    ) -> Trade {
+        let trade_id = {
+            let mut count = self.trade_count.lock();
+            *count += 1;
+            format!("corr-trade-{}", *count)
+        };
+
+        Trade {
+            id: trade_id,
+            signal_id: signal_id.to_string(),
+            contract_token_id: token_id.to_string(),
+            asset: CryptoAsset::BTC, // correlation trades are market-agnostic; BTC as placeholder
+            side,
+            price,
+            size,
+            cost: size * price,
+            divergence_at_entry: violation,
+            status: TradeStatus::Pending,
+            submitted_at: Utc::now(),
+            filled_at: None,
+            pnl: None,
+            exit_price: None,
+            fees_paid: None,
+            fill_ratio: None,
+            hold_ms: None,
+            entry_slippage_bps: None,
+            exit_slippage_bps: None,
+            shadow_entry_price: None,
+            shadow_exit_price: None,
+            shadow_pnl: None,
+            shadow_slippage_bps: None,
+            signal_latency_us,
+            execution_latency_us: None,
+        }
+    }
+
+    /// Simplified paper execution for correlation trades.
+    /// Correlation arbs are held until resolution, so we model the fill
+    /// but don't simulate a full exit cycle.
+    async fn paper_corr_execute(
+        &self,
+        mut trade: Trade,
+        start: Instant,
+        violation: f64,
+    ) -> Result<Trade> {
+        let latency_ms = start.elapsed().as_millis() as f64;
+        let mut rng = rand::thread_rng();
+        let paper = &self.config.paper;
+
+        let dir = if trade.side == TradeSide::Buy { 1.0 } else { -1.0 };
+
+        let jitter_bps = rng.gen_range(-paper.slippage_jitter_bps..=paper.slippage_jitter_bps);
+        let entry_slippage_bps = Self::clamp(
+            paper.base_slippage_bps
+                + paper.base_spread_bps * 0.5
+                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms
+                + jitter_bps,
+            0.0,
+            paper.max_spread_bps * 1.5,
+        );
+
+        let entry_price = Self::clamp(
+            trade.price * (1.0 + dir * entry_slippage_bps / 10_000.0),
+            0.01,
+            0.99,
+        );
+
+        let fees_paid = trade.size * (paper.entry_fee_bps / 10_000.0);
+
+        trade.price = entry_price;
+        trade.cost = trade.size * entry_price;
+        trade.status = TradeStatus::Filled;
+        trade.filled_at = Some(Utc::now());
+        trade.fees_paid = Some(fees_paid);
+        trade.fill_ratio = Some(1.0);
+        trade.entry_slippage_bps = Some(entry_slippage_bps);
+        // PnL computed at resolution, not at entry
+        trade.pnl = None;
+
+        info!(
+            "PAPER CORR FILL: {} {} entry={:.4} size=${:.2} viol={:.4} fees=${:.2} latency={}ms",
+            if trade.side == TradeSide::Buy { "BUY" } else { "SELL" },
+            trade.contract_token_id,
+            entry_price,
+            trade.size,
+            violation,
+            fees_paid,
+            latency_ms as u64,
+        );
+
+        self.trades.lock().push(trade.clone());
+        self.save_trades();
         Ok(trade)
     }
 }

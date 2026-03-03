@@ -4,11 +4,67 @@
  * Features are used by the edge model to estimate true profitability.
  */
 
+/**
+ * Human-readable names for each feature dimension (index-aligned with toVector output).
+ * Used by edge-model for importance reports.
+ */
+const FEATURE_NAMES = [
+  'Gross Edge',
+  'Executable Edge',
+  'Has CLOB Data',
+  'Urgency (Time Decay)',
+  'Log Liquidity (norm)',
+  'Liquidity Bucket',
+  'Depth Ratio (Yes/No)',
+  'Spread',
+  'Price Mid-Deviation',
+  'Price Extreme Flag',
+  'Log Volume (norm)',
+  'Price Velocity',
+  'Price Volatility',
+  'Has History Flag',
+  'Category Win Rate',
+  'Strategy Win Rate',
+  'Whale Consensus',
+  'Whale Count (norm)',
+  'Is Buy-Both Flag',
+];
+
+// Keyword sets for market type classification
+const MARKET_TYPE_KEYWORDS = {
+  crypto: ['bitcoin', 'btc', 'eth', 'ethereum', 'solana', 'crypto', 'price', 'defi', 'token'],
+  politics: ['election', 'president', 'senate', 'congress', 'vote', 'political', 'trump', 'biden', 'democrat', 'republican'],
+  sports: ['nfl', 'nba', 'mlb', 'game', 'match', 'win', 'championship', 'team', 'player', 'score'],
+  entertainment: ['oscar', 'grammy', 'movie', 'film', 'album', 'award', 'box office'],
+  science: ['temperature', 'climate', 'space', 'nasa', 'discovery'],
+};
+
 class FeatureEngine {
   constructor(dataStore, whaleTracker) {
     this.store = dataStore;
     this.whaleTracker = whaleTracker;
     this._categoryStats = {};
+  }
+
+  /**
+   * Classify a market question into a type using keyword matching.
+   * Returns one of: crypto, politics, sports, entertainment, science, other.
+   */
+  getMarketType(question) {
+    if (!question) return 'other';
+    const q = question.toLowerCase();
+    let bestType = 'other';
+    let bestCount = 0;
+
+    for (const [type, keywords] of Object.entries(MARKET_TYPE_KEYWORDS)) {
+      const count = keywords.filter(kw => q.includes(kw)).length;
+      if (count > bestCount) {
+        bestCount = count;
+        bestType = type;
+      }
+    }
+
+    return bestType;
   }
 
   /**
@@ -159,3 +215,4 @@ class FeatureEngine {
 }
 
 module.exports = FeatureEngine;
+module.exports.FEATURE_NAMES = FEATURE_NAMES;

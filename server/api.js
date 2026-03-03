@@ -13,6 +13,41 @@ const DataStore = require('../learning/data-store');
 const EdgeModel = require('../learning/edge-model');
 const { MarketMaker } = require('../strategies/market-maker');
 const GPUClient = require('../lib/gpu-client');
+const RustTradeTrainer = require('../learning/rust-trade-trainer');
+const ClobClient = require('../clob-client');
+const OrderflowWatcher = require('../lib/orderflow-watcher');
+const OrderbookImbalanceAnalyzer = require('../lib/orderbook-imbalance');
+const { setOrderflowWatcher } = require('../strategies');
+
+// Shared OrderflowWatcher singleton
+let _orderflowWatcher = null;
+function getOrderflowWatcher(wsServer) {
+  if (!_orderflowWatcher) {
+    const clob = new ClobClient();
+    const imbalance = new OrderbookImbalanceAnalyzer(clob);
+    _orderflowWatcher = new OrderflowWatcher(clob, imbalance);
+    _orderflowWatcher.start();
+    setOrderflowWatcher(_orderflowWatcher);
+
+    // Connect ClobClient to start receiving data
+    clob.connect();
+
+    // Broadcast whale events to dashboard WebSocket
+    if (wsServer) {
+      _orderflowWatcher.on('whale-trade', (data) => {
+        wsServer.broadcast && wsServer.broadcast('orderflow', { event: 'whale-trade', ...data });
+      });
+      _orderflowWatcher.on('mega-whale-trade', (data) => {
+        wsServer.broadcast && wsServer.broadcast('orderflow', { event: 'mega-whale', ...data });
+      });
+      _orderflowWatcher.on('whale-consensus', (data) => {
+        wsServer.broadcast && wsServer.broadcast('orderflow', { event: 'consensus', ...data });
+      });
+    }
+  }
+  return _orderflowWatcher;
+}
+
 function createApiServer(wsServer) {
   const app = express();
   
@@ -33,15 +68,39 @@ function createApiServer(wsServer) {
   
   const _gpuClient = new GPUClient();
 
+  // ── Rust Trade -> GPU Training Loop ──
+  // Starts after EdgeModel is lazy-initialized on first access
+  let _rustTradeTrainer = null;
+
+  async function ensureRustTradeTrainer() {
+    if (_rustTradeTrainer) return _rustTradeTrainer;
+    try {
+      const edgeModel = await getEdgeModel();
+      _rustTradeTrainer = new RustTradeTrainer({
+        gpuClient: _gpuClient,
+        edgeModel,
+      });
+      _rustTradeTrainer.start();
+    } catch (err) {
+      console.error('[api] Failed to start RustTradeTrainer:', err.message);
+    }
+    return _rustTradeTrainer;
+  }
+
+  // Kick off the trainer after a brief startup delay
+  setTimeout(() => ensureRustTradeTrainer().catch(() => {}), 8_000);
+
   // Status (running state, version)
   api.get('/status', async (req, res) => {
     const gpuStatus = await _gpuClient.getStatus().catch(() => ({ available: false }));
+    const trainerStats = _rustTradeTrainer ? _rustTradeTrainer.getStats() : { running: false };
     res.json({
       status: 'running',
       version: '3.0.0',
       timestamp: new Date().toISOString(),
       gpu: gpuStatus,
-      endpoints: ['/api/portfolio', '/api/opportunities', '/api/strategies', '/api/report', '/api/risk', '/api/gpu']
+      rustTradeTrainer: trainerStats,
+      endpoints: ['/api/portfolio', '/api/opportunities', '/api/strategies', '/api/report', '/api/risk', '/api/gpu', '/api/gpu/train-status']
     });
   });
 
@@ -74,7 +133,47 @@ function createApiServer(wsServer) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
-  
+
+  // Rust -> GPU training pipeline status
+  api.get('/gpu/train-status', async (req, res) => {
+    try {
+      const trainer = _rustTradeTrainer;
+      if (!trainer) {
+        return res.json({
+          success: true,
+          data: { running: false, message: 'RustTradeTrainer not yet initialized' },
+        });
+      }
+      const stats = trainer.getStats();
+      const gpuAvailable = await _gpuClient.isAvailable();
+      res.json({
+        success: true,
+        data: {
+          ...stats,
+          gpuAvailable,
+          gpuUrl: _gpuClient.baseUrl,
+          rustEngineUrl: process.env.LATENCY_ENGINE_URL || 'http://localhost:8900',
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Force an immediate sync of Rust trades to GPU
+  api.post('/gpu/train-sync', async (req, res) => {
+    try {
+      const trainer = await ensureRustTradeTrainer();
+      if (!trainer) {
+        return res.status(503).json({ success: false, error: 'RustTradeTrainer failed to initialize' });
+      }
+      await trainer._syncOnce();
+      res.json({ success: true, data: trainer.getStats() });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   const accountId = process.env.ACCOUNT_ID || 'default';
   const botDataDir = accountId !== 'default'
     ? path.join(__dirname, '..', 'data', `account-${accountId}`)
@@ -101,7 +200,7 @@ function createApiServer(wsServer) {
         data: {
           ...portfolio,
           trades: merged.mergedTrades,
-          totalTrades: merged.mergedTrades.length,
+          totalTrades: rust?.tradeCount || merged.mergedTrades.length,
           pnl: merged.mergedPnl,
           totalValue: merged.totalValue,
           totalReturn: merged.totalReturn,
@@ -121,12 +220,13 @@ function createApiServer(wsServer) {
       const report = await bot.generateReport();
       const rust = await fetchRustSnapshot();
       const merged = computeMergedStats(bot.getPortfolio(), report, rust);
-      res.json({ success: true, data: merged.mergedTrades.slice(0, 200) });
+      const limit = parseInt(req.query.limit) || 500;
+      res.json({ success: true, data: merged.mergedTrades.slice(0, limit) });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
-  
+
   // Get opportunities
   api.get('/opportunities', async (req, res) => {
     try {
@@ -201,8 +301,9 @@ function createApiServer(wsServer) {
       const report = await bot.generateReport();
       const rust = await fetchRustSnapshot();
       const merged = computeMergedStats(portfolio, report, rust);
-      const hasClosed = merged.closedTrades.length > 0;
-      const winRate = hasClosed ? (merged.wins.length / merged.closedTrades.length) * 100 : 0;
+      const realClosed = merged.realClosedCount || merged.closedTrades.length;
+      const hasClosed = realClosed > 0;
+      const winRate = hasClosed ? (merged.wins.length / realClosed) * 100 : 0;
 
       res.json({
         success: true,
@@ -210,8 +311,8 @@ function createApiServer(wsServer) {
           ...report,
           performance: {
             ...(report.performance || {}),
-            totalTrades: merged.mergedTrades.length,
-            closedTrades: merged.closedTrades.length,
+            totalTrades: rust?.tradeCount || merged.mergedTrades.length,
+            closedTrades: realClosed,
             winningTrades: merged.wins.length,
             losingTrades: merged.losses.length,
             winRate: `${winRate.toFixed(1)}%`,
@@ -248,7 +349,8 @@ function createApiServer(wsServer) {
       const { marketId, size } = req.body;
       const scanner = new PolymarketScanner();
       const bot = new PolymarketArbitrageBot({ mode: 'paper', dataDir: botDataDir });
-      
+      await bot.loadPortfolio();
+
       const markets = await scanner.fetchMarkets();
       const market = markets.find(m => m.id === marketId);
       
@@ -354,6 +456,28 @@ function createApiServer(wsServer) {
       };
       const estimate = model.estimate(opp);
       res.json({ success: true, data: estimate });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ── Feature Importance Endpoints ──
+
+  api.get('/learning/features', async (req, res) => {
+    try {
+      const model = await getEdgeModel();
+      const report = model.getFeatureReport();
+      res.json({ success: true, data: report });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.get('/learning/features/permutation', async (req, res) => {
+    try {
+      const model = await getEdgeModel();
+      const importance = model.getFeatureImportance({ permutation: true });
+      res.json({ success: true, data: importance });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -528,12 +652,14 @@ function createApiServer(wsServer) {
     return path.join(__dirname, '..', 'data', `account-${accountId}`);
   }
 
-  function loadAccountBot(accountId) {
+  async function loadAccountBot(accountId) {
     if (SINGLE_ACCOUNT_ONLY && accountId !== SINGLE_ACCOUNT_ID) {
       throw new Error(`Account '${accountId}' is disabled in single-account mode`);
     }
     const dataDir = getAccountDataDir(accountId);
-    return new PolymarketArbitrageBot({ mode: 'paper', dataDir });
+    const bot = new PolymarketArbitrageBot({ mode: 'paper', dataDir });
+    await bot.loadPortfolio();
+    return bot;
   }
 
   function discoverAccounts() {
@@ -660,10 +786,18 @@ function createApiServer(wsServer) {
     const nodeTrades = allNodeTrades.filter(t => t?.fillMethod !== 'rust-engine' && t?.strategy !== 'crypto-latency-arb');
     const rustTrades = rust?.recentTrades || [];
     const mergedTrades = mergeTrades(nodeTrades, rustTrades);
+    // Use real Rust counts (not limited by display array size)
+    const rustClosedCount = rust?.closedCount || 0;
+    const rustWinCount = rust?.winCount || 0;
+    const rustLossCount = rust?.lossCount || 0;
+    const nodeClosedTrades = nodeTrades.filter(t => t.realizedPnl != null);
+    const nodeWins = nodeClosedTrades.filter(t => toNumber(t.realizedPnl, 0) > 0);
+    const nodeLosses = nodeClosedTrades.filter(t => toNumber(t.realizedPnl, 0) < 0);
     const closedTrades = mergedTrades.filter(t => t.realizedPnl != null);
     const openTrades = mergedTrades.filter(t => t.realizedPnl == null);
-    const wins = closedTrades.filter(t => toNumber(t.realizedPnl, 0) > 0);
-    const losses = closedTrades.filter(t => toNumber(t.realizedPnl, 0) < 0);
+    // Real counts combining Node + Rust
+    const wins = { length: nodeWins.length + rustWinCount };
+    const losses = { length: nodeLosses.length + rustLossCount };
 
     const syntheticRustOpenCost = getOpenPositionCost(portfolio?.positions || {}, { includeSyntheticRust: true })
       - getOpenPositionCost(portfolio?.positions || {}, { includeSyntheticRust: false });
@@ -703,6 +837,7 @@ function createApiServer(wsServer) {
       ? ((combinedTotalValue - STARTING_CAPITAL) / STARTING_CAPITAL) * 100
       : 0;
 
+    const realClosedCount = nodeClosedTrades.length + rustClosedCount;
     return {
       mergedPnl,
       mergedTrades,
@@ -710,6 +845,7 @@ function createApiServer(wsServer) {
       openTrades,
       wins,
       losses,
+      realClosedCount,
       totalValue: combinedTotalValue,
       totalReturn,
     };
@@ -876,7 +1012,11 @@ function createApiServer(wsServer) {
       ]);
       const status = statusRes.data || {};
       const pnl = pnlRes.data || {};
-      const recentTrades = mapRustTrades(Array.isArray(tradesRes.data) ? tradesRes.data.slice(-200).reverse() : []);
+      const allRustTrades = Array.isArray(tradesRes.data) ? tradesRes.data : [];
+      const filledRust = allRustTrades.filter(t => t.status === 'filled');
+      const rustWins = filledRust.filter(t => toNumber(t.pnl, 0) > 0).length;
+      const rustLosses = filledRust.filter(t => toNumber(t.pnl, 0) <= 0).length;
+      const recentTrades = mapRustTrades(allRustTrades.slice(-500).reverse());
       const data = {
         available: status.running === true,
         status,
@@ -886,7 +1026,10 @@ function createApiServer(wsServer) {
           total: toNumber(pnl.total, 0),
         },
         recentTrades,
-        tradeCount: toNumber(status.trades_today, 0),
+        tradeCount: filledRust.length || toNumber(status.trades_today, 0),
+        closedCount: filledRust.length,
+        winCount: rustWins,
+        lossCount: rustLosses,
       };
       _rustSnapshotCache = { ts: Date.now(), data };
       return data;
@@ -909,27 +1052,28 @@ function createApiServer(wsServer) {
       const accounts = [];
       const rust = await fetchRustSnapshot();
       for (const id of ids) {
-        const bot = loadAccountBot(id);
-        await new Promise(r => setTimeout(r, 100));
+        const bot = await loadAccountBot(id);
         const portfolio = bot.getPortfolio();
         const report = await bot.generateReport();
         const includeRust = id === SINGLE_ACCOUNT_ID || id === 'paper';
         const merged = computeMergedStats(portfolio, report, includeRust ? rust : null);
-        const hasClosed = merged.closedTrades.length > 0;
-        const winRate = hasClosed ? (merged.wins.length / merged.closedTrades.length * 100) : 0;
+        const realClosed = merged.realClosedCount || merged.closedTrades.length;
+        const hasClosed = realClosed > 0;
+        const winRate = hasClosed ? (merged.wins.length / realClosed * 100) : 0;
+        const realTradeCount = includeRust ? (rust?.tradeCount || merged.mergedTrades.length) : merged.mergedTrades.length;
         accounts.push({
           id,
           portfolio: {
             ...portfolio,
             trades: merged.mergedTrades,
-            totalTrades: merged.mergedTrades.length,
+            totalTrades: realTradeCount,
             totalValue: merged.totalValue,
             pnl: merged.mergedPnl,
           },
           performance: {
             ...(report.performance || {}),
-            totalTrades: merged.mergedTrades.length,
-            closedTrades: merged.closedTrades.length,
+            totalTrades: realTradeCount,
+            closedTrades: realClosed,
             winningTrades: merged.wins.length,
             losingTrades: merged.losses.length,
             winRate: `${winRate.toFixed(1)}%`,
@@ -977,8 +1121,7 @@ function createApiServer(wsServer) {
       const accounts = {};
       const rust = await fetchRustSnapshot();
       for (const id of ids) {
-        const bot = loadAccountBot(id);
-        await new Promise(r => setTimeout(r, 100));
+        const bot = await loadAccountBot(id);
         const portfolio = bot.getPortfolio();
         const report = await bot.generateReport();
         const includeRust = id === SINGLE_ACCOUNT_ID || id === 'paper';
@@ -1046,19 +1189,19 @@ function createApiServer(wsServer) {
 
   api.get('/accounts/:id/portfolio', async (req, res) => {
     try {
-      const bot = loadAccountBot(req.params.id);
-      await new Promise(r => setTimeout(r, 100));
+      const bot = await loadAccountBot(req.params.id);
       const portfolio = bot.getPortfolio();
       const report = await bot.generateReport();
       const includeRust = req.params.id === SINGLE_ACCOUNT_ID || req.params.id === 'paper';
       const rust = includeRust ? await fetchRustSnapshot() : null;
       const merged = computeMergedStats(portfolio, report, rust);
+      const realTradeCount = includeRust ? (rust?.tradeCount || merged.mergedTrades.length) : merged.mergedTrades.length;
       res.json({
         success: true,
         data: {
           ...portfolio,
           trades: merged.mergedTrades,
-          totalTrades: merged.mergedTrades.length,
+          totalTrades: realTradeCount,
           pnl: merged.mergedPnl,
           totalValue: merged.totalValue,
           totalReturn: merged.totalReturn,
@@ -1073,13 +1216,13 @@ function createApiServer(wsServer) {
 
   api.get('/accounts/:id/trades', async (req, res) => {
     try {
-      const bot = loadAccountBot(req.params.id);
-      await new Promise(r => setTimeout(r, 100));
+      const bot = await loadAccountBot(req.params.id);
       const report = await bot.generateReport();
       const includeRust = req.params.id === SINGLE_ACCOUNT_ID || req.params.id === 'paper';
       const rust = includeRust ? await fetchRustSnapshot() : null;
       const merged = computeMergedStats(bot.getPortfolio(), report, rust);
-      res.json({ success: true, data: merged.mergedTrades.slice(0, 200) });
+      const limit = parseInt(req.query.limit) || 500;
+      res.json({ success: true, data: merged.mergedTrades.slice(0, limit) });
     } catch (err) {
       const status = /disabled in single-account mode/i.test(err.message) ? 404 : 500;
       res.status(status).json({ success: false, error: err.message });
@@ -1125,6 +1268,40 @@ function createApiServer(wsServer) {
 
     return curve;
   }
+
+  // ── Orderflow / Whale Detection ──
+  api.get('/orderflow/feed', (req, res) => {
+    try {
+      const watcher = getOrderflowWatcher(wsServer);
+      const limit = parseInt(req.query.limit) || 50;
+      res.json({ success: true, data: watcher.getActivityFeed(limit) });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.get('/orderflow/stats', (req, res) => {
+    try {
+      const watcher = getOrderflowWatcher(wsServer);
+      res.json({ success: true, data: watcher.getStats() });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.get('/orderflow/volume', (req, res) => {
+    try {
+      const watcher = getOrderflowWatcher(wsServer);
+      res.json({ success: true, data: watcher.getVolumeSnapshot() });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // Initialize OrderflowWatcher after a short delay (let server bind first)
+  setTimeout(() => {
+    try { getOrderflowWatcher(wsServer); } catch (e) { console.error('[OrderflowWatcher] Init error:', e.message); }
+  }, 5000);
 
   app.use('/api', api);
 

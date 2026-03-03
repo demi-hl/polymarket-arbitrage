@@ -224,9 +224,24 @@ class ClobClient extends EventEmitter {
         this.emit('book', { assetId, book });
       }
     } else if (type === 'price_change') {
-      this.emit('price', msg);
+      const parsed = {
+        assetId: msg.asset_id || msg.market,
+        oldPrice: parseFloat(msg.old_price || 0),
+        newPrice: parseFloat(msg.price || 0),
+        timestamp: Date.now(),
+        raw: msg,
+      };
+      this.emit('price', parsed);
     } else if (type === 'last_trade_price') {
-      this.emit('trade', msg);
+      const parsed = {
+        assetId: msg.asset_id || msg.market,
+        price: parseFloat(msg.price || 0),
+        size: parseFloat(msg.size || msg.amount || 0),
+        side: msg.side || (msg.is_buy ? 'buy' : 'sell') || 'unknown',
+        timestamp: msg.timestamp ? new Date(msg.timestamp).getTime() : Date.now(),
+        raw: msg,
+      };
+      this.emit('trade', parsed);
     }
   }
 

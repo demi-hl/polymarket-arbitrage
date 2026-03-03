@@ -159,6 +159,10 @@ pub struct Trade {
     pub shadow_exit_price: Option<f64>,
     pub shadow_pnl: Option<f64>,
     pub shadow_slippage_bps: Option<f64>,
+    /// Microseconds from signal timestamp to order submission
+    pub signal_latency_us: Option<u64>,
+    /// Microseconds for the full execution (submission to fill/response)
+    pub execution_latency_us: Option<u64>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
@@ -195,6 +199,56 @@ pub struct EngineStatus {
     pub daily_pnl: f64,
 }
 
+// ── Correlated Market Arbitrage Types ──
+
+/// Defines the logical relationship between two Polymarket markets.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum Relationship {
+    /// Market A is a subset of Market B.
+    /// e.g. "Win primary" is a subset of "Win presidency" — P(A) <= P(B).
+    Subset,
+    /// Market A is a superset of Market B. P(A) >= P(B).
+    Superset,
+    /// Both markets cannot be true simultaneously. P(A) + P(B) <= 1.
+    MutuallyExclusive,
+    /// A and B are complementary — P(A) + P(B) >= 1.
+    Complementary,
+}
+
+/// A registered pair of correlated Polymarket markets.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CorrelatedPair {
+    pub id: String,
+    pub market_a_token: String,
+    pub market_b_token: String,
+    pub relationship: Relationship,
+    /// Human-readable label, e.g. "Trump primary vs presidency"
+    pub label: Option<String>,
+}
+
+/// Signal emitted when a correlated pair violates its logical constraint.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CorrelationSignal {
+    pub id: String,
+    pub pair: CorrelatedPair,
+    /// Price of market A (YES mid)
+    pub price_a: f64,
+    /// Price of market B (YES mid)
+    pub price_b: f64,
+    /// Raw violation magnitude (always positive when a violation exists)
+    pub violation: f64,
+    /// Net edge after fees (violation - fee estimate)
+    pub net_edge: f64,
+    pub confidence: f64,
+    /// Which token to BUY (the underpriced side)
+    pub buy_token: String,
+    /// Which token to SELL/short (the overpriced side)
+    pub sell_token: String,
+    pub suggested_size: f64,
+    pub timestamp: DateTime<Utc>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct FeedStatus {
     pub binance_connected: bool,
@@ -203,4 +257,42 @@ pub struct FeedStatus {
     pub polymarket_books: u32,
     pub cryptoquant_connected: bool,
     pub tradingview_connected: bool,
+}
+
+// --- Event-driven update types ---
+
+/// Emitted by BinanceFeed when a price changes by more than the minimum threshold (0.01%).
+#[derive(Debug, Clone)]
+pub struct PriceUpdate {
+    pub symbol: String,
+    pub asset: CryptoAsset,
+    pub price: f64,
+    pub prev_price: f64,
+    pub change_pct: f64,
+    pub timestamp: DateTime<Utc>,
+}
+
+/// Emitted by PolymarketFeed when an orderbook changes.
+#[derive(Debug, Clone)]
+pub struct BookUpdate {
+    pub token_id: String,
+    pub mid_price: f64,
+    pub spread: f64,
+    pub best_bid: f64,
+    pub best_ask: f64,
+    pub timestamp: DateTime<Utc>,
+}
+
+/// Pre-computed probability for a contract, cached until underlying price changes.
+#[derive(Debug, Clone)]
+pub struct CachedProb {
+    pub token_id: String,
+    pub asset: CryptoAsset,
+    pub prob: f64,
+    pub vol: f64,
+    pub binance_price: f64,
+    pub strike: f64,
+    pub direction: Direction,
+    pub secs_to_expiry: f64,
+    pub timestamp: DateTime<Utc>,
 }

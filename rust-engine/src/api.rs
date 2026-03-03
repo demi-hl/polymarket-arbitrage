@@ -23,6 +23,9 @@ pub fn create_router(state: Arc<AppState>) -> Router {
         .route("/config", post(update_config))
         .route("/markets", post(register_markets))
         .route("/status", get(status))
+        .route("/latency", get(latency))
+        .route("/correlations", get(list_correlations).post(register_correlations))
+        .route("/correlations/signals", get(correlation_signals))
         .layer(CorsLayer::permissive())
         .with_state(state)
 }
@@ -236,4 +239,136 @@ async fn status(State(state): State<Arc<AppState>>) -> Json<EngineStatus> {
         trades_today: risk_state.daily_trades,
         daily_pnl: risk_state.daily_pnl,
     })
+}
+
+#[derive(Serialize)]
+struct LatencyResponse {
+    total_trades_measured: usize,
+    avg_signal_latency_us: f64,
+    avg_execution_latency_us: f64,
+    signal_latency_p50_us: u64,
+    signal_latency_p95_us: u64,
+    signal_latency_p99_us: u64,
+    execution_latency_p50_us: u64,
+    execution_latency_p95_us: u64,
+    execution_latency_p99_us: u64,
+}
+
+fn percentile(sorted: &[u64], pct: f64) -> u64 {
+    if sorted.is_empty() {
+        return 0;
+    }
+    let idx = ((pct / 100.0) * (sorted.len() as f64 - 1.0)).round() as usize;
+    sorted[idx.min(sorted.len() - 1)]
+}
+
+async fn latency(State(state): State<Arc<AppState>>) -> Json<LatencyResponse> {
+    let history = state.executor.get_latency_history();
+    let total = history.len();
+
+    if total == 0 {
+        return Json(LatencyResponse {
+            total_trades_measured: 0,
+            avg_signal_latency_us: 0.0,
+            avg_execution_latency_us: 0.0,
+            signal_latency_p50_us: 0,
+            signal_latency_p95_us: 0,
+            signal_latency_p99_us: 0,
+            execution_latency_p50_us: 0,
+            execution_latency_p95_us: 0,
+            execution_latency_p99_us: 0,
+        });
+    }
+
+    let mut signal_latencies: Vec<u64> = history.iter().map(|r| r.signal_latency_us).collect();
+    let mut exec_latencies: Vec<u64> = history.iter().map(|r| r.execution_latency_us).collect();
+    signal_latencies.sort_unstable();
+    exec_latencies.sort_unstable();
+
+    let avg_signal = signal_latencies.iter().sum::<u64>() as f64 / total as f64;
+    let avg_exec = exec_latencies.iter().sum::<u64>() as f64 / total as f64;
+
+    Json(LatencyResponse {
+        total_trades_measured: total,
+        avg_signal_latency_us: avg_signal,
+        avg_execution_latency_us: avg_exec,
+        signal_latency_p50_us: percentile(&signal_latencies, 50.0),
+        signal_latency_p95_us: percentile(&signal_latencies, 95.0),
+        signal_latency_p99_us: percentile(&signal_latencies, 99.0),
+        execution_latency_p50_us: percentile(&exec_latencies, 50.0),
+        execution_latency_p95_us: percentile(&exec_latencies, 95.0),
+        execution_latency_p99_us: percentile(&exec_latencies, 99.0),
+    })
+}
+
+// ── Correlation endpoints ──
+
+#[derive(Deserialize)]
+struct CorrelationRegistration {
+    pairs: Vec<CorrelationPairInput>,
+}
+
+#[derive(Deserialize)]
+struct CorrelationPairInput {
+    /// Unique ID for this pair. Auto-generated if absent.
+    id: Option<String>,
+    market_a_token: String,
+    market_b_token: String,
+    /// "subset", "superset", "mutually_exclusive", "complementary"
+    relationship: String,
+    label: Option<String>,
+}
+
+async fn register_correlations(
+    State(state): State<Arc<AppState>>,
+    Json(reg): Json<CorrelationRegistration>,
+) -> (StatusCode, Json<serde_json::Value>) {
+    let mut registered = 0u32;
+
+    for (i, input) in reg.pairs.into_iter().enumerate() {
+        let relationship = match input.relationship.to_lowercase().as_str() {
+            "subset" => Relationship::Subset,
+            "superset" => Relationship::Superset,
+            "mutually_exclusive" => Relationship::MutuallyExclusive,
+            "complementary" => Relationship::Complementary,
+            other => {
+                info!("Unknown relationship type: {other}, skipping");
+                continue;
+            }
+        };
+
+        let pair_id = input.id.unwrap_or_else(|| format!("corr-pair-{}", i));
+
+        let pair = CorrelatedPair {
+            id: pair_id,
+            market_a_token: input.market_a_token,
+            market_b_token: input.market_b_token,
+            relationship,
+            label: input.label,
+        };
+
+        if state.correlation_detector.add_pair(pair) {
+            registered += 1;
+        }
+    }
+
+    info!("Registered {registered} correlated pairs");
+
+    (
+        StatusCode::OK,
+        Json(serde_json::json!({ "registered": registered })),
+    )
+}
+
+async fn list_correlations(
+    State(state): State<Arc<AppState>>,
+) -> Json<Vec<CorrelatedPair>> {
+    Json(state.correlation_detector.get_pairs())
+}
+
+async fn correlation_signals(
+    State(state): State<Arc<AppState>>,
+) -> Json<Vec<CorrelationSignal>> {
+    let signals = state.recent_correlation_signals.lock().clone();
+    Json(signals)
 }

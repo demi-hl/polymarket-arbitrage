@@ -9,7 +9,7 @@ use tokio_tungstenite::connect_async;
 use tokio_tungstenite::tungstenite::Message;
 use tracing::{error, info, warn};
 
-use crate::models::{CryptoContract, OrderbookState};
+use crate::models::{BookUpdate, CryptoContract, OrderbookState};
 
 #[derive(Debug, Serialize)]
 struct SubscribeMsg {
@@ -32,16 +32,20 @@ pub struct PolymarketFeed {
     pub orderbooks: Arc<DashMap<String, OrderbookState>>,
     pub contracts: Arc<RwLock<Vec<CryptoContract>>>,
     pub tx: broadcast::Sender<OrderbookState>,
+    /// Event channel for book updates — consumed by ProbabilityCache
+    book_update_tx: broadcast::Sender<BookUpdate>,
     ws_url: String,
 }
 
 impl PolymarketFeed {
     pub fn new(ws_url: &str) -> Self {
         let (tx, _) = broadcast::channel(1024);
+        let (book_update_tx, _) = broadcast::channel(256);
         Self {
             orderbooks: Arc::new(DashMap::new()),
             contracts: Arc::new(RwLock::new(Vec::new())),
             tx,
+            book_update_tx,
             ws_url: ws_url.to_string(),
         }
     }
@@ -56,6 +60,12 @@ impl PolymarketFeed {
 
     pub fn book_count(&self) -> u32 {
         self.orderbooks.len() as u32
+    }
+
+    /// Subscribe to orderbook update events.
+    /// Fires on every book change (bid/ask/mid update).
+    pub fn subscribe(&self) -> broadcast::Receiver<BookUpdate> {
+        self.book_update_tx.subscribe()
     }
 
     pub async fn add_contracts(&self, new_contracts: Vec<CryptoContract>) {
@@ -166,21 +176,36 @@ impl PolymarketFeed {
             }
 
             if best_bid > 0.0 {
+                let now = Utc::now();
+                let mid = (best_bid + best_ask) / 2.0;
+                let spread = best_ask - best_bid;
+
                 let book = OrderbookState {
                     token_id: token_id.clone(),
                     best_bid,
                     best_ask,
                     bid_size,
                     ask_size,
-                    mid_price: (best_bid + best_ask) / 2.0,
-                    spread: best_ask - best_bid,
-                    updated_at: Utc::now(),
+                    mid_price: mid,
+                    spread,
+                    updated_at: now,
                 };
-                self.orderbooks.insert(token_id, book.clone());
+                self.orderbooks.insert(token_id.clone(), book.clone());
                 let _ = self.tx.send(book);
+
+                // Emit BookUpdate for event-driven processing
+                let _ = self.book_update_tx.send(BookUpdate {
+                    token_id,
+                    mid_price: mid,
+                    spread,
+                    best_bid,
+                    best_ask,
+                    timestamp: now,
+                });
             }
         } else if let Some(price_str) = &event.price {
             if let Ok(price) = price_str.parse::<f64>() {
+                let now = Utc::now();
                 let book = OrderbookState {
                     token_id: token_id.clone(),
                     best_bid: price,
@@ -189,10 +214,20 @@ impl PolymarketFeed {
                     ask_size: 0.0,
                     mid_price: price,
                     spread: 0.0,
-                    updated_at: Utc::now(),
+                    updated_at: now,
                 };
-                self.orderbooks.insert(token_id, book.clone());
+                self.orderbooks.insert(token_id.clone(), book.clone());
                 let _ = self.tx.send(book);
+
+                // Emit BookUpdate for event-driven processing
+                let _ = self.book_update_tx.send(BookUpdate {
+                    token_id,
+                    mid_price: price,
+                    spread: 0.0,
+                    best_bid: price,
+                    best_ask: price,
+                    timestamp: now,
+                });
             }
         }
     }

@@ -156,15 +156,7 @@ export default function Overview() {
     const n = Number(v)
     return Number.isFinite(n) ? n : fallback
   }
-  const getOppEdge = (opp) => (
-    parseNum(
-      opp?.edgePercent
-      ?? opp?.executableEdge
-      ?? opp?.expectedReturn
-      ?? opp?.edge,
-      0
-    )
-  )
+
 
   const anim = (delay = 0) => ({
     initial: { opacity: 0, y: 20, filter: 'blur(6px)' },
@@ -371,83 +363,8 @@ export default function Overview() {
         ))}
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <motion.div {...anim(0.3)} className="card">
-          <div className="flex items-center justify-between mb-5">
-            <h3 className="text-xl font-semibold">Live Opportunities</h3>
-            <div className="flex items-center gap-2">
-              {opportunitiesMeta?.stale && (
-                <span className="text-[10px] text-yellow-300 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full">
-                  stale feed
-                </span>
-              )}
-              <span className="badge-info text-sm">{opportunities.length}</span>
-            </div>
-          </div>
-          {opportunitiesMeta?.warning && (
-            <div className="mb-3 text-[11px] text-yellow-200 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
-              {opportunitiesMeta.warning}
-            </div>
-          )}
-          <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
-            {(opportunities || []).slice(0, 12).map((opp, i) => (
-              <motion.div
-                key={opp?.marketId || i}
-                initial={{ opacity: 0, x: -12, filter: 'blur(4px)' }}
-                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                transition={{ delay: 0.35 + i * 0.04, duration: 0.5 }}
-                whileHover={{ x: 4, backgroundColor: 'rgba(0, 212, 255, 0.03)' }}
-                className="p-4 rounded-xl transition-colors"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
-              >
-                <p className="text-sm font-medium truncate text-gray-200">{opp?.question ?? '—'}</p>
-                <div className="flex justify-between items-center mt-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-profit text-sm font-mono font-bold" style={{ textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>+{(getOppEdge(opp) * 100).toFixed(2)}%</span>
-                    {opp?.direction && <span className="text-[10px] text-gray-500 font-mono">{opp.direction}</span>}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {opp?.strategy && <span className="text-[10px] text-accent/60 bg-accent/5 px-2 py-0.5 rounded-full border border-accent/10">{opp.strategy}</span>}
-                    <span className="text-[11px] text-gray-500 font-mono">${(opp?.liquidity ?? 0).toLocaleString()}</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-            {opportunities.length === 0 && (
-              <div className="text-center py-12">
-                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
-                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
-                >
-                  {opportunitiesMeta?.stale ? (
-                    <Clock size={20} className="text-yellow-400/60" />
-                  ) : (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-                    >
-                      <Activity size={20} className="text-accent/40" />
-                    </motion.div>
-                  )}
-                </div>
-                <p className="text-gray-400 text-sm font-medium">
-                  {opportunitiesMeta?.stale ? 'Scanner timed out' : 'Scanning markets'}
-                </p>
-                <p className="text-gray-600 text-xs mt-1.5 max-w-[240px] mx-auto">
-                  {opportunitiesMeta?.stale
-                    ? 'Polymarket API was slow to respond. Retrying every 15s.'
-                    : 'Polling for edges above 5% threshold. Next scan shortly.'}
-                </p>
-                {opportunitiesMeta?.marketsScanned > 0 && (
-                  <p className="text-[10px] text-gray-600 font-mono mt-3">
-                    {opportunitiesMeta.marketsScanned} markets last scanned
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        <motion.div {...anim(0.35)} className="card">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-xl font-semibold">
               Recent Trades
