@@ -50,7 +50,7 @@ function isRustTrade(trade) {
 }
 
 export default function Overview() {
-  const { portfolio, opportunities, opportunitiesMeta, trades, loading } = useTrading()
+  const { portfolio, opportunities, opportunitiesMeta, trades, strategies, loading } = useTrading()
   const oracle = useOracleData()
   const realism = useRealismData()
   const [tradeFilter, setTradeFilter] = useState('all')
@@ -89,9 +89,16 @@ export default function Overview() {
   const worstTrade = closedTrades.length > 0 ? Math.min(...closedTrades.map(t => t.realizedPnl)) : 0
 
   const strategyBreakdown = {}
+  // Seed from the /strategies API so all registered strategies appear
+  ;(strategies || []).forEach(s => {
+    const name = s?.name || s?.id
+    if (name && !strategyBreakdown[name]) {
+      strategyBreakdown[name] = { count: 0, pnl: 0, wins: 0, active: s?.enabled !== false }
+    }
+  })
   allTrades.forEach(t => {
     const s = t.strategy || 'unknown'
-    if (!strategyBreakdown[s]) strategyBreakdown[s] = { count: 0, pnl: 0, wins: 0 }
+    if (!strategyBreakdown[s]) strategyBreakdown[s] = { count: 0, pnl: 0, wins: 0, active: true }
     strategyBreakdown[s].count++
     if (t.realizedPnl != null) {
       strategyBreakdown[s].pnl += t.realizedPnl
@@ -99,8 +106,8 @@ export default function Overview() {
     }
   })
   const topStrategies = Object.entries(strategyBreakdown)
-    .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, 6)
+    .sort((a, b) => b[1].count - a[1].count || (b[1].active ? 1 : 0) - (a[1].active ? 1 : 0))
+    .slice(0, 10)
   const filteredRecentTrades = (trades || []).filter(trade => {
     if (tradeFilter === 'rust') return isRustTrade(trade)
     if (tradeFilter === 'node') return !isRustTrade(trade)
@@ -470,36 +477,45 @@ export default function Overview() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div {...anim(0.4)} className="card">
-          <h3 className="text-xl font-semibold mb-5">Strategy Breakdown</h3>
-          <div className="space-y-3">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-xl font-semibold">Strategy Breakdown</h3>
+            <span className="text-[10px] text-gray-500 font-mono">{topStrategies.length} strategies</span>
+          </div>
+          <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
             {topStrategies.map(([name, data], i) => {
               const wr = data.count > 0 && data.wins > 0 ? ((data.wins / data.count) * 100).toFixed(0) : '—'
               const maxCount = Math.max(...topStrategies.map(([, d]) => d.count), 1)
+              const hasTrades = data.count > 0
               return (
                 <motion.div
                   key={name}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.45 + i * 0.05 }}
-                  className="strategy-bar flex items-center justify-between p-4 rounded-xl relative"
-                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
+                  transition={{ delay: 0.45 + i * 0.03 }}
+                  className="strategy-bar flex items-center justify-between p-3.5 rounded-xl relative"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)', opacity: hasTrades ? 1 : 0.5 }}
                 >
-                  <div className="absolute left-0 top-0 bottom-0 rounded-xl opacity-[0.04]"
-                    style={{
-                      width: `${(data.count / maxCount) * 100}%`,
-                      background: data.pnl >= 0
-                        ? 'linear-gradient(90deg, rgba(16,185,129,0.8), transparent)'
-                        : 'linear-gradient(90deg, rgba(239,68,68,0.8), transparent)',
-                    }}
-                  />
+                  {hasTrades && (
+                    <div className="absolute left-0 top-0 bottom-0 rounded-xl opacity-[0.04]"
+                      style={{
+                        width: `${(data.count / maxCount) * 100}%`,
+                        background: data.pnl >= 0
+                          ? 'linear-gradient(90deg, rgba(16,185,129,0.8), transparent)'
+                          : 'linear-gradient(90deg, rgba(239,68,68,0.8), transparent)',
+                      }}
+                    />
+                  )}
                   <div className="flex items-center gap-3 relative z-10">
                     <span className="text-accent/60 bg-accent/5 px-2.5 py-1 rounded-lg text-[11px] font-mono border border-accent/10">{name}</span>
+                    {!hasTrades && data.active && (
+                      <span className="text-[9px] text-gray-600 uppercase tracking-wider">idle</span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-6 text-xs font-mono relative z-10">
-                    <span className="text-gray-400">{data.count} trades</span>
-                    <span className="text-gray-500">{wr}% wr</span>
-                    <span className={data.pnl >= 0 ? 'text-profit' : 'text-loss'} style={{ textShadow: data.pnl >= 0 ? '0 0 8px rgba(16,185,129,0.2)' : '0 0 8px rgba(239,68,68,0.2)' }}>
-                      {data.pnl >= 0 ? '+' : ''}${data.pnl.toFixed(2)}
+                  <div className="flex items-center gap-5 text-xs font-mono relative z-10">
+                    <span className="text-gray-400">{hasTrades ? `${data.count} trades` : '—'}</span>
+                    <span className="text-gray-500 w-12 text-right">{wr}% wr</span>
+                    <span className={`w-20 text-right ${hasTrades ? (data.pnl >= 0 ? 'text-profit' : 'text-loss') : 'text-gray-600'}`} style={hasTrades ? { textShadow: data.pnl >= 0 ? '0 0 8px rgba(16,185,129,0.2)' : '0 0 8px rgba(239,68,68,0.2)' } : {}}>
+                      {hasTrades ? `${data.pnl >= 0 ? '+' : ''}$${data.pnl.toFixed(2)}` : '—'}
                     </span>
                   </div>
                 </motion.div>

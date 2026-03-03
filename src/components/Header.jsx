@@ -2,19 +2,17 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTrading } from '../context/TradingContext'
-import { useMultiAccount } from '../context/MultiAccountContext'
 
 export default function Header({ minimal = false }) {
   const [clock, setClock] = useState(new Date())
-  const { portfolio } = useTrading()
-  const { accountIds, loading } = useMultiAccount()
+  const { portfolio, systemStatus, loading } = useTrading()
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
 
-  const isLive = !loading && accountIds.length >= 1
+  const isLive = !loading && systemStatus?.connected
 
   if (minimal) {
     return (

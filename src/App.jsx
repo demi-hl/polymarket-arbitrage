@@ -81,6 +81,7 @@ function AppLayout() {
       </div>
       <Toaster
         position="bottom-right"
+        offset={{ bottom: 80 }}
         toastOptions={{
           style: {
             background: 'rgba(18, 18, 26, 0.95)',
