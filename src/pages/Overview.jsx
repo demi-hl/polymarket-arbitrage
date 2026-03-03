@@ -140,8 +140,8 @@ export default function Overview() {
         <p className="text-[13px] text-gray-500 mt-2.5 tracking-wide font-light">
           20 strategies · Deep learning · GPU sentiment · Oracle daemon · Whale tracking · Kelly sizing
         </p>
-        <div className="mt-3 flex items-center gap-3">
-          <span className="text-[10px] uppercase tracking-wider text-gray-500">Shadow-live realism</span>
+        <div className="mt-3 flex flex-wrap items-center gap-2.5">
+          <span className="text-[10px] uppercase tracking-wider text-gray-500">Paper→live gap</span>
           <span
             className="text-[11px] font-mono px-2 py-0.5 rounded-full border"
             style={{
@@ -150,11 +150,16 @@ export default function Overview() {
               background: realism?.score >= 80 ? 'rgba(16,185,129,0.08)' : realism?.score >= 65 ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
             }}
           >
-            {realism?.score != null ? `${realism.score}/100 (${realism.grade})` : 'warming up'}
+            {realism?.score != null ? `${realism.score}/100` : 'warming up'}
           </span>
           {realism?.sampleSize > 0 && (
             <span className="text-[10px] text-gray-600 font-mono">
               n={realism.sampleSize} · MAE ${realism.maeUsd}
+            </span>
+          )}
+          {realism?.score != null && realism.score < 65 && (
+            <span className="text-[10px] text-gray-600">
+              — slippage/latency widen paper vs live
             </span>
           )}
         </div>
@@ -170,7 +175,7 @@ export default function Overview() {
           }}
         >
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-[10px] uppercase tracking-wider">
-            <span className="text-gray-500">Live-adjusted projection</span>
+            <span className="text-gray-500">Projection (adjusted for slippage)</span>
             <span
               className="text-[10px] px-2 py-0.5 rounded-full border font-mono"
               style={{
@@ -179,7 +184,7 @@ export default function Overview() {
                 background: 'rgba(255,255,255,0.02)',
               }}
             >
-              {realism?.projection?.available ? `${realism.projection.confidence} confidence` : 'warming up'}
+              {realism?.projection?.available ? `${realism.projection.confidence} sample size` : 'warming up'}
             </span>
             {realism?.projection?.sampleSize > 0 && (
               <span className="text-gray-600 font-mono">n={realism.projection.sampleSize}</span>
@@ -370,18 +375,34 @@ export default function Overview() {
               </motion.div>
             ))}
             {opportunities.length === 0 && (
-              <div className="text-center py-16">
-                <motion.div
-                  animate={{ opacity: [0.4, 0.8, 0.4] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-4"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
                 >
-                  <p className="text-gray-500 text-base">{opportunitiesMeta?.stale ? 'No fresh opportunities yet' : 'No opportunities'}</p>
-                  <p className="text-gray-600 text-sm mt-1">
-                    {opportunitiesMeta?.stale
-                      ? 'Scanner timed out; showing stale fallback until next successful scan.'
-                      : 'Waiting for next scan cycle'}
+                  {opportunitiesMeta?.stale ? (
+                    <Clock size={20} className="text-yellow-400/60" />
+                  ) : (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
+                    >
+                      <Activity size={20} className="text-accent/40" />
+                    </motion.div>
+                  )}
+                </div>
+                <p className="text-gray-400 text-sm font-medium">
+                  {opportunitiesMeta?.stale ? 'Scanner timed out' : 'Scanning markets'}
+                </p>
+                <p className="text-gray-600 text-xs mt-1.5 max-w-[240px] mx-auto">
+                  {opportunitiesMeta?.stale
+                    ? 'Polymarket API was slow to respond. Retrying every 15s.'
+                    : 'Polling for edges above 5% threshold. Next scan shortly.'}
+                </p>
+                {opportunitiesMeta?.marketsScanned > 0 && (
+                  <p className="text-[10px] text-gray-600 font-mono mt-3">
+                    {opportunitiesMeta.marketsScanned} markets last scanned
                   </p>
-                </motion.div>
+                )}
               </div>
             )}
           </div>
