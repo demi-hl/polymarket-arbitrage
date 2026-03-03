@@ -13,7 +13,7 @@ class PolymarketArbitrageBot extends EventEmitter {
     super();
     
     this.mode = config.mode || 'paper';
-    this.edgeThreshold = config.edgeThreshold || 0.02;
+    this.edgeThreshold = config.edgeThreshold || 0.05;
     this.scanThreshold = config.scanThreshold;
     this.maxPositionSize = config.maxPositionSize || 1000;
     /** @type {string[]|undefined} - Sectors to scan: politics, sports, crypto */

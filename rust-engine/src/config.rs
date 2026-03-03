@@ -83,9 +83,9 @@ impl Default for Config {
                 sideways_size_pct: 0.003,
             },
             detection: DetectionConfig {
-                base_threshold: 0.003,
-                trending_threshold: 0.002,
-                sideways_threshold: 0.005,
+                base_threshold: 0.020,
+                trending_threshold: 0.015,
+                sideways_threshold: 0.030,
                 min_sources_agree: 1,
                 priority_expiry_minutes: vec![15, 60, 240],
             },
