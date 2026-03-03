@@ -186,9 +186,12 @@ impl OrderExecutor {
             paper.min_hold_ms
         };
 
-        let convergence_ratio = rng.gen_range(
-            paper.min_convergence_ratio..=paper.max_convergence_ratio
-        );
+        // Asymmetric convergence: ~40% chance of adverse price move (realistic)
+        let convergence_ratio = if rng.gen::<f64>() < 0.4 {
+            rng.gen_range(paper.min_convergence_ratio..0.0_f64)
+        } else {
+            rng.gen_range(0.0_f64..=paper.max_convergence_ratio)
+        };
         let move_from_convergence = trade.divergence_at_entry.abs() * convergence_ratio;
         let noise = (rng.gen::<f64>() - 0.5) * move_from_convergence * paper.noise_std_ratio;
         let modeled_move = Self::clamp(move_from_convergence + noise, -0.20, 0.20);

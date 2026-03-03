@@ -109,7 +109,7 @@ class PolymarketArbitrageBot extends EventEmitter {
   }
 
   estimateTotalCost(edgePercent, slippage) {
-    return this.fees.polymarketSpread + slippage + (this.fees.gasCostPerTx * 2 / 100);
+    return this.fees.polymarket + this.fees.polymarketSpread + slippage + (this.fees.gasCostPerTx * 2 / 100);
   }
 
   async simulateExecution(opportunity, size) {
@@ -171,7 +171,7 @@ class PolymarketArbitrageBot extends EventEmitter {
       : (yesSlippage + noSlippage) / 2;
 
     // Limit order improvement: if placing at mid instead of market, reduce slippage by ~40%
-    const limitOrderDiscount = fillMethod === 'clob' ? 0.4 : 0.25;
+    const limitOrderDiscount = fillMethod === 'clob' ? 0.15 : 0.10;
     const effectiveSlippage = avgSlippage * (1 - limitOrderDiscount);
 
     const effectiveEdge = opportunity.executableEdge ?? opportunity.edgePercent;
@@ -402,10 +402,10 @@ class PolymarketArbitrageBot extends EventEmitter {
         const yesBook = yesToken ? this.clob.getCachedBook(yesToken) : null;
         const noBook = noToken ? this.clob.getCachedBook(noToken) : null;
 
-        currentYes = yesBook?.midpoint
+        currentYes = yesBook?.bestBid
           ?? pos.currentYesPrice
           ?? pos.entryYesPrice ?? 0.5;
-        currentNo = noBook?.midpoint
+        currentNo = noBook?.bestBid
           ?? pos.currentNoPrice
           ?? pos.entryNoPrice ?? 0.5;
       }
@@ -426,13 +426,16 @@ class PolymarketArbitrageBot extends EventEmitter {
     if (!position) throw new Error(`No position found for market ${marketId}`);
 
     const winningShares = outcome === 'yes' ? position.yesShares : position.noShares;
-    const payout = winningShares * 1;
+    const grossPayout = winningShares * 1;
+    const exitFee = grossPayout * this.fees.polymarket;
+    const payout = grossPayout - exitFee;
     const realizedPnl = payout - position.entryCost;
 
     position.status = 'closed';
     position.closeTime = new Date().toISOString();
     position.outcome = outcome;
     position.payout = payout;
+    position.exitFee = exitFee;
     position.realizedPnl = realizedPnl;
 
     this.portfolio.cash += payout;
@@ -456,11 +459,13 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     const GAS_COST = 0.04;
     const SELL_SLIPPAGE = 0.003;
+    const TAKER_FEE = this.fees.polymarket;
 
     const yesExitPrice = currentYesPrice * (1 - SELL_SLIPPAGE);
     const noExitPrice = currentNoPrice * (1 - SELL_SLIPPAGE);
     const sellValue = (position.yesShares * yesExitPrice) + (position.noShares * noExitPrice);
-    const payout = sellValue - GAS_COST;
+    const takerFee = sellValue * TAKER_FEE;
+    const payout = sellValue - GAS_COST - takerFee;
     const realizedPnl = payout - position.entryCost;
 
     position.status = 'closed';
