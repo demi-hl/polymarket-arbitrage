@@ -1,21 +1,25 @@
 mod api;
 mod config;
+mod correlation;
 mod detector;
 mod executor;
 mod feeds;
 mod models;
+mod precompute;
 mod risk;
 mod signer;
 mod trend;
 
 use config::Config;
+use correlation::CorrelationDetector;
 use detector::DivergenceDetector;
 use executor::OrderExecutor;
 use feeds::binance::BinanceFeed;
 use feeds::cryptoquant::CryptoQuantFeed;
 use feeds::polymarket::PolymarketFeed;
 use feeds::tradingview::TradingViewFeed;
-use models::Signal;
+use models::{CorrelationSignal, Signal};
+use precompute::ProbabilityCache;
 use risk::RiskManager;
 use signer::OrderSigner;
 use std::sync::Arc;
@@ -31,7 +35,10 @@ pub struct AppState {
     pub tradingview: Arc<TradingViewFeed>,
     pub executor: Arc<OrderExecutor>,
     pub risk: Arc<RiskManager>,
-    pub recent_signals: parking_lot::Mutex<Vec<Signal>>,
+    pub correlation_detector: Arc<CorrelationDetector>,
+    pub prob_cache: Arc<ProbabilityCache>,
+    pub recent_signals: Arc<parking_lot::Mutex<Vec<Signal>>>,
+    pub recent_correlation_signals: parking_lot::Mutex<Vec<CorrelationSignal>>,
     pub start_time: Instant,
 }
 
@@ -80,6 +87,10 @@ async fn main() {
         risk.clone(),
         signer,
     ));
+    executor.load_trades();
+
+    let correlation_detector = Arc::new(CorrelationDetector::new(config.clone()));
+    let prob_cache = Arc::new(ProbabilityCache::new(config.clone()));
 
     // Load persisted trades from disk (#4)
     executor.load_trades();
@@ -92,7 +103,10 @@ async fn main() {
         tradingview: tradingview.clone(),
         executor: executor.clone(),
         risk: risk.clone(),
-        recent_signals: parking_lot::Mutex::new(Vec::new()),
+        correlation_detector: correlation_detector.clone(),
+        prob_cache: prob_cache.clone(),
+        recent_signals: Arc::new(parking_lot::Mutex::new(Vec::new())),
+        recent_correlation_signals: parking_lot::Mutex::new(Vec::new()),
         start_time: Instant::now(),
     });
 
@@ -109,7 +123,22 @@ async fn main() {
     let tv_handle = tradingview.clone();
     tokio::spawn(async move { tv_handle.run().await });
 
-    // Spawn the detection + execution loop
+    // Spawn event-driven probability computation (reacts to price/book changes instantly)
+    {
+        let pc = state.prob_cache.clone();
+        let pc_binance = state.binance.clone();
+        let pc_poly = state.polymarket.clone();
+        let pc_cq = state.cryptoquant.clone();
+        let pc_tv = state.tradingview.clone();
+        let pc_exec = state.executor.clone();
+        let pc_risk = state.risk.clone();
+        let pc_signals = state.recent_signals.clone();
+        tokio::spawn(async move {
+            pc.run(pc_binance, pc_poly, pc_cq, pc_tv, pc_exec, pc_risk, pc_signals).await;
+        });
+    }
+
+    // Spawn the detection + execution loop (kept as fallback safety net)
     let det_state = state.clone();
     tokio::spawn(async move {
         detection_loop(det_state).await;
@@ -155,7 +184,7 @@ async fn detection_loop(state: Arc<AppState>) {
         tokio::time::sleep(std::time::Duration::from_millis(500)).await;
     }
 
-    let mut interval = tokio::time::interval(std::time::Duration::from_millis(250));
+    let mut interval = tokio::time::interval(std::time::Duration::from_millis(100));
     let mut scan_count = 0u64;
 
     loop {
@@ -171,7 +200,7 @@ async fn detection_loop(state: Arc<AppState>) {
 
         let contracts = state.polymarket.contracts.read().await;
         if contracts.is_empty() {
-            if scan_count % 40 == 0 {
+            if scan_count % 100 == 0 {
                 info!(
                     "No contracts registered yet. BTC={} ETH={} SOL={}",
                     state.binance.get_price(models::CryptoAsset::BTC)
@@ -221,8 +250,39 @@ async fn detection_loop(state: Arc<AppState>) {
             }
         }
 
+        // Correlation scan — runs every tick alongside divergence detection
+        let corr_signals = state.correlation_detector.scan(&state.polymarket);
+        if !corr_signals.is_empty() {
+            {
+                let mut recent = state.recent_correlation_signals.lock();
+                for sig in &corr_signals {
+                    recent.push(sig.clone());
+                }
+                if recent.len() > 500 {
+                    let drain = recent.len() - 500;
+                    recent.drain(..drain);
+                }
+            }
+
+            for corr_sig in &corr_signals {
+                match state.executor.execute_correlation(corr_sig).await {
+                    Ok(trades) => {
+                        for trade in &trades {
+                            info!(
+                                "Corr trade executed: {} {:?} status={:?}",
+                                trade.id, trade.side, trade.status
+                            );
+                        }
+                    }
+                    Err(e) => {
+                        warn!("Corr trade execution failed: {e}");
+                    }
+                }
+            }
+        }
+
         // Log periodic status
-        if scan_count % 240 == 0 {
+        if scan_count % 150 == 0 {
             let risk_state = state.risk.get_state();
             let (realized, _) = state.executor.get_pnl();
             info!(

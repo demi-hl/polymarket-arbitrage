@@ -15,6 +15,8 @@ const createApiServer = require('./server/api');
 const { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT } = require('./strategies');
 const EdgeScorer = require('./lib/edge-scorer');
 const RiskManager = require('./lib/risk-manager');
+const DataStore = require('./learning/data-store');
+const EdgeModel = require('./learning/edge-model');
 const OrderbookImbalanceAnalyzer = require('./lib/orderbook-imbalance');
 const GPUClient = require('./lib/gpu-client');
 let WhaleTracker, setWhaleTracker;
@@ -145,6 +147,17 @@ program
         ? path.join(__dirname, 'data', `account-${accountId}`)
         : undefined
     });
+
+    // Initialize learning system and wire edge model for strategy-specific thresholds
+    try {
+      const dataStore = new DataStore();
+      await dataStore.init();
+      const edgeModel = new EdgeModel(dataStore, null);
+      await edgeModel.init();
+      bot.edgeModel = edgeModel;
+    } catch (err) {
+      console.error(chalk.yellow(`  EdgeModel init failed: ${err.message} — using fixed thresholds`));
+    }
 
     const registry = new StrategyRegistry(bot);
     ALL_STRATEGIES.forEach(s => registry.register(s));

@@ -169,6 +169,8 @@ const newsSentiment = require('./news-sentiment');
 const resolutionFrontrun = require('./resolution-frontrun');
 const cryptoLatencyArb = require('./crypto-latency-arb');
 const systematicFactorSuite = require('./systematic-factor-suite');
+const impliedVolSurface = require('./implied-vol-surface');
+const { strategies: whaleFlow, setOrderflowWatcher } = require('./whale-flow');
 
 const ALL_STRATEGIES = [].concat(
   resolutionFrontrun,
@@ -187,8 +189,10 @@ const ALL_STRATEGIES = [].concat(
   newsSentiment,
   cryptoLatencyArb,
   systematicFactorSuite,
+  impliedVolSurface,
+  whaleFlow,
 );
 
 const STRATEGY_COUNT = ALL_STRATEGIES.length;
 
-module.exports = { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT, setWhaleTracker };
+module.exports = { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT, setWhaleTracker, setOrderflowWatcher };

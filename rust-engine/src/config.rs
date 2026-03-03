@@ -72,7 +72,7 @@ impl Default for Config {
             polymarket_api_passphrase: None,
             private_key: None,
             risk: RiskConfig {
-                max_per_trade_pct: 0.005,
+                max_per_trade_pct: 0.01,
                 daily_loss_cap_pct: 0.02,
                 capital: 10_000.0,
                 max_concurrent_positions: 5,
@@ -85,28 +85,28 @@ impl Default for Config {
                 min_trade_size: 10.0,
             },
             detection: DetectionConfig {
-                base_threshold: 0.20,
-                trending_threshold: 0.18,
-                sideways_threshold: 0.25,
+                base_threshold: 0.05,    // 5% min — sub-3% trades are net losers
+                trending_threshold: 0.03, // 3% for trending (more reliable)
+                sideways_threshold: 0.07, // 7% for sideways (need bigger edge)
                 min_sources_agree: 1,
                 priority_expiry_minutes: vec![15, 60, 240],
             },
             paper: PaperSimConfig {
-                entry_fee_bps: 50.0,
-                exit_fee_bps: 50.0,
-                base_spread_bps: 12.0,
-                max_spread_bps: 70.0,
-                base_slippage_bps: 6.0,
-                slippage_jitter_bps: 4.0,
-                latency_impact_bps_per_100ms: 1.5,
-                partial_fill_probability: 0.12,
-                min_partial_fill_ratio: 0.55,
+                entry_fee_bps: 0.0,   // maker entry = 0 bps (if filled)
+                exit_fee_bps: 50.0,   // taker exit = 50 bps (Polymarket real fee)
+                base_spread_bps: 15.0,
+                max_spread_bps: 80.0,
+                base_slippage_bps: 8.0,
+                slippage_jitter_bps: 5.0,
+                latency_impact_bps_per_100ms: 2.0,
+                partial_fill_probability: 0.20,   // 20% partial fills (realistic for limit orders)
+                min_partial_fill_ratio: 0.40,
                 min_fill_to_execute_ratio: 0.35,
                 min_hold_ms: 800,
-                max_hold_ms: 6500,
-                min_convergence_ratio: -0.30,
-                max_convergence_ratio: 0.85,
-                noise_std_ratio: 0.35,
+                max_hold_ms: 5000,  // 5s max — edge decays past this
+                min_convergence_ratio: -0.40,     // can move 40% AGAINST you
+                max_convergence_ratio: 0.85,      // max 85% convergence (not 95%)
+                noise_std_ratio: 0.45,            // more noise = more realistic
             },
             binance_ws_url: "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker".into(),
             polymarket_ws_url: "wss://ws-subscriptions-clob.polymarket.com/ws/market".into(),
