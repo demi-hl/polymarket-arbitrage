@@ -10,6 +10,7 @@ export default function Portfolio() {
 
   const displayTrades = portfolio?.trades || trades || []
 
+  const totalValue = portfolio?.totalValue || portfolio?.cash || 0
   const totalPnl = portfolio?.pnl?.total || 0
   const realizedPnl = portfolio?.pnl?.realized || 0
   const unrealizedPnl = portfolio?.pnl?.unrealized || 0
@@ -48,8 +49,8 @@ export default function Portfolio() {
                 <Wallet className="text-accent" size={24} />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Cash Balance</p>
-                <AnimatedNumber value={portfolio?.cash || 0} prefix="$" className="text-2xl font-bold font-mono" />
+                <p className="text-sm text-gray-400">Total Value</p>
+                <AnimatedNumber value={totalValue} prefix="$" className="text-2xl font-bold font-mono" />
               </div>
             </div>
           </div>
@@ -117,6 +118,7 @@ export default function Portfolio() {
                 </div>
               </motion.div>
               <p className="mt-4 text-gray-400">Cash Available</p>
+              <p className="text-[11px] text-gray-600 mt-1 font-mono">${(portfolio?.cash || 0).toFixed(2)} cash</p>
             </div>
           </div>
         </motion.div>
@@ -179,7 +181,7 @@ export default function Portfolio() {
               </tr>
             </thead>
             <tbody>
-              {displayTrades.slice().reverse().map((trade, i) => {
+              {displayTrades.slice(0, 200).map((trade, i) => {
                 const hasRealized = trade.realizedPnl != null
                 const pnl = hasRealized ? trade.realizedPnl : (trade.expectedProfit ?? 0)
                 const status = hasRealized ? 'closed' : (trade.status || 'open')
