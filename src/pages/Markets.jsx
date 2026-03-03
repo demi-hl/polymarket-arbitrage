@@ -31,9 +31,9 @@ export default function Markets() {
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col lg:flex-row gap-4 lg:gap-0 lg:justify-between lg:items-center">
         <h2 className="text-2xl font-bold text-gradient-minimal">Market Explorer</h2>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 sm:gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
@@ -41,7 +41,7 @@ export default function Markets() {
               placeholder="Search markets..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input-field pl-10 w-64"
+              className="input-field pl-10 w-full sm:w-64"
             />
           </div>
           

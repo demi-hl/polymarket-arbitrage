@@ -127,7 +127,7 @@ export default function ABTest() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
-          className="flex items-center gap-8 text-xs uppercase tracking-widest text-gray-500 mb-10 pb-6 relative"
+          className="flex flex-wrap items-center gap-4 sm:gap-8 text-xs uppercase tracking-widest text-gray-500 mb-10 pb-6 relative"
         >
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/[0.06] to-transparent" />
           <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function ABTest() {
         </p>
       </div>
 
-      <div className="flex items-center gap-8 text-[11px] uppercase tracking-widest text-gray-500 mb-10 pb-6 border-b border-white/[0.04]">
+      <div className="flex flex-wrap items-center gap-4 sm:gap-8 text-[11px] uppercase tracking-widest text-gray-500 mb-10 pb-6 border-b border-white/[0.04]">
         <div className="flex items-center gap-2">
           <div
             className="w-1.5 h-1.5 rounded-full"

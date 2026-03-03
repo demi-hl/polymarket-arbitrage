@@ -103,7 +103,7 @@ export default function Backtest() {
           Configuration
         </h3>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm text-gray-400 mb-2">Strategy Filter</label>
             <select
@@ -136,7 +136,7 @@ export default function Backtest() {
             Scope: {results.scopeLabel}
             {strategy !== 'all' ? ' (ROI uses capital deployed by this strategy in current sample)' : ''}
           </p>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div className="card text-center">
               <p className="text-sm text-gray-400">Total Trades</p>
               <p className="text-2xl font-bold font-mono">{results.totalTrades}</p>
@@ -167,7 +167,7 @@ export default function Backtest() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="card text-center">
               <p className="text-sm text-gray-400">Avg Win</p>
               <p className="text-xl font-bold font-mono text-profit">+${results.avgWin.toFixed(2)}</p>

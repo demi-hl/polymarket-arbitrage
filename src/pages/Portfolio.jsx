@@ -41,7 +41,7 @@ export default function Portfolio() {
         </div>
       </div>
 
-      <StaggerContainer className="grid grid-cols-3 gap-4">
+      <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <StaggerItem>
           <div className="card">
             <div className="flex items-center gap-4">
@@ -93,7 +93,7 @@ export default function Portfolio() {
         </StaggerItem>
       </StaggerContainer>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
