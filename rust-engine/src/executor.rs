@@ -8,6 +8,8 @@ use std::sync::Arc;
 use std::time::Instant;
 use tracing::{error, info, warn};
 
+const TRADES_FILE: &str = "data/rust-trades.json";
+
 use crate::config::Config;
 use crate::models::*;
 use crate::risk::RiskManager;
@@ -52,6 +54,46 @@ impl OrderExecutor {
             config,
             trades: Arc::new(Mutex::new(Vec::new())),
             trade_count: Arc::new(Mutex::new(0)),
+        }
+    }
+
+    /// Load trades from disk on startup
+    pub fn load_trades(&self) {
+        let path = std::path::Path::new(TRADES_FILE);
+        if !path.exists() {
+            info!("No saved trades file found, starting fresh");
+            return;
+        }
+        match std::fs::read_to_string(path) {
+            Ok(data) => match serde_json::from_str::<Vec<Trade>>(&data) {
+                Ok(saved) => {
+                    let count = saved.len();
+                    let mut trades = self.trades.lock();
+                    *trades = saved;
+                    let mut tc = self.trade_count.lock();
+                    *tc = count as u64;
+                    info!("Loaded {count} trades from disk");
+                }
+                Err(e) => warn!("Failed to parse trades file: {e}"),
+            },
+            Err(e) => warn!("Failed to read trades file: {e}"),
+        }
+    }
+
+    /// Save trades to disk
+    pub fn save_trades(&self) {
+        let trades = self.trades.lock();
+        let path = std::path::Path::new(TRADES_FILE);
+        if let Some(parent) = path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        match serde_json::to_string(&*trades) {
+            Ok(json) => {
+                if let Err(e) = std::fs::write(path, json) {
+                    error!("Failed to write trades file: {e}");
+                }
+            }
+            Err(e) => error!("Failed to serialize trades: {e}"),
         }
     }
 

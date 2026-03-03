@@ -13,7 +13,7 @@ class PolymarketArbitrageBot extends EventEmitter {
     super();
     
     this.mode = config.mode || 'paper';
-    this.edgeThreshold = config.edgeThreshold || 0.05;
+    this.edgeThreshold = config.edgeThreshold || 0.10;
     this.scanThreshold = config.scanThreshold;
     this.maxPositionSize = config.maxPositionSize || 1000;
     /** @type {string[]|undefined} - Sectors to scan: politics, sports, crypto */
@@ -122,8 +122,8 @@ class PolymarketArbitrageBot extends EventEmitter {
 
     const positionSize = Math.min(dynamicSize, opportunity.maxPosition, this.maxPositionSize, liquidityCap);
 
-    if (positionSize < 5) {
-      throw new Error(`Position too small ($${positionSize.toFixed(2)}) — insufficient liquidity`);
+    if (positionSize < 10) {
+      throw new Error(`Position too small ($${positionSize.toFixed(2)}) — min $10 to absorb friction`);
     }
 
     const dir = opportunity.direction || 'BUY_BOTH';

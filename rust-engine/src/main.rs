@@ -81,6 +81,9 @@ async fn main() {
         signer,
     ));
 
+    // Load persisted trades from disk (#4)
+    executor.load_trades();
+
     let state = Arc::new(AppState {
         config: config.clone(),
         binance: binance.clone(),
@@ -110,6 +113,16 @@ async fn main() {
     let det_state = state.clone();
     tokio::spawn(async move {
         detection_loop(det_state).await;
+    });
+
+    // Spawn periodic trade persistence (every 30s) (#4)
+    let persist_executor = executor.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(std::time::Duration::from_secs(30));
+        loop {
+            interval.tick().await;
+            persist_executor.save_trades();
+        }
     });
 
     // Spawn daily risk reset (at 00:00 UTC)
