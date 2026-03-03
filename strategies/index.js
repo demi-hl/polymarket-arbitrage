@@ -168,6 +168,7 @@ const smartMoney = require('./smart-money');
 const newsSentiment = require('./news-sentiment');
 const resolutionFrontrun = require('./resolution-frontrun');
 const cryptoLatencyArb = require('./crypto-latency-arb');
+const systematicFactorSuite = require('./systematic-factor-suite');
 
 const ALL_STRATEGIES = [].concat(
   resolutionFrontrun,
@@ -185,6 +186,7 @@ const ALL_STRATEGIES = [].concat(
   smartMoney,
   newsSentiment,
   cryptoLatencyArb,
+  systematicFactorSuite,
 );
 
 const STRATEGY_COUNT = ALL_STRATEGIES.length;

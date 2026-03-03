@@ -3,7 +3,7 @@ use chrono::Utc;
 use parking_lot::Mutex;
 use reqwest::Client;
 use rand::Rng;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use std::sync::Arc;
 use std::time::Instant;
 use tracing::{error, info, warn};
