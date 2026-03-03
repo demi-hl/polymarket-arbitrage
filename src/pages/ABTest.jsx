@@ -26,9 +26,9 @@ function useAnimatedNumber(value, duration = 600) {
 }
 
 const THEMES = {
-  A: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
-  B: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
-  paper: { color: '#10b981', label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment' },
+  A: { color: '#10b981', label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment' },
+  B: { color: '#10b981', label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment' },
+  paper: { color: '#10b981', label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment' },
 }
 
 export default function ABTest() {
