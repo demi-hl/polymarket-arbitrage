@@ -50,7 +50,7 @@ function isRustTrade(trade) {
 }
 
 export default function Overview() {
-  const { portfolio, opportunities, trades, loading } = useTrading()
+  const { portfolio, opportunities, opportunitiesMeta, trades, loading } = useTrading()
   const oracle = useOracleData()
   const realism = useRealismData()
   const [tradeFilter, setTradeFilter] = useState('all')
@@ -106,6 +106,19 @@ export default function Overview() {
     if (tradeFilter === 'node') return !isRustTrade(trade)
     return true
   })
+  const parseNum = (v, fallback = 0) => {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : fallback
+  }
+  const getOppEdge = (opp) => (
+    parseNum(
+      opp?.edgePercent
+      ?? opp?.executableEdge
+      ?? opp?.expectedReturn
+      ?? opp?.edge,
+      0
+    )
+  )
 
   const anim = (delay = 0) => ({
     initial: { opacity: 0, y: 20, filter: 'blur(6px)' },
@@ -311,8 +324,20 @@ export default function Overview() {
         <motion.div {...anim(0.3)} className="card">
           <div className="flex items-center justify-between mb-5">
             <h3 className="text-xl font-semibold">Live Opportunities</h3>
-            <span className="badge-info text-sm">{opportunities.length}</span>
+            <div className="flex items-center gap-2">
+              {opportunitiesMeta?.stale && (
+                <span className="text-[10px] text-yellow-300 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-full">
+                  stale feed
+                </span>
+              )}
+              <span className="badge-info text-sm">{opportunities.length}</span>
+            </div>
           </div>
+          {opportunitiesMeta?.warning && (
+            <div className="mb-3 text-[11px] text-yellow-200 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
+              {opportunitiesMeta.warning}
+            </div>
+          )}
           <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
             {(opportunities || []).slice(0, 12).map((opp, i) => (
               <motion.div
@@ -327,7 +352,7 @@ export default function Overview() {
                 <p className="text-sm font-medium truncate text-gray-200">{opp?.question ?? '—'}</p>
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-profit text-sm font-mono font-bold" style={{ textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>+{((opp?.edgePercent ?? 0) * 100).toFixed(2)}%</span>
+                    <span className="text-profit text-sm font-mono font-bold" style={{ textShadow: '0 0 10px rgba(16,185,129,0.3)' }}>+{(getOppEdge(opp) * 100).toFixed(2)}%</span>
                     {opp?.direction && <span className="text-[10px] text-gray-500 font-mono">{opp.direction}</span>}
                   </div>
                   <div className="flex items-center gap-3">
@@ -343,8 +368,12 @@ export default function Overview() {
                   animate={{ opacity: [0.4, 0.8, 0.4] }}
                   transition={{ repeat: Infinity, duration: 3 }}
                 >
-                  <p className="text-gray-500 text-base">No opportunities</p>
-                  <p className="text-gray-600 text-sm mt-1">Waiting for next scan cycle</p>
+                  <p className="text-gray-500 text-base">{opportunitiesMeta?.stale ? 'No fresh opportunities yet' : 'No opportunities'}</p>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {opportunitiesMeta?.stale
+                      ? 'Scanner timed out; showing stale fallback until next successful scan.'
+                      : 'Waiting for next scan cycle'}
+                  </p>
                 </motion.div>
               </div>
             )}
