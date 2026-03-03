@@ -71,7 +71,7 @@ impl Default for Config {
             polymarket_api_passphrase: None,
             private_key: None,
             risk: RiskConfig {
-                max_per_trade_pct: 0.008,
+                max_per_trade_pct: 0.005,
                 daily_loss_cap_pct: 0.02,
                 capital: 10_000.0,
                 max_concurrent_positions: 5,
