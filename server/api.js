@@ -778,6 +778,92 @@ function createApiServer(wsServer) {
     };
   }
 
+  function computeLiveProjection(rustTrades = [], realism = null) {
+    const sample = rustTrades
+      .filter(t => t.realizedPnl != null && t.shadowPnl != null)
+      .slice(0, 200);
+
+    if (sample.length === 0) {
+      return {
+        available: false,
+        confidence: 'low',
+        sampleSize: 0,
+        estimatedWinRateLow: null,
+        estimatedWinRateHigh: null,
+        projectedNetPnlPerTrade: null,
+        projectedNetPnlPerTradeLow: null,
+        projectedNetPnlPerTradeHigh: null,
+        riskFlag: 'red',
+        note: 'No comparable samples yet. Run more trades before trusting live projections.',
+      };
+    }
+
+    const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+    const avg = arr => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+    const stdDev = arr => {
+      if (arr.length < 2) return 0;
+      const m = avg(arr);
+      const variance = avg(arr.map(v => (v - m) ** 2));
+      return Math.sqrt(Math.max(0, variance));
+    };
+
+    const realizedSeries = sample.map(t => toNumber(t.realizedPnl, 0));
+    const winners = realizedSeries.filter(v => v > 0).length;
+    const baseWinRate = (winners / sample.length) * 100;
+    const avgRealized = avg(realizedSeries);
+    const pnlVolatility = stdDev(realizedSeries);
+
+    const score = toNumber(realism?.score, 0);
+    const fillRatio = toNumber(realism?.avgFillRatio, 1);
+    const slippageDrift = Math.abs(
+      toNumber(realism?.avgEntrySlippageBps, 0) - toNumber(realism?.avgShadowSlippageBps, 0)
+    );
+    const maeUsd = toNumber(realism?.maeUsd, 0);
+    const biasUsd = Math.abs(toNumber(realism?.biasUsd, 0));
+
+    // Conservative live penalty built from realism drift.
+    const winRatePenalty =
+      8
+      + Math.max(0, 80 - score) * 0.3
+      + Math.max(0, 1 - fillRatio) * 22
+      + Math.max(0, slippageDrift) * 0.18;
+
+    const projectedWinRate = clamp(baseWinRate - winRatePenalty, 5, 95);
+    const rangeHalfWidth = sample.length < 40 ? 12 : sample.length < 100 ? 8 : 5;
+    const estimatedWinRateLow = clamp(projectedWinRate - rangeHalfWidth, 1, 99);
+    const estimatedWinRateHigh = clamp(projectedWinRate + rangeHalfWidth, 1, 99);
+
+    const costDrag = biasUsd + (maeUsd * 0.35) + (Math.max(0, slippageDrift) * 0.01);
+    const projectedNetPnlPerTrade = avgRealized - costDrag;
+    const pnlBandHalf = Math.max(0.2, (pnlVolatility * 0.35) + (sample.length < 50 ? 0.45 : 0.2));
+    const projectedNetPnlPerTradeLow = projectedNetPnlPerTrade - pnlBandHalf;
+    const projectedNetPnlPerTradeHigh = projectedNetPnlPerTrade + pnlBandHalf;
+
+    const confidence = sample.length >= 120 ? 'high' : sample.length >= 50 ? 'medium' : 'low';
+    const riskFlag = projectedNetPnlPerTrade <= 0
+      ? 'red'
+      : estimatedWinRateLow < 45
+        ? 'yellow'
+        : 'green';
+
+    return {
+      available: true,
+      confidence,
+      sampleSize: sample.length,
+      estimatedWinRateLow: Number(estimatedWinRateLow.toFixed(1)),
+      estimatedWinRateHigh: Number(estimatedWinRateHigh.toFixed(1)),
+      projectedNetPnlPerTrade: Number(projectedNetPnlPerTrade.toFixed(3)),
+      projectedNetPnlPerTradeLow: Number(projectedNetPnlPerTradeLow.toFixed(3)),
+      projectedNetPnlPerTradeHigh: Number(projectedNetPnlPerTradeHigh.toFixed(3)),
+      riskFlag,
+      note: riskFlag === 'red'
+        ? 'Live expectancy is currently negative after realism penalties.'
+        : riskFlag === 'yellow'
+          ? 'Live expectancy is positive but fragile; keep sizing conservative.'
+          : 'Live projection is positive with acceptable confidence.',
+    };
+  }
+
   async function fetchRustSnapshot() {
     if (Date.now() - _rustSnapshotCache.ts < RUST_CACHE_TTL_MS && _rustSnapshotCache.data) {
       return _rustSnapshotCache.data;
@@ -865,6 +951,7 @@ function createApiServer(wsServer) {
     try {
       const rust = await fetchRustSnapshot();
       const realism = computeRealismMetrics(rust?.recentTrades || []);
+      const projection = computeLiveProjection(rust?.recentTrades || [], realism);
       res.json({
         success: true,
         data: {
@@ -872,6 +959,7 @@ function createApiServer(wsServer) {
           paperMode: rust?.status?.paper_mode !== false,
           timestamp: new Date().toISOString(),
           ...realism,
+          projection,
         },
       });
     } catch (err) {
