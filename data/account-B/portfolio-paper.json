@@ -1,10 +1,1 @@
-{
-  "cash": 10000,
-  "positions": {},
-  "trades": [],
-  "pnl": {
-    "realized": 0,
-    "unrealized": 0,
-    "total": 0
-  }
-}
+{"cash":10000,"positions":{},"tradeHistory":[],"stats":{"totalTrades":0,"winningTrades":0,"losingTrades":0,"totalPnl":0,"bestTrade":0,"worstTrade":0}}
