@@ -138,7 +138,7 @@ export default function Overview() {
       <motion.div {...anim(0)}>
         <h2 className="text-4xl font-extralight tracking-tight text-gradient-minimal">Dashboard</h2>
         <p className="text-[13px] text-gray-500 mt-2.5 tracking-wide font-light">
-          20 strategies · Deep learning · GPU sentiment · Oracle daemon · Whale tracking · Kelly sizing
+          29 strategies · Deep learning · GPU sentiment · Oracle daemon · Whale tracking · Kelly sizing
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2.5">
           <span className="text-[10px] uppercase tracking-wider text-gray-500">Paper→live gap</span>
