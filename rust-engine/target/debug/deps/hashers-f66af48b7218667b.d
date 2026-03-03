@@ -1,0 +1,9 @@
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/hashers-f66af48b7218667b.d: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/jenkins/mod.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/jenkins/spooky_hash.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/pigeon.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/oz.rs
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/libhashers-f66af48b7218667b.rmeta: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/jenkins/mod.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/jenkins/spooky_hash.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/pigeon.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/oz.rs
+
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/lib.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/jenkins/mod.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/jenkins/spooky_hash.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/pigeon.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hashers-1.0.1/src/oz.rs:

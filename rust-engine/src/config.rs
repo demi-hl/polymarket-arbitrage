@@ -12,6 +12,7 @@ pub struct Config {
 
     pub risk: RiskConfig,
     pub detection: DetectionConfig,
+    pub paper: PaperSimConfig,
 
     pub binance_ws_url: String,
     pub polymarket_ws_url: String,
@@ -41,6 +42,25 @@ pub struct DetectionConfig {
     pub priority_expiry_minutes: Vec<u32>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PaperSimConfig {
+    pub entry_fee_bps: f64,
+    pub exit_fee_bps: f64,
+    pub base_spread_bps: f64,
+    pub max_spread_bps: f64,
+    pub base_slippage_bps: f64,
+    pub slippage_jitter_bps: f64,
+    pub latency_impact_bps_per_100ms: f64,
+    pub partial_fill_probability: f64,
+    pub min_partial_fill_ratio: f64,
+    pub min_fill_to_execute_ratio: f64,
+    pub min_hold_ms: u64,
+    pub max_hold_ms: u64,
+    pub min_convergence_ratio: f64,
+    pub max_convergence_ratio: f64,
+    pub noise_std_ratio: f64,
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
@@ -68,6 +88,23 @@ impl Default for Config {
                 sideways_threshold: 0.005,
                 min_sources_agree: 1,
                 priority_expiry_minutes: vec![15, 60, 240],
+            },
+            paper: PaperSimConfig {
+                entry_fee_bps: 8.0,
+                exit_fee_bps: 8.0,
+                base_spread_bps: 12.0,
+                max_spread_bps: 70.0,
+                base_slippage_bps: 6.0,
+                slippage_jitter_bps: 4.0,
+                latency_impact_bps_per_100ms: 1.5,
+                partial_fill_probability: 0.12,
+                min_partial_fill_ratio: 0.55,
+                min_fill_to_execute_ratio: 0.35,
+                min_hold_ms: 800,
+                max_hold_ms: 6500,
+                min_convergence_ratio: 0.35,
+                max_convergence_ratio: 0.95,
+                noise_std_ratio: 0.35,
             },
             binance_ws_url: "wss://stream.binance.com:9443/stream?streams=btcusdt@ticker/ethusdt@ticker/solusdt@ticker".into(),
             polymarket_ws_url: "wss://ws-subscriptions-clob.polymarket.com/ws/market".into(),
@@ -113,6 +150,81 @@ impl Config {
         if let Ok(v) = std::env::var("DAILY_LOSS_CAP_PCT") {
             if let Ok(pct) = v.parse() {
                 config.risk.daily_loss_cap_pct = pct;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_ENTRY_FEE_BPS") {
+            if let Ok(x) = v.parse() {
+                config.paper.entry_fee_bps = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_EXIT_FEE_BPS") {
+            if let Ok(x) = v.parse() {
+                config.paper.exit_fee_bps = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_BASE_SPREAD_BPS") {
+            if let Ok(x) = v.parse() {
+                config.paper.base_spread_bps = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MAX_SPREAD_BPS") {
+            if let Ok(x) = v.parse() {
+                config.paper.max_spread_bps = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_BASE_SLIPPAGE_BPS") {
+            if let Ok(x) = v.parse() {
+                config.paper.base_slippage_bps = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_SLIPPAGE_JITTER_BPS") {
+            if let Ok(x) = v.parse() {
+                config.paper.slippage_jitter_bps = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_LATENCY_IMPACT_BPS_PER_100MS") {
+            if let Ok(x) = v.parse() {
+                config.paper.latency_impact_bps_per_100ms = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_PARTIAL_FILL_PROBABILITY") {
+            if let Ok(x) = v.parse() {
+                config.paper.partial_fill_probability = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MIN_PARTIAL_FILL_RATIO") {
+            if let Ok(x) = v.parse() {
+                config.paper.min_partial_fill_ratio = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MIN_FILL_TO_EXECUTE_RATIO") {
+            if let Ok(x) = v.parse() {
+                config.paper.min_fill_to_execute_ratio = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MIN_HOLD_MS") {
+            if let Ok(x) = v.parse() {
+                config.paper.min_hold_ms = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MAX_HOLD_MS") {
+            if let Ok(x) = v.parse() {
+                config.paper.max_hold_ms = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MIN_CONVERGENCE_RATIO") {
+            if let Ok(x) = v.parse() {
+                config.paper.min_convergence_ratio = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_MAX_CONVERGENCE_RATIO") {
+            if let Ok(x) = v.parse() {
+                config.paper.max_convergence_ratio = x;
+            }
+        }
+        if let Ok(v) = std::env::var("PAPER_NOISE_STD_RATIO") {
+            if let Ok(x) = v.parse() {
+                config.paper.noise_std_ratio = x;
             }
         }
 

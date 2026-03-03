@@ -148,6 +148,12 @@ pub struct Trade {
     pub submitted_at: DateTime<Utc>,
     pub filled_at: Option<DateTime<Utc>>,
     pub pnl: Option<f64>,
+    pub exit_price: Option<f64>,
+    pub fees_paid: Option<f64>,
+    pub fill_ratio: Option<f64>,
+    pub hold_ms: Option<u64>,
+    pub entry_slippage_bps: Option<f64>,
+    pub exit_slippage_bps: Option<f64>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]

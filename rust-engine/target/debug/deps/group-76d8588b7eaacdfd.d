@@ -1,0 +1,10 @@
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/group-76d8588b7eaacdfd.d: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/cofactor.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/prime.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/wnaf.rs
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/libgroup-76d8588b7eaacdfd.rlib: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/cofactor.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/prime.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/wnaf.rs
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/libgroup-76d8588b7eaacdfd.rmeta: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/cofactor.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/prime.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/wnaf.rs
+
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/lib.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/cofactor.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/prime.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/group-0.13.0/src/wnaf.rs:

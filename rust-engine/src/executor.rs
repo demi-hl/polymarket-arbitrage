@@ -2,6 +2,7 @@ use anyhow::{Context, Result};
 use chrono::Utc;
 use parking_lot::Mutex;
 use reqwest::Client;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use std::time::Instant;
@@ -32,6 +33,10 @@ pub struct OrderExecutor {
 }
 
 impl OrderExecutor {
+    fn clamp(v: f64, lo: f64, hi: f64) -> f64 {
+        v.max(lo).min(hi)
+    }
+
     pub fn new(config: Config, risk: Arc<RiskManager>, signer: Option<Arc<OrderSigner>>) -> Self {
         let client = Client::builder()
             .pool_max_idle_per_host(10)
@@ -99,6 +104,12 @@ impl OrderExecutor {
             submitted_at: Utc::now(),
             filled_at: None,
             pnl: None,
+            exit_price: None,
+            fees_paid: None,
+            fill_ratio: None,
+            hold_ms: None,
+            entry_slippage_bps: None,
+            exit_slippage_bps: None,
         };
 
         self.risk.record_trade(&trade);
@@ -127,29 +138,107 @@ impl OrderExecutor {
 
     async fn paper_execute(&self, mut trade: Trade, start: Instant) -> Result<Trade> {
         let latency = start.elapsed();
+        let latency_ms = latency.as_millis() as f64;
+        let mut rng = rand::thread_rng();
+        let paper = &self.config.paper;
 
-        // Simulate fill with small slippage
-        let slippage = (rand::random::<f64>() - 0.5) * 0.002;
-        trade.price += slippage;
+        let base_spread_bps = paper.base_spread_bps
+            + trade.divergence_at_entry.abs() * 10_000.0 * 0.6;
+        let spread_bps = Self::clamp(base_spread_bps, paper.base_spread_bps, paper.max_spread_bps);
+
+        let fill_ratio = if rng.gen::<f64>() < paper.partial_fill_probability {
+            rng.gen_range(paper.min_partial_fill_ratio..=1.0)
+        } else {
+            1.0
+        };
+        if fill_ratio < paper.min_fill_to_execute_ratio {
+            trade.status = TradeStatus::Cancelled;
+            trade.pnl = Some(0.0);
+            trade.fill_ratio = Some(fill_ratio);
+            self.trades.lock().push(trade.clone());
+            return Ok(trade);
+        }
+
+        let dir = if trade.side == TradeSide::Buy { 1.0 } else { -1.0 };
+        let jitter_entry_bps = rng.gen_range(-paper.slippage_jitter_bps..=paper.slippage_jitter_bps);
+        let entry_slippage_bps = Self::clamp(
+            paper.base_slippage_bps
+                + spread_bps * 0.5
+                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms
+                + jitter_entry_bps,
+            0.0,
+            paper.max_spread_bps * 1.5,
+        );
+
+        let entry_price = Self::clamp(
+            trade.price * (1.0 + dir * entry_slippage_bps / 10_000.0),
+            0.01,
+            0.99,
+        );
+
+        let hold_ms = if paper.max_hold_ms > paper.min_hold_ms {
+            rng.gen_range(paper.min_hold_ms..=paper.max_hold_ms)
+        } else {
+            paper.min_hold_ms
+        };
+
+        let convergence_ratio = rng.gen_range(
+            paper.min_convergence_ratio..=paper.max_convergence_ratio
+        );
+        let move_from_convergence = trade.divergence_at_entry.abs() * convergence_ratio;
+        let noise = (rng.gen::<f64>() - 0.5) * move_from_convergence * paper.noise_std_ratio;
+        let modeled_move = Self::clamp(move_from_convergence + noise, -0.20, 0.20);
+
+        let jitter_exit_bps = rng.gen_range(-paper.slippage_jitter_bps..=paper.slippage_jitter_bps);
+        let exit_slippage_bps = Self::clamp(
+            paper.base_slippage_bps * 0.8 + spread_bps * 0.4 + jitter_exit_bps,
+            0.0,
+            paper.max_spread_bps * 1.5,
+        );
+
+        let exit_price = Self::clamp(
+            entry_price * (1.0 + dir * modeled_move - dir * exit_slippage_bps / 10_000.0),
+            0.01,
+            0.99,
+        );
+
+        let filled_notional = trade.size * fill_ratio;
+        let shares = if entry_price > 0.0 {
+            filled_notional / entry_price
+        } else {
+            0.0
+        };
+        let gross_pnl = (exit_price - entry_price) * shares * dir;
+        let fees_paid = filled_notional * (paper.entry_fee_bps + paper.exit_fee_bps) / 10_000.0;
+        let net_pnl = gross_pnl - fees_paid;
+
+        trade.price = entry_price;
+        trade.size = filled_notional;
+        trade.cost = filled_notional;
         trade.status = TradeStatus::Filled;
         trade.filled_at = Some(Utc::now());
+        trade.pnl = Some(net_pnl);
+        trade.exit_price = Some(exit_price);
+        trade.fees_paid = Some(fees_paid);
+        trade.fill_ratio = Some(fill_ratio);
+        trade.hold_ms = Some(hold_ms);
+        trade.entry_slippage_bps = Some(entry_slippage_bps);
+        trade.exit_slippage_bps = Some(exit_slippage_bps);
 
-        // Simulate P&L based on divergence closing
-        let expected_pnl = trade.divergence_at_entry.abs() * trade.size * 0.5;
-        let noise = (rand::random::<f64>() - 0.3) * expected_pnl * 0.4;
-        trade.pnl = Some(expected_pnl + noise);
-
-        self.risk.record_fill(&trade, trade.pnl.unwrap_or(0.0));
+        self.risk.record_fill(&trade, net_pnl);
 
         info!(
-            "PAPER FILL: {} {} {:.4}@{:.4} size=${:.2} pnl=${:.2} latency={:?}",
+            "PAPER FILL: {} {} entry={:.4} exit={:.4} size=${:.2} fill={:.0}% pnl=${:.2} fees=${:.2} hold={}ms latency={}ms",
             trade.asset.binance_symbol(),
             if trade.side == TradeSide::Buy { "BUY" } else { "SELL" },
-            trade.price,
-            trade.divergence_at_entry,
+            entry_price,
+            exit_price,
             trade.size,
-            trade.pnl.unwrap_or(0.0),
-            latency,
+            fill_ratio * 100.0,
+            net_pnl,
+            fees_paid,
+            hold_ms,
+            latency_ms as u64,
         );
 
         self.trades.lock().push(trade.clone());

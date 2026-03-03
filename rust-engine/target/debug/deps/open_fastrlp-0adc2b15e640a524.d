@@ -1,0 +1,8 @@
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/open_fastrlp-0adc2b15e640a524.d: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/decode.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/encode.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/types.rs
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/libopen_fastrlp-0adc2b15e640a524.rmeta: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/decode.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/encode.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/types.rs
+
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/lib.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/decode.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/encode.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/open-fastrlp-0.1.4/src/types.rs:

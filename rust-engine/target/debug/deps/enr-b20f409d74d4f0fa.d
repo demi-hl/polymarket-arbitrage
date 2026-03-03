@@ -1,0 +1,10 @@
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/enr-b20f409d74d4f0fa.d: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/builder.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/error.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/keys/mod.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/keys/k256_key.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/node_id.rs
+
+/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/rust-engine/target/debug/deps/libenr-b20f409d74d4f0fa.rmeta: /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/lib.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/builder.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/error.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/keys/mod.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/keys/k256_key.rs /Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/node_id.rs
+
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/lib.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/builder.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/error.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/keys/mod.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/keys/k256_key.rs:
+/Users/christophergervais/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/enr-0.10.0/src/node_id.rs:
