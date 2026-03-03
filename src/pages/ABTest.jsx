@@ -123,7 +123,7 @@ export default function ABTest() {
             Paper <span className="text-gradient-minimal">Trading</span>
           </h1>
           <p className="text-base text-gray-500 font-light tracking-wide">
-            20 strategies &middot; Deep learning &middot; GPU sentiment &middot; Oracle daemon &middot; Whale tracking &middot; Kelly sizing
+            29 strategies &middot; Deep learning &middot; GPU sentiment &middot; Oracle daemon &middot; Whale tracking &middot; Kelly sizing
           </p>
         </motion.div>
 
