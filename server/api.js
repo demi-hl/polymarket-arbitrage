@@ -621,6 +621,29 @@ function createApiServer(wsServer) {
     return out;
   }
 
+  function isRustTrade(trade = {}) {
+    return trade.fillMethod === 'rust-engine'
+      || trade.executedBy === 'rust-engine'
+      || trade.strategy === 'crypto-latency-arb'
+      || Boolean(trade.rustTradeId);
+  }
+
+  function selectFeedTrades(trades = [], limit = 80) {
+    const sorted = [...trades].sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+    const recent = sorted.slice(0, limit);
+    const nodeInRecent = recent.filter(t => !isRustTrade(t));
+    if (nodeInRecent.length > 0) return recent;
+
+    // If Rust saturates the latest window, reserve a small slice for latest Node trades.
+    const latestNode = sorted.filter(t => !isRustTrade(t)).slice(0, Math.min(12, limit));
+    if (latestNode.length === 0) return recent;
+    const rustPortion = recent.filter(isRustTrade).slice(0, Math.max(0, limit - latestNode.length));
+    const mixed = [...rustPortion, ...latestNode]
+      .sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime())
+      .slice(0, limit);
+    return mixed;
+  }
+
   function computeMergedStats(portfolio, report, rust) {
     const rustPnl = rust?.pnl || { realized: 0, unrealized: 0, total: 0 };
 
@@ -755,7 +778,7 @@ function createApiServer(wsServer) {
             totalReturn: merged.totalReturn.toFixed(2),
           },
           pnl: merged.mergedPnl,
-          recentTrades: merged.mergedTrades.slice(0, 80),
+          recentTrades: selectFeedTrades(merged.mergedTrades, 80),
           totalValue: merged.totalValue,
           rust: includeRust ? rust : { available: false },
         });
@@ -813,7 +836,7 @@ function createApiServer(wsServer) {
           avgEdge: (avgEdge * 100).toFixed(2),
           profitFactor: parseFloat(report.performance.profitFactor) || 0,
           pnl: merged.mergedPnl,
-          recentTrades: trades.slice(0, 80),
+          recentTrades: selectFeedTrades(trades, 80),
           equityCurve: buildEquityCurve(trades, merged.mergedPnl, portfolio),
           rust: includeRust ? rust : { available: false },
         };
