@@ -18,9 +18,15 @@ export default function Backtest() {
   const runBacktest = async () => {
     setRunning(true)
     try {
-      const res = await api.get('/report')
-      if (res?.success && res.data) {
-        const { performance, portfolio, pnl } = res.data
+      const [reportRes, tradesRes] = await Promise.all([
+        api.get('/report'),
+        api.get('/trades'),
+      ])
+      if (!reportRes?.success || !reportRes?.data) return
+      const { performance, portfolio, pnl } = reportRes.data
+      const allTrades = tradesRes?.success ? (tradesRes.data || []) : []
+
+      if (strategy === 'all') {
         const totalTrades = performance.totalTrades || 0
         const winRate = parseFloat(performance.winRate) || 0
         const netProfit = pnl?.total || 0
@@ -41,8 +47,42 @@ export default function Backtest() {
           profitFactor,
           realizedPnl: pnl?.realized || 0,
           unrealizedPnl: pnl?.unrealized || 0,
+          scopeLabel: 'All strategies',
         })
+        return
       }
+
+      const scoped = allTrades.filter(t => t?.strategy === strategy)
+      const closed = scoped.filter(t => t.realizedPnl != null)
+      const open = scoped.filter(t => t.realizedPnl == null)
+      const winning = closed.filter(t => Number(t.realizedPnl) > 0)
+      const losing = closed.filter(t => Number(t.realizedPnl) < 0)
+      const realized = closed.reduce((s, t) => s + (Number(t.realizedPnl) || 0), 0)
+      const unrealizedEst = open.reduce((s, t) => s + (Number(t.expectedProfit) || 0), 0)
+      const netProfit = realized + unrealizedEst
+      const avgWin = winning.length > 0 ? winning.reduce((s, t) => s + Number(t.realizedPnl || 0), 0) / winning.length : 0
+      const avgLoss = losing.length > 0 ? losing.reduce((s, t) => s + Number(t.realizedPnl || 0), 0) / losing.length : 0
+      const totalWin = winning.reduce((s, t) => s + Number(t.realizedPnl || 0), 0)
+      const totalLossAbs = Math.abs(losing.reduce((s, t) => s + Number(t.realizedPnl || 0), 0))
+      const profitFactor = totalLossAbs > 0 ? totalWin / totalLossAbs : (totalWin > 0 ? 999 : 0)
+      const winRate = closed.length > 0 ? (winning.length / closed.length) * 100 : 0
+      const deployed = scoped.reduce((s, t) => s + (Number(t.totalCost) || 0), 0)
+      const roi = deployed > 0 ? (netProfit / deployed) * 100 : 0
+
+      setResults({
+        totalTrades: scoped.length,
+        winningTrades: winning.length,
+        losingTrades: losing.length,
+        winRate,
+        netProfit,
+        roi,
+        avgWin,
+        avgLoss,
+        profitFactor,
+        realizedPnl: realized,
+        unrealizedPnl: unrealizedEst,
+        scopeLabel: strategy,
+      })
     } catch (err) {
       console.error('Backtest fetch failed:', err)
     } finally {
@@ -92,6 +132,10 @@ export default function Backtest() {
 
       {results && (
         <>
+          <p className="text-xs text-gray-500 -mt-2 mb-2">
+            Scope: {results.scopeLabel}
+            {strategy !== 'all' ? ' (ROI uses capital deployed by this strategy in current sample)' : ''}
+          </p>
           <div className="grid grid-cols-4 gap-4">
             <div className="card text-center">
               <p className="text-sm text-gray-400">Total Trades</p>

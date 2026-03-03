@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { motion } from 'framer-motion'
 import { useTrading } from '../context/TradingContext'
-import { Brain, ToggleLeft, ToggleRight } from '../components/Icons'
+import { Brain } from '../components/Icons'
 import { StaggerContainer, StaggerItem } from '../components/PageTransition'
 
 const STRATEGY_INFO = {
@@ -32,16 +32,7 @@ const RISK_COLORS = {
 
 export default function Strategies() {
   const { strategies, trades } = useTrading()
-  const [enabledStrategies, setEnabledStrategies] = useState(new Set(strategies.map(s => s.name)))
-
-  const toggleStrategy = (name) => {
-    setEnabledStrategies(prev => {
-      const next = new Set(prev)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
-    })
-  }
+  const enabledCount = strategies.length
 
   const tradesByStrategy = {}
   for (const t of (trades || [])) {
@@ -63,7 +54,7 @@ export default function Strategies() {
         <div>
           <h2 className="text-2xl font-bold text-gradient-minimal">Trading Strategies</h2>
           <p className="text-xs text-gray-500 mt-1">
-            {enabledStrategies.size} / {strategies.length} active · all strategies scanned every cycle
+            {enabledCount} / {strategies.length} active · all strategies scanned every cycle
           </p>
         </div>
       </div>
@@ -73,13 +64,12 @@ export default function Strategies() {
           <p className="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-4">{type}</p>
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {strats.map((strategy) => {
-              const enabled = enabledStrategies.has(strategy.name)
               const stratTrades = tradesByStrategy[strategy.name] || []
               const riskClass = RISK_COLORS[strategy.riskLevel] || RISK_COLORS.medium
               return (
                 <StaggerItem key={strategy.name}>
-                  <div className={`strategy-bar rounded-xl border p-4 transition-all duration-300 ${enabled ? 'border-white/[0.06]' : 'border-white/[0.03] opacity-50'}`}
-                    style={{ background: enabled ? 'rgba(255,255,255,0.02)' : 'transparent' }}
+                  <div className="strategy-bar rounded-xl border p-4 transition-all duration-300 border-white/[0.06]"
+                    style={{ background: 'rgba(255,255,255,0.02)' }}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2.5">
@@ -95,12 +85,9 @@ export default function Strategies() {
                           </span>
                         </div>
                       </div>
-                      <button
-                        onClick={() => toggleStrategy(strategy.name)}
-                        className="text-gray-400 hover:text-white transition-colors flex-shrink-0"
-                      >
-                        {enabled ? <ToggleRight size={28} className="text-profit" /> : <ToggleLeft size={28} />}
-                      </button>
+                      <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400">
+                        active
+                      </span>
                     </div>
                     <p className="text-[11px] text-gray-500 leading-relaxed mb-2">
                       {STRATEGY_INFO[strategy.name] || `${strategy.type} strategy`}

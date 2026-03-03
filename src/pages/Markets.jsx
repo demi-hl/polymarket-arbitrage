@@ -90,9 +90,9 @@ export default function Markets() {
             <tr>
               <th>Market</th>
               <th>Edge</th>
-              <th>YES Price</th>
-              <th>NO Price</th>
-              <th>Sum</th>
+              <th>YES Prob</th>
+              <th>NO Prob</th>
+              <th>Prob Sum</th>
               <th>Liquidity</th>
               <th>Action</th>
             </tr>
@@ -109,10 +109,10 @@ export default function Markets() {
                     +{(opp.edgePercent * 100).toFixed(2)}%
                   </span>
                 </td>
-                <td className="font-mono">${opp.yesPrice?.toFixed(3)}</td>
-                <td className="font-mono">${opp.noPrice?.toFixed(3)}</td>
+                <td className="font-mono">{((opp.yesPrice || 0) * 100).toFixed(1)}%</td>
+                <td className="font-mono">{((opp.noPrice || 0) * 100).toFixed(1)}%</td>
                 <td className={`font-mono ${opp.sum < 1 ? 'text-profit' : 'text-loss'}`}>
-                  ${opp.sum?.toFixed(3)}
+                  {((opp.sum || 0) * 100).toFixed(1)}%
                 </td>
                 <td className="font-mono">${opp.liquidity?.toLocaleString()}</td>
                 <td>
