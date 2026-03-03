@@ -49,6 +49,7 @@ export default function Header({ minimal = false }) {
   }
 
   const cash = portfolio?.cash ?? 0
+  const totalValue = portfolio?.totalValue ?? cash
   const pnl = portfolio?.pnl?.total ?? 0
 
   return (
@@ -93,7 +94,7 @@ export default function Header({ minimal = false }) {
         <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
 
         <span className="hidden sm:inline font-mono text-gray-400 text-sm">
-          ${cash.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </span>
 
         {pnl !== 0 && (
