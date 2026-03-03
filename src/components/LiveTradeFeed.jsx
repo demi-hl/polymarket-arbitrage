@@ -1,10 +1,23 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+function isRustTrade(trade) {
+  return trade?.fillMethod === 'rust-engine'
+    || trade?.executedBy === 'rust-engine'
+    || trade?.strategy === 'crypto-latency-arb'
+    || Boolean(trade?.rustTradeId)
+}
+
 export default function LiveTradeFeed({ trades = [], maxItems = 25 }) {
   const containerRef = useRef(null)
   const [prevCount, setPrevCount] = useState(trades.length)
+  const [tradeFilter, setTradeFilter] = useState('all')
   const newCount = Math.max(0, trades.length - prevCount)
+  const filteredTrades = trades.filter(trade => {
+    if (tradeFilter === 'rust') return isRustTrade(trade)
+    if (tradeFilter === 'node') return !isRustTrade(trade)
+    return true
+  })
 
   useEffect(() => {
     if (containerRef.current && trades.length > prevCount) containerRef.current.scrollTop = 0
@@ -30,6 +43,32 @@ export default function LiveTradeFeed({ trades = [], maxItems = 25 }) {
           </div>
           <p className="text-[11px] uppercase tracking-[0.2em] text-gray-400 font-medium">Live feed</p>
         </div>
+        <div className="flex items-center gap-2">
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'rust', label: 'Rust' },
+            { id: 'node', label: 'Node' },
+          ].map(opt => (
+            <button
+              key={opt.id}
+              type="button"
+              aria-pressed={tradeFilter === opt.id}
+              onClick={() => setTradeFilter(opt.id)}
+              className="relative px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-medium transition-colors cursor-pointer"
+              style={{ color: tradeFilter === opt.id ? '#fff' : 'rgba(156,163,175,0.85)' }}
+            >
+              {tradeFilter === opt.id && (
+                <motion.span
+                  layoutId="live-feed-trade-toggle"
+                  className="absolute inset-0 rounded-md border"
+                  style={{ background: 'rgba(0,212,255,0.15)', borderColor: 'rgba(0,212,255,0.35)' }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                />
+              )}
+              <span className="relative z-10">{opt.label}</span>
+            </button>
+          ))}
+        </div>
         {newCount > 0 && (
           <motion.span
             initial={{ scale: 0.8, opacity: 0 }}
@@ -41,7 +80,7 @@ export default function LiveTradeFeed({ trades = [], maxItems = 25 }) {
         )}
       </div>
 
-      {trades.length === 0 ? (
+      {filteredTrades.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center py-10">
           <motion.div
             animate={{ opacity: [0.3, 0.6, 0.3] }}
@@ -55,14 +94,16 @@ export default function LiveTradeFeed({ trades = [], maxItems = 25 }) {
                 style={{ background: 'rgba(0,212,255,0.05)' }}
               />
             </div>
-            <p className="text-xs text-gray-500">Waiting for paper trades</p>
+            <p className="text-xs text-gray-500">
+              {trades.length === 0 ? 'Waiting for paper trades' : `No ${tradeFilter} trades right now`}
+            </p>
             <p className="text-[10px] text-gray-600 mt-1">Bot scans every 90s</p>
           </motion.div>
         </div>
       ) : (
         <div ref={containerRef} className="flex-1 overflow-y-auto -mx-1" style={{ maxHeight: '320px' }}>
           <AnimatePresence>
-            {trades.slice(0, maxItems).map((trade, i) => (
+            {filteredTrades.slice(0, maxItems).map((trade, i) => (
               <TradeRow key={trade.id || `${trade.timestamp}-${i}`} trade={trade} isNew={i < newCount} index={i} />
             ))}
           </AnimatePresence>

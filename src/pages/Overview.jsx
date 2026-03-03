@@ -25,9 +25,17 @@ function useOracleData() {
   return data
 }
 
+function isRustTrade(trade) {
+  return trade?.fillMethod === 'rust-engine'
+    || trade?.executedBy === 'rust-engine'
+    || trade?.strategy === 'crypto-latency-arb'
+    || Boolean(trade?.rustTradeId)
+}
+
 export default function Overview() {
   const { portfolio, opportunities, trades, loading } = useTrading()
   const oracle = useOracleData()
+  const [tradeFilter, setTradeFilter] = useState('all')
 
   if (loading) {
     return (
@@ -75,6 +83,11 @@ export default function Overview() {
   const topStrategies = Object.entries(strategyBreakdown)
     .sort((a, b) => b[1].count - a[1].count)
     .slice(0, 6)
+  const filteredRecentTrades = (trades || []).filter(trade => {
+    if (tradeFilter === 'rust') return isRustTrade(trade)
+    if (tradeFilter === 'node') return !isRustTrade(trade)
+    return true
+  })
 
   const anim = (delay = 0) => ({
     initial: { opacity: 0, y: 20, filter: 'blur(6px)' },
@@ -257,9 +270,35 @@ export default function Overview() {
                 </span>
               )}
             </h3>
+            <div className="flex items-center gap-2">
+              {[
+                { id: 'all', label: 'All' },
+                { id: 'rust', label: 'Rust' },
+                { id: 'node', label: 'Node' },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  aria-pressed={tradeFilter === opt.id}
+                  onClick={() => setTradeFilter(opt.id)}
+                  className="relative px-2.5 py-1 rounded-md text-[10px] uppercase tracking-wider font-medium transition-colors cursor-pointer"
+                  style={{ color: tradeFilter === opt.id ? '#fff' : 'rgba(156,163,175,0.85)' }}
+                >
+                  {tradeFilter === opt.id && (
+                    <motion.span
+                      layoutId="overview-trade-toggle"
+                      className="absolute inset-0 rounded-md border"
+                      style={{ background: 'rgba(0,212,255,0.15)', borderColor: 'rgba(0,212,255,0.35)' }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  <span className="relative z-10">{opt.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
           <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
-            {(trades || []).slice(-12).reverse().map((trade, i) => {
+            {filteredRecentTrades.slice(-12).reverse().map((trade, i) => {
               const hasRealized = trade.realizedPnl != null
               const pnl = hasRealized ? trade.realizedPnl : (trade.expectedProfit || 0)
               return (
@@ -298,9 +337,11 @@ export default function Overview() {
                 </motion.div>
               )
             })}
-            {trades.length === 0 && (
+            {filteredRecentTrades.length === 0 && (
               <div className="text-center py-16">
-                <p className="text-gray-500 text-base">No trades yet</p>
+                <p className="text-gray-500 text-base">
+                  {trades.length === 0 ? 'No trades yet' : `No ${tradeFilter} trades yet`}
+                </p>
               </div>
             )}
           </div>
