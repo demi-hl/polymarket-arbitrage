@@ -15,6 +15,7 @@ export function TradingProvider({ children }) {
   const [selectedAccount, setSelectedAccount] = useState('paper')
   const [accountIds, setAccountIds] = useState([])
   const seenTradeIds = useRef(new Set())
+  const seenKeyRef = useRef('trade-seen-ids')
   const initialLoad = useRef(true)
 
   const api = useApi()
@@ -41,6 +42,7 @@ export function TradingProvider({ children }) {
           ? selectedAccount
           : (availableIds[0] || selectedAccount)
         if (effectiveAccount !== selectedAccount) setSelectedAccount(effectiveAccount)
+        seenKeyRef.current = `trade-seen-ids:${effectiveAccount || 'paper'}`
 
         const portfolioRes = effectiveAccount
           ? await api.get(`/accounts/${effectiveAccount}/portfolio`).catch(() => null)
@@ -48,8 +50,20 @@ export function TradingProvider({ children }) {
 
         if (portfolioRes?.success && portfolioRes.data) {
           const newTrades = portfolioRes.data.trades || []
+          if (seenTradeIds.current.size === 0 && typeof window !== 'undefined') {
+            try {
+              const raw = window.sessionStorage.getItem(seenKeyRef.current)
+              if (raw) {
+                const parsed = JSON.parse(raw)
+                if (Array.isArray(parsed)) {
+                  seenTradeIds.current = new Set(parsed.filter(Boolean))
+                }
+              }
+            } catch {}
+          }
+
           // Trades are sorted newest-first. Track IDs to avoid duplicate or stale toasts.
-          if (initialLoad.current && seenTradeIds.current.size === 0) {
+          if (seenTradeIds.current.size === 0) {
             newTrades.slice(0, 200).forEach(t => {
               if (t?.id) seenTradeIds.current.add(t.id)
             })
@@ -70,6 +84,14 @@ export function TradingProvider({ children }) {
             if (seenTradeIds.current.size > 2000) {
               seenTradeIds.current = new Set(newTrades.slice(0, 300).map(t => t.id).filter(Boolean))
             }
+          }
+          if (typeof window !== 'undefined') {
+            try {
+              window.sessionStorage.setItem(
+                seenKeyRef.current,
+                JSON.stringify(Array.from(seenTradeIds.current).slice(-600))
+              )
+            } catch {}
           }
           setPortfolio(portfolioRes.data)
           setTrades(newTrades)
