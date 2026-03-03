@@ -150,6 +150,21 @@ impl OrderExecutor {
             + trade.divergence_at_entry.abs() * 10_000.0 * 0.6;
         let spread_bps = Self::clamp(base_spread_bps, paper.base_spread_bps, paper.max_spread_bps);
 
+        // Maker order simulation (#5): post limit at mid, 0% entry fee, but
+        // 30% chance of non-fill (maker orders aren't guaranteed to fill).
+        // Exit is still taker (50bps fee).
+        let maker_nonfill_prob = 0.30;
+        let is_maker_entry = rng.gen::<f64>() >= maker_nonfill_prob; // 70% fill rate for makers
+
+        if !is_maker_entry {
+            // Maker order didn't fill — skip this trade
+            trade.status = TradeStatus::Cancelled;
+            trade.pnl = Some(0.0);
+            trade.fill_ratio = Some(0.0);
+            self.trades.lock().push(trade.clone());
+            return Ok(trade);
+        }
+
         let fill_ratio = if rng.gen::<f64>() < paper.partial_fill_probability {
             rng.gen_range(paper.min_partial_fill_ratio..=1.0)
         } else {
@@ -164,14 +179,15 @@ impl OrderExecutor {
         }
 
         let dir = if trade.side == TradeSide::Buy { 1.0 } else { -1.0 };
+
+        // Maker entry: much lower slippage (posting at mid, not crossing spread)
         let jitter_entry_bps = rng.gen_range(-paper.slippage_jitter_bps..=paper.slippage_jitter_bps);
         let entry_slippage_bps = Self::clamp(
-            paper.base_slippage_bps
-                + spread_bps * 0.5
-                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms
+            paper.base_slippage_bps * 0.3  // maker gets much better fills
+                + (latency_ms / 100.0) * paper.latency_impact_bps_per_100ms * 0.5
                 + jitter_entry_bps,
             0.0,
-            paper.max_spread_bps * 1.5,
+            paper.max_spread_bps * 0.5,
         );
 
         let entry_price = Self::clamp(
@@ -249,7 +265,8 @@ impl OrderExecutor {
             0.0
         };
         let gross_pnl = (exit_price - entry_price) * shares * dir;
-        let fees_paid = filled_notional * (paper.entry_fee_bps + paper.exit_fee_bps) / 10_000.0;
+        // Maker entry = 0% fee, taker exit = 50bps (#5)
+        let fees_paid = filled_notional * paper.exit_fee_bps / 10_000.0;
         let net_pnl = gross_pnl - fees_paid;
         let shadow_shares = if shadow_entry_price > 0.0 {
             filled_notional / shadow_entry_price
