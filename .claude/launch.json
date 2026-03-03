@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "vite-dashboard",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "api-server",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["polymarket.js", "server"],
+      "port": 3001
+    },
+    {
+      "name": "gpu-worker",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["gpu-worker/server.py"],
+      "port": 8899
+    }
+  ]
+}
