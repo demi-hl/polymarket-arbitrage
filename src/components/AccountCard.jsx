@@ -3,9 +3,9 @@ import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown } from './Icons'
 
 const ACCOUNT_THEMES = {
-  A: { label: 'Paper A', sub: 'Paper account', color: '#f59e0b' },
-  B: { label: 'Paper B', sub: 'Paper account', color: '#00d4ff' },
-  paper: { label: 'Paper Trading', sub: '20 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
+  A: { label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
+  B: { label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
+  paper: { label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
 }
 
 function fallback(id) {
