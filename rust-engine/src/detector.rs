@@ -157,6 +157,11 @@ impl DivergenceDetector {
             };
             let suggested_size = base_size * trend.position_size_multiplier() * confidence * edge_multiplier * asset_multiplier;
 
+            // Skip if below minimum trade size (#2) — small trades can't absorb friction
+            if suggested_size < self.config.risk.min_trade_size {
+                continue;
+            }
+
             self.signal_count += 1;
             let signal = Signal {
                 id: format!("sig-{}", self.signal_count),

@@ -228,7 +228,14 @@ impl OrderExecutor {
             0.01,
             0.99,
         );
-        let shadow_move = trade.divergence_at_entry.abs() * 0.65;
+        // Shadow convergence uses same adversarial model (40% adverse) but with
+        // a separate roll — shadow is the "what if less friction" path, not "always wins"
+        let shadow_convergence = if rng.gen::<f64>() < 0.4 {
+            rng.gen_range(paper.min_convergence_ratio..0.0_f64)
+        } else {
+            rng.gen_range(0.0_f64..=paper.max_convergence_ratio)
+        };
+        let shadow_move = trade.divergence_at_entry.abs() * shadow_convergence;
         let shadow_exit_price = Self::clamp(
             shadow_entry_price * (1.0 + dir * shadow_move - dir * shadow_exit_bps / 10_000.0),
             0.01,
