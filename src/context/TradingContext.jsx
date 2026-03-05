@@ -17,6 +17,7 @@ export function TradingProvider({ children }) {
   const seenTradeIds = useRef(new Set())
   const seenKeyRef = useRef('trade-seen-ids')
   const initialLoad = useRef(true)
+  const settleCount = useRef(0) // require 2 fetches before showing data
 
   const api = useApi()
 
@@ -69,7 +70,8 @@ export function TradingProvider({ children }) {
             })
           } else {
             const newestUnseen = newTrades.find(t => t?.id && !seenTradeIds.current.has(t.id))
-            if (newestUnseen) {
+            const isLanding = window.location.pathname === '/'
+            if (newestUnseen && window.__demiNotifications !== false && !isLanding) {
               toast.success(
                 `Trade executed: ${(newestUnseen.question || '').substring(0, 40)}...`,
                 {
@@ -104,8 +106,13 @@ export function TradingProvider({ children }) {
         if (!cancelled) setSystemStatus({ connected: false })
       } finally {
         if (!cancelled) {
-          setLoading(false)
-          initialLoad.current = false
+          settleCount.current++
+          // Wait for 2 successful fetches before showing data
+          // This prevents the flash where Node-only data shows before Rust PnL merges in
+          if (settleCount.current >= 2) {
+            setLoading(false)
+            initialLoad.current = false
+          }
         }
       }
     }
@@ -126,6 +133,7 @@ export function TradingProvider({ children }) {
       }
     }
 
+    settleCount.current = 0
     fetchCore()
     fetchOpportunities()
 

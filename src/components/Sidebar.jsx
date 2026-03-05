@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavLink, Link, useLocation } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { LayoutDashboard, Brain, TrendingUp, Wallet, BarChart3, GitCompare, Settings } from './Icons'
+import { LayoutDashboard, Brain, TrendingUp, Wallet, BarChart3, GitCompare, Settings, Users, Newspaper } from './Icons'
 
 const navItems = [
   { path: '/overview', icon: LayoutDashboard, label: 'Overview' },
@@ -9,6 +9,8 @@ const navItems = [
   { path: '/strategies', icon: Brain, label: 'Strategies' },
   { path: '/markets', icon: TrendingUp, label: 'Markets' },
   { path: '/portfolio', icon: Wallet, label: 'Portfolio' },
+  { path: '/whales', icon: Users, label: 'Whale Tracker' },
+  { path: '/news', icon: Newspaper, label: 'News Scanner' },
   { path: '/backtest', icon: BarChart3, label: 'Backtest' },
 ]
 

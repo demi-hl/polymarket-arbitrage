@@ -117,23 +117,19 @@ impl TrendState {
     }
 
     /// Base divergence threshold. May be adjusted upward by book depth in detector.
-    /// Tuned from 135k trade analysis: raised all thresholds to eliminate <5% edge bleed.
-    /// Strong trends 18→22%, Weak 20→25%, Sideways 25→30%.
     pub fn divergence_threshold(&self) -> f64 {
         match self {
-            Self::StrongUp | Self::StrongDown => 0.22,
-            Self::WeakUp | Self::WeakDown => 0.25,
-            Self::Sideways => 0.30,
+            Self::StrongUp | Self::StrongDown => 0.18,
+            Self::WeakUp | Self::WeakDown => 0.20,
+            Self::Sideways => 0.25,
         }
     }
 
-    /// Position size multiplier by trend. Increased from analysis showing
-    /// bigger positions ($50-100) have 65% WR vs 41% for <$10.
     pub fn position_size_multiplier(&self) -> f64 {
         match self {
-            Self::StrongUp | Self::StrongDown => 2.0,
-            Self::WeakUp | Self::WeakDown => 1.2,
-            Self::Sideways => 0.7,
+            Self::StrongUp | Self::StrongDown => 1.6,
+            Self::WeakUp | Self::WeakDown => 1.0,
+            Self::Sideways => 0.6,
         }
     }
 }

@@ -72,22 +72,22 @@ impl Default for Config {
             polymarket_api_passphrase: None,
             private_key: None,
             risk: RiskConfig {
-                max_per_trade_pct: 0.02,       // 2% hard cap (was 1%) — bigger wins at higher edges
-                daily_loss_cap_pct: 0.03,       // 3% daily loss limit (was 2%)
+                max_per_trade_pct: 0.01,
+                daily_loss_cap_pct: 0.02,
                 capital: 10_000.0,
                 max_concurrent_positions: 5,
                 cooldown_per_market_secs: 30,
                 order_timeout_secs: 5,
                 consecutive_loss_pause: 3,
                 consecutive_loss_pause_secs: 600,
-                trending_size_pct: 0.015,       // 1.5% for trending (was 0.8%) — $150 per trade
-                sideways_size_pct: 0.006,       // 0.6% for sideways (was 0.3%) — $60 per trade
-                min_trade_size: 25.0,           // $25 min (was $10) — small trades lose money
+                trending_size_pct: 0.008,
+                sideways_size_pct: 0.003,
+                min_trade_size: 10.0,
             },
             detection: DetectionConfig {
-                base_threshold: 0.08,    // 8% min — <5% edge trades were 31% WR, net losers
-                trending_threshold: 0.06, // 6% for trending (raised from 3%)
-                sideways_threshold: 0.12, // 12% for sideways (raised from 7%)
+                base_threshold: 0.05,    // 5% min — sub-3% trades are net losers
+                trending_threshold: 0.03, // 3% for trending (more reliable)
+                sideways_threshold: 0.07, // 7% for sideways (need bigger edge)
                 min_sources_agree: 1,
                 priority_expiry_minutes: vec![15, 60, 240],
             },

@@ -7,6 +7,7 @@ import Header from './components/Header'
 import ParticleBackground from './components/ParticleBackground'
 import PageTransition from './components/PageTransition'
 import ErrorBoundary from './components/ErrorBoundary'
+import NFTGate from './components/NFTGate'
 import Landing from './pages/Landing'
 import Overview from './pages/Overview'
 import ABTest from './pages/ABTest'
@@ -14,6 +15,9 @@ import Strategies from './pages/Strategies'
 import Markets from './pages/Markets'
 import Portfolio from './pages/Portfolio'
 import Backtest from './pages/Backtest'
+import CopyTrading from './pages/CopyTrading'
+import NewsScanner from './pages/NewsScanner'
+import { WalletProvider } from './context/WalletContext'
 import { MultiAccountProvider } from './context/MultiAccountContext'
 import { TradingProvider } from './context/TradingContext'
 import { LayoutDashboard, GitCompare, TrendingUp, Wallet, BarChart3 } from './components/Icons'
@@ -44,13 +48,15 @@ function AppLayout() {
             <AnimatePresence mode="wait">
               <Routes location={location} key={location.pathname}>
                 <Route path="/" element={<PageTransition><Landing /></PageTransition>} />
-                <Route path="/overview" element={<PageTransition><Overview /></PageTransition>} />
-                <Route path="/ab-test" element={<PageTransition><ABTest /></PageTransition>} />
-                <Route path="/paper" element={<PageTransition><ABTest /></PageTransition>} />
-                <Route path="/strategies" element={<PageTransition><Strategies /></PageTransition>} />
-                <Route path="/markets" element={<PageTransition><Markets /></PageTransition>} />
-                <Route path="/portfolio" element={<PageTransition><Portfolio /></PageTransition>} />
-                <Route path="/backtest" element={<PageTransition><Backtest /></PageTransition>} />
+                <Route path="/overview" element={<PageTransition><NFTGate><Overview /></NFTGate></PageTransition>} />
+                <Route path="/ab-test" element={<PageTransition><NFTGate><ABTest /></NFTGate></PageTransition>} />
+                <Route path="/paper" element={<PageTransition><NFTGate><ABTest /></NFTGate></PageTransition>} />
+                <Route path="/strategies" element={<PageTransition><NFTGate><Strategies /></NFTGate></PageTransition>} />
+                <Route path="/markets" element={<PageTransition><NFTGate><Markets /></NFTGate></PageTransition>} />
+                <Route path="/portfolio" element={<PageTransition><NFTGate><Portfolio /></NFTGate></PageTransition>} />
+                <Route path="/whales" element={<PageTransition><NFTGate><CopyTrading /></NFTGate></PageTransition>} />
+                <Route path="/news" element={<PageTransition><NFTGate><NewsScanner /></NFTGate></PageTransition>} />
+                <Route path="/backtest" element={<PageTransition><NFTGate><Backtest /></NFTGate></PageTransition>} />
               </Routes>
             </AnimatePresence>
           </ErrorBoundary>
@@ -100,11 +106,13 @@ function AppLayout() {
 
 function App() {
   return (
-    <MultiAccountProvider>
-      <TradingProvider>
-        <AppLayout />
-      </TradingProvider>
-    </MultiAccountProvider>
+    <WalletProvider>
+      <MultiAccountProvider>
+        <TradingProvider>
+          <AppLayout />
+        </TradingProvider>
+      </MultiAccountProvider>
+    </WalletProvider>
   )
 }
 

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useMultiAccount } from '../context/MultiAccountContext'
+import { useWallet } from '../context/WalletContext'
 import DarkOrb from '../components/DarkOrb'
+import ConnectWallet from '../components/ConnectWallet'
 
 const ease = [0.16, 1, 0.3, 1]
 
@@ -14,15 +16,16 @@ function StatRing({ value, label, color = '#00d4ff', delay = 0 }) {
       transition={{ duration: 0.9, delay, ease }}
       className="flex flex-col items-center gap-1"
     >
-      <span className="font-mono text-lg tabular-nums tracking-tight" style={{ color }}>{value}</span>
-      <span className="text-[10px] uppercase tracking-[0.2em] text-gray-600">{label}</span>
+      <span className="font-mono text-xl tabular-nums tracking-tight" style={{ color }}>{value}</span>
+      <span className="text-xs uppercase tracking-[0.2em] text-gray-600">{label}</span>
     </motion.div>
   )
 }
 
 export default function Landing() {
   const [clock, setClock] = useState(new Date())
-  const { accountIds, comparison, accounts } = useMultiAccount()
+  const { accountIds, accounts } = useMultiAccount()
+  const { address, nftVerified } = useWallet()
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000)
@@ -30,14 +33,17 @@ export default function Landing() {
   }, [])
 
   const acctValues = Object.values(accounts || {})
-  const combined = comparison?.combinedValue
-    ? parseFloat(comparison.combinedValue)
-    : acctValues.reduce((sum, acct) => sum + (acct?.totalValue || 0), 0)
-  const totalCash = acctValues.reduce((sum, acct) => sum + (acct?.cash || 0), 0)
   const totalTrades = acctValues.reduce((sum, acct) => sum + (acct?.totalTrades || 0), 0)
   const totalOpen = acctValues.reduce((sum, acct) => sum + (acct?.openTradeCount || acct?.openPositions || 0), 0)
+  const totalPnl = acctValues.reduce((sum, acct) => {
+    const pnl = acct?.pnl || {}
+    return sum + (pnl.total || pnl.realized || 0)
+  }, 0)
+  const totalEquity = acctValues.reduce((sum, acct) => {
+    const val = acct?.totalValue ?? acct?.cash ?? 0
+    return sum + val
+  }, 0)
   const live = accountIds.length >= 1
-  const displayValue = typeof totalCash === 'number' && totalCash > 0 ? totalCash : (typeof combined === 'number' ? combined : 0)
 
   const stagger = {
     container: { animate: { transition: { staggerChildren: 0.1 } } },
@@ -45,7 +51,7 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-full flex flex-col items-center justify-center font-futuristic relative overflow-hidden">
+    <div className="min-h-full flex flex-col items-center justify-center font-futuristic relative overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 -my-4 sm:-my-6 px-4 sm:px-6 lg:px-8 py-4 sm:py-6" style={{ minHeight: 'calc(100vh - 3.5rem)' }}>
       {/* Aurora background wash */}
       <div className="aurora-bg" />
 
@@ -74,9 +80,9 @@ export default function Landing() {
         <motion.div
           variants={stagger.item}
           transition={{ duration: 0.8 }}
-          className="mb-10"
+          className="mb-6"
         >
-          <span className="inline-flex items-center gap-3 text-[10px] uppercase tracking-[0.35em] text-gray-500">
+          <span className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-gray-500">
             <span className="w-8 h-px bg-gradient-to-r from-transparent to-gray-600" />
             Polymarket Arbitrage System
             <span className="w-8 h-px bg-gradient-to-l from-transparent to-gray-600" />
@@ -95,7 +101,7 @@ export default function Landing() {
         <motion.h2
           variants={stagger.item}
           transition={{ duration: 1.2, ease }}
-          className="text-6xl sm:text-8xl font-extralight tracking-[-0.03em] mb-8 leading-[0.88] text-gradient-hero"
+          className="text-6xl sm:text-8xl font-extralight tracking-[-0.03em] mb-5 leading-[0.88] text-gradient-hero"
         >
           Production
         </motion.h2>
@@ -106,31 +112,55 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="mb-3 space-y-1"
         >
-          <p className="text-[13px] text-gray-500 font-light tracking-wide max-w-md mx-auto leading-relaxed">
+          <p className="text-base text-gray-500 font-light tracking-wide max-w-lg mx-auto leading-relaxed">
             31 strategies · Whale flow detection · Crypto latency engine
           </p>
-          <p className="text-[13px] text-gray-500 font-light tracking-wide max-w-md mx-auto leading-relaxed">
-            Real-time orderflow · Cross-platform arbitrage · GPU sentiment
+          <p className="text-base text-gray-500 font-light tracking-wide max-w-lg mx-auto leading-relaxed">
+            Real-time orderflow · Cross-platform arbitrage · AI sentiment analysis
           </p>
         </motion.div>
 
         <motion.p
           variants={stagger.item}
           transition={{ duration: 0.5 }}
-          className="text-[9px] text-gray-600 tracking-[0.3em] uppercase mb-14 font-medium"
+          className="text-xs text-gray-600 tracking-[0.3em] uppercase mb-8 font-medium"
         >
           by DEMI
         </motion.p>
+
+        {/* Wallet Connect */}
+        <motion.div
+          variants={stagger.item}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col items-center gap-4 mb-6"
+        >
+          {!address && (
+            <p className="text-sm text-gray-500 tracking-wide mb-1">
+              Connect your wallet to verify you hold a Locals Only NFT
+            </p>
+          )}
+          <ConnectWallet />
+          {address && !nftVerified && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-sm text-red-400/80 tracking-wide"
+            >
+              No Locals Only NFT found in this wallet
+            </motion.p>
+          )}
+        </motion.div>
 
         {/* CTAs */}
         <motion.div
           variants={stagger.item}
           transition={{ duration: 0.6 }}
-          className="flex items-center justify-center gap-5 mb-16"
+          className="flex items-center justify-center gap-5 mb-8"
         >
           <Link
-            to="/paper"
-            className="group relative overflow-hidden rounded-2xl text-sm font-medium tracking-wide transition-all duration-700"
+            to={nftVerified ? '/paper' : '#'}
+            onClick={e => { if (!nftVerified) e.preventDefault() }}
+            className={`group relative overflow-hidden rounded-2xl text-sm font-medium tracking-wide transition-all duration-700 ${!nftVerified ? 'opacity-40 cursor-not-allowed' : ''}`}
             style={{ padding: '18px 48px' }}
           >
             <div className="absolute inset-0 rounded-2xl transition-all duration-700"
@@ -145,14 +175,19 @@ export default function Landing() {
             />
             <span className="relative z-10 text-white group-hover:text-accent transition-colors duration-500">Enter Dashboard</span>
           </Link>
-          <Link to="/overview" className="text-sm text-gray-500 hover:text-white transition-colors duration-500" style={{ padding: '18px 32px' }}>
+          <Link
+            to={nftVerified ? '/overview' : '#'}
+            onClick={e => { if (!nftVerified) e.preventDefault() }}
+            className={`text-sm text-gray-500 hover:text-white transition-colors duration-500 ${!nftVerified ? 'opacity-40 cursor-not-allowed' : ''}`}
+            style={{ padding: '18px 32px' }}
+          >
             Overview
           </Link>
         </motion.div>
 
         {/* Divider */}
         <motion.div variants={stagger.item} transition={{ duration: 0.7 }}>
-          <div className="glow-line mb-10" />
+          <div className="glow-line mb-6" />
         </motion.div>
 
         {/* Stats bar */}
@@ -172,7 +207,7 @@ export default function Landing() {
               transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
               style={{ background: live ? '#10b981' : '#4b5563' }}
             />
-            <span className="text-[11px] uppercase tracking-[0.2em] text-gray-600">
+            <span className="text-xs uppercase tracking-[0.2em] text-gray-600">
               {live ? 'Live' : 'Standby'}
             </span>
           </div>
@@ -184,12 +219,21 @@ export default function Landing() {
             delay={0.5}
           />
 
-          {displayValue > 0 && (
+          {totalEquity > 0 && (
             <StatRing
-              value={`$${Math.round(displayValue).toLocaleString()}`}
+              value={`$${Math.round(totalEquity).toLocaleString()}`}
               label="Portfolio"
               color="#00d4ff"
               delay={0.6}
+            />
+          )}
+
+          {totalPnl !== 0 && (
+            <StatRing
+              value={`${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(2)}`}
+              label="P&L"
+              color={totalPnl >= 0 ? '#10b981' : '#ef4444'}
+              delay={0.7}
             />
           )}
 
@@ -198,7 +242,7 @@ export default function Landing() {
               value={totalTrades}
               label="Trades"
               color="#a855f7"
-              delay={0.7}
+              delay={0.75}
             />
           )}
 

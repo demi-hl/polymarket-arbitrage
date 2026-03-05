@@ -2,10 +2,30 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTrading } from '../context/TradingContext'
+import { useWallet } from '../context/WalletContext'
+import ConnectWallet from './ConnectWallet'
+import { Bell, BellOff } from './Icons'
+
+function useNotifications() {
+  const [enabled, setEnabled] = useState(() => {
+    try { return localStorage.getItem('demi_notifications') !== 'off' } catch { return true }
+  })
+  const toggle = () => {
+    const next = !enabled
+    setEnabled(next)
+    try { localStorage.setItem('demi_notifications', next ? 'on' : 'off') } catch {}
+    // Expose globally so TradingContext can check
+    window.__demiNotifications = next
+  }
+  useEffect(() => { window.__demiNotifications = enabled }, [enabled])
+  return { enabled, toggle }
+}
 
 export default function Header({ minimal = false }) {
   const [clock, setClock] = useState(new Date())
   const { portfolio, systemStatus, loading } = useTrading()
+  const { address } = useWallet()
+  const notifications = useNotifications()
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000)
@@ -17,12 +37,14 @@ export default function Header({ minimal = false }) {
   if (minimal) {
     return (
       <header
-        className="h-14 flex items-center justify-end px-4 sm:px-8 relative z-20"
+        className="h-14 flex items-center justify-between px-4 sm:px-8 relative z-20"
         style={{
           background: 'transparent',
         }}
       >
+        <div />
         <div className="flex items-center gap-5 text-[10px] uppercase tracking-[0.25em] text-gray-600 font-futuristic">
+          {address && <ConnectWallet variant="compact" />}
           <div className="flex items-center gap-2.5">
             <div className="relative">
               <motion.div
@@ -67,6 +89,35 @@ export default function Header({ minimal = false }) {
       </Link>
 
       <div className="flex items-center gap-3 sm:gap-6 text-[10px] uppercase tracking-[0.2em] text-gray-500 font-futuristic">
+        {/* Notification toggle */}
+        <button
+          onClick={notifications.toggle}
+          className="relative group p-1.5 rounded-lg transition-colors duration-300 hover:bg-white/5"
+          title={notifications.enabled ? 'Notifications on' : 'Notifications off'}
+        >
+          {notifications.enabled ? (
+            <Bell size={14} className="text-gray-400 group-hover:text-accent transition-colors" />
+          ) : (
+            <BellOff size={14} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
+          )}
+          {notifications.enabled && (
+            <motion.div
+              className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+              style={{ background: '#00d4ff' }}
+              animate={{ opacity: [1, 0.4, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            />
+          )}
+        </button>
+
+        <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
+
+        {address && (
+          <>
+            <ConnectWallet variant="compact" />
+            <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          </>
+        )}
         <div className="flex items-center gap-2.5">
           <div className="relative">
             <motion.div
@@ -91,11 +142,13 @@ export default function Header({ minimal = false }) {
 
         <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
 
-        <span className="hidden sm:inline font-mono text-gray-400 text-sm">
-          ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-        </span>
+        {!loading && (
+          <span className="hidden sm:inline font-mono text-gray-400 text-sm">
+            ${totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+          </span>
+        )}
 
-        {pnl !== 0 && (
+        {!loading && pnl !== 0 && (
           <>
             <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
             <span className={`font-mono text-xs sm:text-sm font-medium ${pnl >= 0 ? 'profit-glow' : 'loss-glow'}`}>
