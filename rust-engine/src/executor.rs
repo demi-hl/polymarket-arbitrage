@@ -89,7 +89,7 @@ impl OrderExecutor {
         }
     }
 
-    fn save_trades(&self) {
+    pub fn save_trades(&self) {
         let trades = self.trades.lock();
         if let Ok(json) = serde_json::to_string(&*trades) {
             let _ = std::fs::create_dir_all("data");
