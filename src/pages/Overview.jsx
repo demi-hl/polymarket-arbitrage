@@ -177,7 +177,7 @@ export default function Overview() {
           </div>
         </div>
         <p className="text-[13px] text-gray-500 mt-2.5 tracking-wide font-light">
-          37 strategies · MRO-Kelly sizing · Rust latency engine · Whale tracking
+          39 strategies · MRO-Kelly sizing · Rust latency engine · Whale tracking
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2.5">
           <span className="text-[10px] uppercase tracking-wider text-gray-500">Paper→live gap</span>

@@ -15,6 +15,7 @@
  */
 const axios = require('axios');
 const { fetchMarketsOnce } = require('./lib/with-scanner');
+const gpu = require('../lib/gpu-singleton');
 
 const CLOB_API = 'https://clob.polymarket.com';
 
@@ -158,6 +159,32 @@ const smartMoneyDetector = {
             totalPressure: Math.round(totalPressure),
           });
         }
+      }
+
+      // ── GPU: Edge prediction to filter false positives ──
+      if (opportunities.length > 0) {
+        try {
+          const predictions = await gpu.predictEdge(opportunities.map(o => ({
+            edge: o.edgePercent,
+            liquidity: o.liquidity,
+            volume: o.volume,
+            price: o.yesPrice,
+            confidence: o.confidence,
+            strategy: 'smart-money-detector',
+          })));
+          if (predictions) {
+            for (let i = 0; i < opportunities.length && i < predictions.length; i++) {
+              const winProb = predictions[i]?.winProbability || predictions[i]?.win_probability || 0.5;
+              opportunities[i].gpuWinProb = winProb;
+              // Boost or penalize edge based on GPU model prediction
+              if (winProb > 0.6) {
+                opportunities[i].edgePercent *= 1 + (winProb - 0.5); // up to 50% boost
+              } else if (winProb < 0.35) {
+                opportunities[i].edgePercent *= winProb; // heavy penalty for low win prob
+              }
+            }
+          }
+        } catch {}
       }
 
       opportunities.sort((a, b) => b.edgePercent - a.edgePercent);

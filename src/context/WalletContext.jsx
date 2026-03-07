@@ -21,10 +21,17 @@ export function WalletProvider({ children }) {
   const [nftVerified, setNftVerified] = useState(null) // null=unchecked, true/false
   const [nftBalance, setNftBalance] = useState(0)
   const [checking, setChecking] = useState(false)
+  const [jwt, setJwt] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   // Reconnect on mount if previously connected
   useEffect(() => {
     const saved = localStorage.getItem('demi_wallet_address')
+    const savedJwt = localStorage.getItem('locals_jwt')
+    if (savedJwt) {
+      setJwt(savedJwt)
+      setIsAuthenticated(true)
+    }
     if (saved && window.ethereum) {
       window.ethereum.request({ method: 'eth_accounts' })
         .then(accounts => {
@@ -32,6 +39,7 @@ export function WalletProvider({ children }) {
             setAddress(accounts[0])
           } else {
             localStorage.removeItem('demi_wallet_address')
+            localStorage.removeItem('locals_jwt')
           }
         })
         .catch(() => {})
@@ -70,6 +78,62 @@ export function WalletProvider({ children }) {
     }
   }, [])
 
+  // ── Backend Authentication (SIWE pattern) ──
+  const authenticate = useCallback(async (addr) => {
+    try {
+      // 1. Request nonce from backend
+      const nonceRes = await fetch('/api/auth/nonce', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: addr }),
+      })
+      const nonceData = await nonceRes.json()
+      if (!nonceData.success) {
+        toast.error('Auth failed: ' + (nonceData.error || 'Could not get nonce'))
+        return false
+      }
+
+      // 2. Sign the message with MetaMask
+      const signature = await window.ethereum.request({
+        method: 'personal_sign',
+        params: [nonceData.message, addr],
+      })
+
+      // 3. Verify signature + NFT on backend
+      const verifyRes = await fetch('/api/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          address: addr,
+          signature,
+          message: nonceData.message,
+        }),
+      })
+      const verifyData = await verifyRes.json()
+
+      if (verifyData.success && verifyData.token) {
+        setJwt(verifyData.token)
+        setIsAuthenticated(true)
+        localStorage.setItem('locals_jwt', verifyData.token)
+        setNftBalance(verifyData.user.nftBalance)
+        setNftVerified(true)
+        toast.success('Authenticated — welcome to Locals Only')
+        return true
+      } else {
+        toast.error(verifyData.error || 'Authentication failed')
+        return false
+      }
+    } catch (err) {
+      if (err.code === 4001) {
+        toast.error('Signature rejected')
+      } else {
+        console.error('[WalletContext] Auth error:', err)
+        toast.error('Authentication failed: ' + err.message)
+      }
+      return false
+    }
+  }, [])
+
   const connect = useCallback(async () => {
     if (!window.ethereum) {
       toast.error('No wallet detected. Install MetaMask or a browser wallet.')
@@ -81,6 +145,8 @@ export function WalletProvider({ children }) {
       if (accounts[0]) {
         setAddress(accounts[0])
         localStorage.setItem('demi_wallet_address', accounts[0])
+        // Auto-authenticate after wallet connect
+        await authenticate(accounts[0])
       }
     } catch (err) {
       if (err.code === 4001) {
@@ -91,13 +157,16 @@ export function WalletProvider({ children }) {
     } finally {
       setIsConnecting(false)
     }
-  }, [])
+  }, [authenticate])
 
   const disconnect = useCallback(() => {
     setAddress(null)
     setNftVerified(null)
     setNftBalance(0)
+    setJwt(null)
+    setIsAuthenticated(false)
     localStorage.removeItem('demi_wallet_address')
+    localStorage.removeItem('locals_jwt')
     toast('Wallet disconnected')
   }, [])
 
@@ -108,13 +177,15 @@ export function WalletProvider({ children }) {
       if (accounts[0]) {
         setAddress(accounts[0])
         localStorage.setItem('demi_wallet_address', accounts[0])
+        // Re-authenticate with new account
+        authenticate(accounts[0])
       } else {
         disconnect()
       }
     }
     window.ethereum.on('accountsChanged', onAccountsChanged)
     return () => window.ethereum.removeListener('accountsChanged', onAccountsChanged)
-  }, [disconnect])
+  }, [disconnect, authenticate])
 
   const value = {
     address,
@@ -122,8 +193,11 @@ export function WalletProvider({ children }) {
     checking,
     nftVerified,
     nftBalance,
+    jwt,
+    isAuthenticated,
     connect,
     disconnect,
+    authenticate,
     verifyNFT,
     nftContract: NFT_CONTRACT,
     chain: HYPEREVM_CHAIN,

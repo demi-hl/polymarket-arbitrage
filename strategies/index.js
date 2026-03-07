@@ -175,6 +175,8 @@ const economicData = require('./economic-data');
 const sportsOdds = require('./sports-odds');
 const newMarketAlpha = require('./new-market-alpha');
 const copyTrade = require('./copy-trade');
+const bayesianLmsr = require('./bayesian-lmsr');
+const sportsLatencyArb = require('./sports-latency-arb');
 
 // ── Multi-strategy modules (each exports an array) ──
 const crossPlatform = require('./cross-platform');
@@ -212,6 +214,8 @@ const ALL_STRATEGIES = [].concat(
   sportsOdds,                         // sportsbook odds cross-reference
   newMarketAlpha,                     // first-mover on new markets
   copyTrade,                          // follow top PnL wallets
+  bayesianLmsr,                       // LMSR softmax + Bayesian posterior + fractional Kelly
+  sportsLatencyArb,                   // live score feed → broadcast delay exploitation
 );
 
 const STRATEGY_COUNT = ALL_STRATEGIES.length;

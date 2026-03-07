@@ -10,6 +10,7 @@
  */
 const axios = require('axios');
 const { fetchMarketsOnce } = require('./lib/with-scanner');
+const gpu = require('../lib/gpu-singleton');
 
 const GAMMA_API = 'https://gamma-api.polymarket.com';
 
@@ -136,6 +137,55 @@ const volumeSpikeDetector = {
             recentVolume: Math.round(recentVol),
           });
         }
+      }
+
+      // ── GPU: Edge prediction + sentiment for volume spike validation ──
+      if (opportunities.length > 0) {
+        try {
+          const [predictions, sentiments] = await Promise.all([
+            gpu.predictEdge(opportunities.map(o => ({
+              edge: o.edgePercent,
+              liquidity: o.liquidity,
+              volume: o.volume,
+              price: o.yesPrice,
+              confidence: o.confidence,
+              volumeRatio: o.volumeRatio,
+              priceMove: o.priceMove,
+              strategy: 'volume-spike-detector',
+            }))),
+            gpu.analyzeSentimentFast(
+              opportunities.slice(0, 5).map(o => o.question || '')
+            ),
+          ]);
+          if (predictions) {
+            for (let i = 0; i < opportunities.length && i < predictions.length; i++) {
+              const winProb = predictions[i]?.winProbability || predictions[i]?.win_probability || 0.5;
+              opportunities[i].gpuWinProb = winProb;
+              if (winProb > 0.6) {
+                opportunities[i].edgePercent *= 1.2; // 20% boost for high win prob
+                opportunities[i].confidence = Math.min(opportunities[i].confidence + 0.1, 1);
+              } else if (winProb < 0.3) {
+                opportunities[i].edgePercent *= 0.4; // heavy penalty
+              }
+            }
+          }
+          if (sentiments) {
+            for (let i = 0; i < Math.min(opportunities.length, sentiments.length, 5); i++) {
+              const s = sentiments[i];
+              if (!s) continue;
+              const sentiment = s.label || s.sentiment || 'neutral';
+              opportunities[i].gpuSentiment = sentiment;
+              // If sentiment aligns with direction, boost; if conflicts, penalize
+              const isBullish = sentiment === 'positive' || sentiment === 'POS';
+              const directionBullish = opportunities[i].direction === 'BUY_YES';
+              if (isBullish === directionBullish) {
+                opportunities[i].confidence = Math.min(opportunities[i].confidence + 0.1, 1);
+              } else {
+                opportunities[i].confidence *= 0.8;
+              }
+            }
+          }
+        } catch {}
       }
 
       opportunities.sort((a, b) => b.edgePercent - a.edgePercent);

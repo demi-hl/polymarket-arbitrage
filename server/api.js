@@ -18,6 +18,7 @@ const ClobClient = require('../clob-client');
 const OrderflowWatcher = require('../lib/orderflow-watcher');
 const OrderbookImbalanceAnalyzer = require('../lib/orderbook-imbalance');
 const { setOrderflowWatcher } = require('../strategies');
+const auth = require('./auth');
 
 // Shared OrderflowWatcher singleton
 let _orderflowWatcher = null;
@@ -48,9 +49,15 @@ function getOrderflowWatcher(wsServer) {
   return _orderflowWatcher;
 }
 
+const DEFAULT_SETTINGS = {
+  positionSizing: { mode: 'fixed', fixedAmount: 25, percentageOfPortfolio: 2, maxPositionPerMarket: 100 },
+  risk: { maxConcurrentPositions: 10, stopLossPercent: 15, takeProfitPercent: 25, maxDailyLoss: 500 },
+  trading: { mode: 'paper', autoExecute: true, minEdgePercent: 3, minLiquidity: 1000 },
+};
+
 function createApiServer(wsServer) {
   const app = express();
-  
+
   app.use(cors());
   app.use(express.json());
   
@@ -63,8 +70,108 @@ function createApiServer(wsServer) {
     });
   });
   
+  // ── Auth Module Init ──
+  auth.init();
+
+  // ── Auth Routes (public, no middleware) ──
+  const authRouter = express.Router();
+
+  authRouter.post('/nonce', (req, res) => {
+    try {
+      const { address } = req.body;
+      if (!address) return res.status(400).json({ error: 'Address required' });
+      const { nonce, message } = auth.generateNonce(address);
+      res.json({ success: true, nonce, message });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  authRouter.post('/verify', async (req, res) => {
+    try {
+      const { address, signature, message } = req.body;
+      if (!address || !signature || !message) {
+        return res.status(400).json({ error: 'Address, signature, and message required' });
+      }
+
+      // 1. Verify nonce hasn't expired
+      const nonce = auth.consumeNonce(address);
+      if (!nonce) {
+        return res.status(401).json({ error: 'Nonce expired or not found. Request a new nonce.' });
+      }
+
+      // 2. Verify signature matches address
+      if (!auth.verifySignature(message, signature, address)) {
+        return res.status(401).json({ error: 'Signature verification failed' });
+      }
+
+      // 3. Check NFT ownership on HyperEVM
+      const nftBalance = await auth.checkNFTBalance(address);
+      if (nftBalance === 0) {
+        return res.status(403).json({ error: 'No Locals Only NFT found. Hold the NFT to access the bot.' });
+      }
+
+      // 4. Issue JWT
+      const token = auth.createJWT({ address, nftBalance });
+
+      // 5. Ensure user data directory exists with defaults
+      const userDir = auth.getUserDataDir(address);
+      const portfolioPath = auth.getUserFilePath(address, 'portfolio.json');
+      if (!fs.existsSync(portfolioPath)) {
+        auth.writeUserFile(address, 'portfolio.json', {
+          cash: 10000, positions: [], trades: [], pnl: { realized: 0, unrealized: 0, total: 0 },
+        });
+      }
+      const settingsPath = auth.getUserFilePath(address, 'settings.json');
+      if (!fs.existsSync(settingsPath)) {
+        auth.writeUserFile(address, 'settings.json', DEFAULT_SETTINGS);
+      }
+
+      res.json({
+        success: true,
+        token,
+        user: { address, nftBalance },
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  authRouter.post('/refresh', (req, res) => {
+    try {
+      const authHeader = req.headers.authorization;
+      if (!authHeader) return res.status(401).json({ error: 'Token required' });
+      const oldToken = authHeader.replace('Bearer ', '');
+      const payload = auth.verifyJWT(oldToken);
+      if (!payload) return res.status(401).json({ error: 'Invalid token' });
+
+      const newToken = auth.createJWT({ address: payload.address, nftBalance: payload.nftBalance });
+      res.json({ success: true, token: newToken });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.use('/api/auth', authRouter);
+
   // API Routes
   const api = express.Router();
+
+  // ── Auth Middleware — protect all /api/* routes ──
+  // Public routes that skip auth (shared market data)
+  const PUBLIC_API_ROUTES = [
+    '/status', '/opportunities', '/strategies', '/gas', '/health',
+    '/oracle', '/whales', '/orderflow', '/realism',  // shared market data
+    '/gpu', '/report', '/accounts',                    // shared infrastructure
+  ];
+  api.use((req, res, next) => {
+    // Skip auth for public read-only market data endpoints
+    if (PUBLIC_API_ROUTES.some(r => req.path === r || req.path.startsWith(r + '/'))) {
+      return next();
+    }
+    // Apply auth middleware to everything else
+    auth.authMiddleware(req, res, next);
+  });
   
   const _gpuClient = new GPUClient();
 
@@ -380,12 +487,85 @@ function createApiServer(wsServer) {
     try {
       const bot = new PolymarketArbitrageBot({ mode: 'paper', dataDir: botDataDir });
       await bot.reset();
+      // Store reset timestamp so we can filter out pre-reset Rust trades
+      _lastResetTimestamp = new Date().toISOString();
+      // Clear Rust snapshot cache so stale data doesn't persist
+      _rustSnapshotCache = { ts: 0, data: null };
+      // Try to reset Rust engine too
+      try { await axios.post(`${RUST_ENGINE_URL}/reset`, {}, { timeout: 2000 }); } catch {}
       res.json({ success: true, message: 'Portfolio reset' });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
   });
   
+  // ── Polygon Gas / MEV Monitor ──
+  let _gasCache = { ts: 0, data: null };
+  const GAS_CACHE_TTL = 15000; // 15s
+
+  api.get('/gas', async (req, res) => {
+    try {
+      if (Date.now() - _gasCache.ts < GAS_CACHE_TTL && _gasCache.data) {
+        return res.json({ success: true, data: _gasCache.data });
+      }
+
+      let gasData;
+      try {
+        // Polygon Gas Station v2
+        const gasRes = await axios.get('https://gasstation.polygon.technology/v2', { timeout: 5000 });
+        const g = gasRes.data;
+        gasData = {
+          network: 'polygon',
+          blockNumber: g.blockNumber || null,
+          baseFee: parseFloat((g.estimatedBaseFee || 0).toFixed(2)),
+          slow: {
+            maxFee: parseFloat((g.safeLow?.maxFee || 30).toFixed(2)),
+            maxPriorityFee: parseFloat((g.safeLow?.maxPriorityFee || 30).toFixed(2)),
+            label: 'Slow',
+            time: '~30s',
+          },
+          standard: {
+            maxFee: parseFloat((g.standard?.maxFee || 35).toFixed(2)),
+            maxPriorityFee: parseFloat((g.standard?.maxPriorityFee || 32).toFixed(2)),
+            label: 'Standard',
+            time: '~15s',
+          },
+          fast: {
+            maxFee: parseFloat((g.fast?.maxFee || 50).toFixed(2)),
+            maxPriorityFee: parseFloat((g.fast?.maxPriorityFee || 40).toFixed(2)),
+            label: 'Fast',
+            time: '~5s',
+          },
+          recommended: {
+            maxFee: parseFloat(((g.fast?.maxFee || 50) * 1.2).toFixed(2)),
+            maxPriorityFee: parseFloat(((g.fast?.maxPriorityFee || 40) * 1.5).toFixed(2)),
+            label: 'MEV Protection',
+            time: '~3s',
+            note: '20% above fast to front-run competing bots',
+          },
+          timestamp: new Date().toISOString(),
+        };
+      } catch {
+        // Fallback if Polygon gas station is down
+        gasData = {
+          network: 'polygon',
+          baseFee: 30,
+          slow: { maxFee: 30, maxPriorityFee: 30, label: 'Slow', time: '~30s' },
+          standard: { maxFee: 35, maxPriorityFee: 32, label: 'Standard', time: '~15s' },
+          fast: { maxFee: 50, maxPriorityFee: 40, label: 'Fast', time: '~5s' },
+          recommended: { maxFee: 60, maxPriorityFee: 60, label: 'MEV Protection', time: '~3s', note: 'Fallback values — gas station unreachable' },
+          timestamp: new Date().toISOString(),
+          fallback: true,
+        };
+      }
+
+      _gasCache = { ts: Date.now(), data: gasData };
+      res.json({ success: true, data: gasData });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
   // Trigger manual scan
   api.post('/scan', async (req, res) => {
     try {
@@ -693,6 +873,7 @@ function createApiServer(wsServer) {
   const STARTING_CAPITAL = toNumber(process.env.STARTING_CAPITAL, 10000);
   const RUST_CACHE_TTL_MS = 2000;
   let _rustSnapshotCache = { ts: 0, data: null };
+  let _lastResetTimestamp = null;
 
   function toNumber(val, fallback = 0) {
     const n = Number(val);
@@ -1027,8 +1208,20 @@ function createApiServer(wsServer) {
       ]);
       const status = statusRes.data || {};
       const pnl = pnlRes.data || {};
-      const allRustTrades = Array.isArray(tradesRes.data) ? tradesRes.data : [];
+      let allRustTrades = Array.isArray(tradesRes.data) ? tradesRes.data : [];
+      // Filter out trades from before the last reset
+      if (_lastResetTimestamp) {
+        const resetTs = new Date(_lastResetTimestamp).getTime();
+        allRustTrades = allRustTrades.filter(t => {
+          const tradeTs = new Date(t.timestamp || t.closed_at || 0).getTime();
+          return tradeTs > resetTs;
+        });
+      }
       const filledRust = allRustTrades.filter(t => t.status === 'filled');
+      // If all trades were filtered out by reset, zero out PnL too
+      const rustPnlAdjusted = filledRust.length === 0
+        ? { realized: 0, unrealized: 0, total: 0 }
+        : pnl;
       const rustWins = filledRust.filter(t => toNumber(t.pnl, 0) > 0).length;
       const rustLosses = filledRust.filter(t => toNumber(t.pnl, 0) <= 0).length;
       const recentTrades = mapRustTrades(allRustTrades.slice(-500).reverse());
@@ -1036,9 +1229,9 @@ function createApiServer(wsServer) {
         available: status.running === true,
         status,
         pnl: {
-          realized: toNumber(pnl.realized, 0),
-          unrealized: toNumber(pnl.unrealized, 0),
-          total: toNumber(pnl.total, 0),
+          realized: toNumber(rustPnlAdjusted.realized, 0),
+          unrealized: toNumber(rustPnlAdjusted.unrealized, 0),
+          total: toNumber(rustPnlAdjusted.total, 0),
         },
         recentTrades,
         tradeCount: filledRust.length || toNumber(status.trades_today, 0),
@@ -1376,18 +1569,18 @@ function createApiServer(wsServer) {
     try { getOrderflowWatcher(wsServer); } catch (e) { console.error('[OrderflowWatcher] Init error:', e.message); }
   }, 5000);
 
-  // ── Settings Endpoints ──
-  const SETTINGS_PATH = path.join(__dirname, '..', 'data', 'settings.json');
-  const DEFAULT_SETTINGS = {
-    positionSizing: { mode: 'fixed', fixedAmount: 25, percentageOfPortfolio: 2, maxPositionPerMarket: 100 },
-    risk: { maxConcurrentPositions: 10, stopLossPercent: 15, takeProfitPercent: 25, maxDailyLoss: 500 },
-    trading: { mode: 'paper', autoExecute: true, minEdgePercent: 3, minLiquidity: 1000 },
-  };
+  // ── Settings Endpoints (per-user) ──
+  // Helper to get settings path for the authenticated user
+  function getUserSettingsPath(req) {
+    if (req.user) return auth.getUserFilePath(req.user.address, 'settings.json');
+    return path.join(__dirname, '..', 'data', 'settings.json'); // fallback
+  }
 
   api.get('/settings', (req, res) => {
     try {
-      let settings = DEFAULT_SETTINGS;
-      try { settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')); } catch {}
+      let settings = { ...DEFAULT_SETTINGS };
+      const settingsPath = getUserSettingsPath(req);
+      try { settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8')); } catch {}
       res.json({ success: true, data: settings });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -1397,7 +1590,8 @@ function createApiServer(wsServer) {
   api.post('/settings', express.json(), (req, res) => {
     try {
       const settings = req.body;
-      fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+      const settingsPath = getUserSettingsPath(req);
+      fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
       res.json({ success: true, data: settings });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
@@ -1406,19 +1600,17 @@ function createApiServer(wsServer) {
 
   api.get('/settings/live-status', (req, res) => {
     try {
-      const credentials = {
-        POLYMARKET_KEY: !!process.env.POLYMARKET_KEY,
-        POLYMARKET_API_KEY: !!process.env.POLYMARKET_API_KEY,
-        POLYMARKET_API_SECRET: !!process.env.POLYMARKET_API_SECRET,
-        POLYMARKET_API_PASSPHRASE: !!process.env.POLYMARKET_API_PASSPHRASE,
-      };
-      const hasAll = Object.values(credentials).every(Boolean);
+      // Check per-user encrypted credentials
+      const credStatus = req.user
+        ? auth.getCredentialStatus(req.user.address)
+        : { hasKey: false, hasApiKey: false, hasSecret: false, hasPassphrase: false };
+      const hasAll = credStatus.hasKey && credStatus.hasApiKey && credStatus.hasSecret && credStatus.hasPassphrase;
       let currentMode = 'paper';
-      try { currentMode = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'))?.trading?.mode || 'paper'; } catch {}
+      try { currentMode = JSON.parse(fs.readFileSync(getUserSettingsPath(req), 'utf8'))?.trading?.mode || 'paper'; } catch {}
       res.json({
         success: true,
         data: {
-          credentials,
+          credentials: credStatus,
           hasAllCredentials: hasAll,
           mode: currentMode,
           canGoLive: hasAll,
@@ -1436,19 +1628,57 @@ function createApiServer(wsServer) {
         return res.status(400).json({ success: false, error: 'Mode must be paper or live' });
       }
       if (mode === 'live') {
-        const hasKey = !!process.env.POLYMARKET_KEY;
-        const hasApi = !!process.env.POLYMARKET_API_KEY;
-        const hasSecret = !!process.env.POLYMARKET_API_SECRET;
-        const hasPass = !!process.env.POLYMARKET_API_PASSPHRASE;
-        if (!hasKey || !hasApi || !hasSecret || !hasPass) {
-          return res.status(400).json({ success: false, error: 'Missing CLOB credentials. Set POLYMARKET_KEY, POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE env vars.' });
+        const credStatus = auth.getCredentialStatus(req.user.address);
+        if (!credStatus.hasKey || !credStatus.hasApiKey || !credStatus.hasSecret || !credStatus.hasPassphrase) {
+          return res.status(400).json({ success: false, error: 'Missing CLOB credentials. Add them in Settings → Credentials.' });
         }
       }
-      let settings = DEFAULT_SETTINGS;
-      try { settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')); } catch {}
+      const settingsPath = getUserSettingsPath(req);
+      let settings = { ...DEFAULT_SETTINGS };
+      try { settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8')); } catch {}
       settings.trading = { ...settings.trading, mode };
-      fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+      fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
       res.json({ success: true, data: { mode } });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  // ── Per-User Credential Management ──
+  api.get('/settings/credentials', (req, res) => {
+    try {
+      const status = auth.getCredentialStatus(req.user.address);
+      res.json({ success: true, data: status });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.post('/settings/credentials', express.json(), (req, res) => {
+    try {
+      const { privateKey, apiKey, apiSecret, passphrase } = req.body;
+      if (!privateKey && !apiKey && !apiSecret && !passphrase) {
+        return res.status(400).json({ success: false, error: 'At least one credential required' });
+      }
+      // Merge with existing credentials (don't overwrite fields not provided)
+      const existing = auth.decryptCredentials(req.user.address) || {};
+      const merged = {
+        privateKey: privateKey || existing.privateKey || '',
+        apiKey: apiKey || existing.apiKey || '',
+        apiSecret: apiSecret || existing.apiSecret || '',
+        passphrase: passphrase || existing.passphrase || '',
+      };
+      auth.encryptCredentials(req.user.address, merged);
+      res.json({ success: true, data: auth.getCredentialStatus(req.user.address) });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.delete('/settings/credentials', (req, res) => {
+    try {
+      auth.deleteCredentials(req.user.address);
+      res.json({ success: true, data: { cleared: true } });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { StaggerContainer, StaggerItem } from '../components/PageTransition'
 import { Settings as SettingsIcon } from '../components/Icons'
+import { useWallet } from '../context/WalletContext'
 
 const DEFAULT_SETTINGS = {
   positionSizing: {
@@ -25,15 +26,18 @@ const DEFAULT_SETTINGS = {
 }
 
 function useSettings() {
+  const { jwt } = useWallet()
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
+  const authHeaders = jwt ? { Authorization: `Bearer ${jwt}` } : {}
+
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch('/api/settings')
+        const res = await fetch('/api/settings', { headers: authHeaders })
         const json = await res.json()
         if (json.success && json.data) {
           setSettings(prev => deepMerge(prev, json.data))
@@ -41,7 +45,7 @@ function useSettings() {
       } catch {} finally { setLoading(false) }
     }
     load()
-  }, [])
+  }, [jwt])
 
   const save = useCallback(async (newSettings) => {
     setSaving(true)
@@ -49,7 +53,7 @@ function useSettings() {
     try {
       const res = await fetch('/api/settings', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify(newSettings),
       })
       const json = await res.json()
@@ -59,7 +63,7 @@ function useSettings() {
         setTimeout(() => setSaved(false), 2000)
       }
     } catch {} finally { setSaving(false) }
-  }, [])
+  }, [jwt])
 
   return { settings, setSettings, save, loading, saving, saved }
 }
@@ -179,16 +183,238 @@ function ModeSelector({ value, onChange, options }) {
   )
 }
 
+function GasMonitor() {
+  const [gas, setGas] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchGas = async () => {
+      try {
+        const res = await fetch('/api/gas')
+        const json = await res.json()
+        if (json.success) setGas(json.data)
+      } catch {} finally { setLoading(false) }
+    }
+    fetchGas()
+    const interval = setInterval(fetchGas, 15000)
+    return () => clearInterval(interval)
+  }, [])
+
+  if (loading) return <div className="shimmer rounded-xl h-40" />
+
+  const tiers = gas ? [gas.slow, gas.standard, gas.fast, gas.recommended] : []
+  const tierColors = ['#6b7280', '#f59e0b', '#10b981', '#00d4ff']
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full" style={{ background: gas ? '#10b981' : '#6b7280', boxShadow: gas ? '0 0 8px rgba(16,185,129,0.5)' : 'none' }} />
+          <span className="text-xs text-gray-400">Polygon Network</span>
+        </div>
+        {gas && (
+          <span className="text-[10px] font-mono text-gray-600">
+            Base: {gas.baseFee} gwei
+          </span>
+        )}
+      </div>
+
+      {gas ? (
+        <div className="grid grid-cols-2 gap-2">
+          {tiers.map((tier, i) => (
+            <div
+              key={tier.label}
+              className="rounded-lg p-3 relative overflow-hidden group"
+              style={{
+                background: tier.label === 'MEV Protection' ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${tier.label === 'MEV Protection' ? 'rgba(0,212,255,0.15)' : 'rgba(255,255,255,0.04)'}`,
+              }}
+            >
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: tierColors[i] }} />
+                <span className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">{tier.label}</span>
+              </div>
+              <div className="font-mono text-sm font-medium" style={{ color: tierColors[i] }}>
+                {tier.maxFee} gwei
+              </div>
+              <div className="text-[9px] text-gray-600 mt-0.5">
+                Priority: {tier.maxPriorityFee} · {tier.time}
+              </div>
+              {tier.note && (
+                <div className="text-[9px] text-accent/60 mt-1">{tier.note}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-xs text-gray-600">Unable to fetch gas prices</div>
+      )}
+
+      <div className="rounded-lg p-3" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
+        <p className="text-[10px] text-gray-500 leading-relaxed">
+          <strong className="text-gray-400">MEV Protection:</strong> Set gas 20% above fast to ensure your CLOB orders land before competing bots.
+          On Polygon, priority fee determines transaction ordering within a block.
+          Higher priority = your trade executes first when exploiting price discrepancies.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function CredentialManager() {
+  const { jwt } = useWallet()
+  const [credStatus, setCredStatus] = useState(null)
+  const [form, setForm] = useState({ privateKey: '', apiKey: '', apiSecret: '', passphrase: '' })
+  const [saving, setSaving] = useState(false)
+  const [showForm, setShowForm] = useState(false)
+
+  useEffect(() => {
+    if (!jwt) return
+    fetch('/api/settings/credentials', { headers: { Authorization: `Bearer ${jwt}` } })
+      .then(r => r.json())
+      .then(j => j.success && setCredStatus(j.data))
+      .catch(() => {})
+  }, [jwt])
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      const body = {}
+      if (form.privateKey) body.privateKey = form.privateKey
+      if (form.apiKey) body.apiKey = form.apiKey
+      if (form.apiSecret) body.apiSecret = form.apiSecret
+      if (form.passphrase) body.passphrase = form.passphrase
+      const res = await fetch('/api/settings/credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        body: JSON.stringify(body),
+      })
+      const j = await res.json()
+      if (j.success) {
+        setCredStatus(j.data)
+        setForm({ privateKey: '', apiKey: '', apiSecret: '', passphrase: '' })
+        setShowForm(false)
+      }
+    } catch {} finally { setSaving(false) }
+  }
+
+  const handleClear = async () => {
+    const res = await fetch('/api/settings/credentials', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${jwt}` },
+    })
+    const j = await res.json()
+    if (j.success) setCredStatus({ hasKey: false, hasApiKey: false, hasSecret: false, hasPassphrase: false })
+  }
+
+  const allSet = credStatus && credStatus.hasKey && credStatus.hasApiKey && credStatus.hasSecret && credStatus.hasPassphrase
+
+  return (
+    <div className="space-y-3">
+      {/* Status grid */}
+      <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+        <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 mb-2">Credential Status</p>
+        <div className="space-y-1.5">
+          {[
+            { key: 'hasKey', label: 'Signing Key' },
+            { key: 'hasApiKey', label: 'API Key' },
+            { key: 'hasSecret', label: 'API Secret' },
+            { key: 'hasPassphrase', label: 'Passphrase' },
+          ].map(cred => (
+            <div key={cred.key} className="flex items-center justify-between">
+              <span className="text-xs text-gray-500">{cred.label}</span>
+              <span className={`text-[10px] font-mono ${credStatus?.[cred.key] ? 'text-emerald-400' : 'text-gray-700'}`}>
+                {credStatus?.[cred.key] ? '● SET' : '○ NOT SET'}
+              </span>
+            </div>
+          ))}
+        </div>
+        {allSet && (
+          <div className="mt-2 pt-2 border-t border-white/5">
+            <span className="text-[10px] font-mono text-emerald-400">✓ Ready for live trading</span>
+          </div>
+        )}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-3 py-1.5 text-xs rounded-md transition-all"
+          style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.2)', color: '#00d4ff' }}
+        >
+          {showForm ? 'Cancel' : allSet ? 'Update Credentials' : 'Add Credentials'}
+        </button>
+        {credStatus && (credStatus.hasKey || credStatus.hasApiKey) && (
+          <button
+            onClick={handleClear}
+            className="px-3 py-1.5 text-xs rounded-md transition-all text-red-400"
+            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.15)' }}
+          >
+            Clear All
+          </button>
+        )}
+      </div>
+
+      {/* Input form */}
+      {showForm && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="space-y-2.5 rounded-lg p-3"
+          style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+        >
+          {[
+            { key: 'privateKey', label: 'Private Key (hex)', placeholder: '0x...' },
+            { key: 'apiKey', label: 'API Key', placeholder: 'Your CLOB API key' },
+            { key: 'apiSecret', label: 'API Secret', placeholder: 'HMAC secret' },
+            { key: 'passphrase', label: 'Passphrase', placeholder: 'API passphrase' },
+          ].map(field => (
+            <div key={field.key}>
+              <label className="text-[10px] uppercase tracking-[0.15em] text-gray-600 mb-1 block">{field.label}</label>
+              <input
+                type="password"
+                value={form[field.key]}
+                onChange={(e) => setForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                placeholder={field.placeholder}
+                className="w-full px-3 py-1.5 rounded-md text-xs font-mono text-white/80 placeholder-gray-700 focus:outline-none focus:ring-1 focus:ring-accent/30"
+                style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.06)' }}
+              />
+            </div>
+          ))}
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full py-2 rounded-md text-xs font-medium transition-all"
+            style={{
+              background: saving ? 'rgba(255,255,255,0.05)' : 'rgba(0,212,255,0.15)',
+              border: '1px solid rgba(0,212,255,0.25)',
+              color: '#00d4ff',
+            }}
+          >
+            {saving ? 'Encrypting & Saving...' : 'Save Credentials (AES-256-GCM)'}
+          </button>
+          <p className="text-[10px] text-gray-600 leading-relaxed">
+            Credentials are encrypted per-user and stored locally. They never leave this server.
+          </p>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
 export default function Settings() {
+  const { jwt } = useWallet()
   const { settings, setSettings, save, loading, saving, saved } = useSettings()
   const [liveStatus, setLiveStatus] = useState(null)
 
   useEffect(() => {
-    fetch('/api/settings/live-status')
+    const headers = jwt ? { Authorization: `Bearer ${jwt}` } : {}
+    fetch('/api/settings/live-status', { headers })
       .then(r => r.json())
       .then(j => j.success && setLiveStatus(j.data))
       .catch(() => {})
-  }, [])
+  }, [jwt])
 
   const update = (section, key, value) => {
     const newSettings = {
@@ -218,7 +444,7 @@ export default function Settings() {
         <div>
           <h2 className="text-2xl font-bold text-gradient-minimal">Settings</h2>
           <p className="text-xs text-gray-500 mt-1">
-            Position sizing · Risk management · Trading mode
+            Position sizing · Risk management · Gas & MEV · Trading mode
           </p>
         </div>
         <motion.button
@@ -342,6 +568,16 @@ export default function Settings() {
           </SettingRow>
         </SettingCard>
 
+        {/* Gas / MEV Monitor */}
+        <SettingCard title="Gas & MEV Monitor" description="Live Polygon gas prices — set priority to front-run competing bots">
+          <GasMonitor />
+        </SettingCard>
+
+        {/* CLOB Credentials (per-user, encrypted) */}
+        <SettingCard title="CLOB Credentials" description="Your Polymarket API keys — encrypted per-user, never shared">
+          <CredentialManager />
+        </SettingCard>
+
         {/* Live Trading Status */}
         <SettingCard title="Trading Mode" description="Switch between paper and live trading">
           <SettingRow label="Mode" description={settings.trading.mode === 'live' ? 'Trading with real USDC on Polygon' : 'Simulated trades — no real funds at risk'}>
@@ -356,31 +592,11 @@ export default function Settings() {
             </div>
           </SettingRow>
 
-          <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 mb-2">Credential Status</p>
-            <div className="space-y-1.5">
-              {[
-                { key: 'POLYMARKET_KEY', label: 'Private Key' },
-                { key: 'POLYMARKET_API_KEY', label: 'API Key' },
-                { key: 'POLYMARKET_API_SECRET', label: 'API Secret' },
-                { key: 'POLYMARKET_API_PASSPHRASE', label: 'Passphrase' },
-              ].map(cred => (
-                <div key={cred.key} className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">{cred.label}</span>
-                  <span className={`text-[10px] font-mono ${
-                    liveStatus?.credentials?.[cred.key] ? 'text-emerald-400' : 'text-gray-700'
-                  }`}>
-                    {liveStatus?.credentials?.[cred.key] ? '● SET' : '○ NOT SET'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="rounded-lg p-3" style={{ background: 'rgba(0,212,255,0.03)', border: '1px solid rgba(0,212,255,0.08)' }}>
             <p className="text-xs text-gray-400 leading-relaxed">
-              To go live, set your Polymarket CLOB API credentials as environment variables in <code className="text-accent/70 font-mono text-[10px]">.env</code> and restart the engine.
-              The bot uses the <strong className="text-gray-300">operator model</strong> — it signs transactions on your behalf without holding your private key in the frontend.
+              Add your CLOB credentials above, then switch to live mode.
+              The bot uses the <strong className="text-gray-300">operator model</strong> — it signs transactions on your behalf.
+              Credentials are encrypted with AES-256-GCM and stored per-user.
             </p>
           </div>
         </SettingCard>

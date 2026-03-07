@@ -13,9 +13,17 @@ gpu-worker/__pycache__/
 gpu-worker/venv/
 gpu-worker/*.pt
 gpu-worker/models/__pycache__/
+gpu-worker/data/
+
+# Rust engine build artifacts
+rust-engine/target/
 
 # Data files (runtime state)
 data/*.json
+data/users/
+
+# Claude worktrees
+.claude/
 
 # OS
 .DS_Store

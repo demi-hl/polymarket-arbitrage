@@ -1,6 +1,6 @@
 import os, torch
 
-HOST = os.getenv("GPU_WORKER_HOST", "0.0.0.0")
+HOST = os.getenv("GPU_WORKER_HOST", os.getenv("BIND_HOST", "0.0.0.0"))
 PORT = int(os.getenv("GPU_WORKER_PORT", "8899"))
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

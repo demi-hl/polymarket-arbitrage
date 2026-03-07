@@ -4,7 +4,7 @@ import { useWallet } from '../context/WalletContext'
 import ConnectWallet from './ConnectWallet'
 
 export default function NFTGate({ children }) {
-  const { address, nftVerified, checking } = useWallet()
+  const { address, nftVerified, checking, isAuthenticated, authenticate } = useWallet()
 
   // Dev bypass — skip NFT gate in local development when no wallet extension
   if (import.meta.env.DEV && !window.ethereum) {
@@ -99,6 +99,49 @@ export default function NFTGate({ children }) {
     )
   }
 
-  // Verified — render dashboard
+  // NFT verified but not authenticated with backend
+  if (nftVerified && !isAuthenticated) {
+    return (
+      <div className="min-h-full flex flex-col items-center justify-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-center max-w-md"
+        >
+          <div className="mb-6">
+            <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center"
+              style={{
+                background: 'rgba(0, 212, 255, 0.1)',
+                border: '1px solid rgba(0, 212, 255, 0.2)',
+              }}
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00d4ff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-light text-white mb-2">Sign to Authenticate</h2>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">
+              NFT verified. Sign a message to authenticate your session.
+            </p>
+            <button
+              onClick={() => authenticate(address)}
+              className="px-6 py-2.5 rounded-lg text-sm font-medium text-white transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(168, 85, 247, 0.2))',
+                border: '1px solid rgba(0, 212, 255, 0.3)',
+              }}
+            >
+              Sign Message
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
+
+  // Verified + authenticated — render dashboard
   return children
 }

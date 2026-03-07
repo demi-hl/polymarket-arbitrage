@@ -9,6 +9,7 @@
  * Position: min(liquidity * 0.8%, $200)
  */
 const { fetchMarketsOnce } = require('./lib/with-scanner');
+const gpu = require('../lib/gpu-singleton');
 
 let _watcher = null;
 function setOrderflowWatcher(watcher) { _watcher = watcher; }
@@ -108,6 +109,35 @@ const whaleFlowStrategy = {
         signalType: 'realtime-consensus',
         clobTokenIds: market.clobTokenIds,
       });
+    }
+
+    // ── GPU: Edge prediction to validate whale signals ──
+    if (opportunities.length > 0) {
+      try {
+        const predictions = await gpu.predictEdge(opportunities.map(o => ({
+          edge: o.edgePercent,
+          liquidity: o.liquidity,
+          volume: o.volume,
+          price: o.yesPrice,
+          confidence: o.confidence,
+          whaleCount: o.whaleCount,
+          buyRatio: o.buyRatio,
+          totalVolume: o.totalVolume,
+          strategy: 'whale-flow',
+        })));
+        if (predictions) {
+          for (let i = 0; i < opportunities.length && i < predictions.length; i++) {
+            const winProb = predictions[i]?.winProbability || predictions[i]?.win_probability || 0.5;
+            opportunities[i].gpuWinProb = winProb;
+            if (winProb > 0.65) {
+              opportunities[i].edgePercent *= 1.25; // GPU confirms whale signal
+              opportunities[i].maxPosition = Math.min(opportunities[i].maxPosition * 1.3, 250);
+            } else if (winProb < 0.3) {
+              opportunities[i].edgePercent *= 0.4; // GPU rejects signal
+            }
+          }
+        }
+      } catch {}
     }
 
     opportunities.sort((a, b) => b.edgePercent - a.edgePercent);

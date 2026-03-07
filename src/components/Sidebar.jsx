@@ -54,7 +54,7 @@ export default function Sidebar() {
             </motion.div>
             <div>
               <p className="text-[17px] uppercase tracking-[0.22em] font-futuristic font-bold group-hover:text-white transition-colors duration-300 text-gradient-minimal">
-                DEMI
+                LOCALS ONLY
               </p>
               <p className="text-[10px] text-gray-500 tracking-[0.15em] uppercase mt-1 font-medium">
                 Polymarket Arb Engine

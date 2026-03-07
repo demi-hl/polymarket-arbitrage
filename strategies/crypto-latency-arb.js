@@ -227,9 +227,18 @@ const cryptoLatencyArbStrategy = {
 
     const opportunities = [];
 
+    // Minimum edge filter — trades below 5% are net losers after slippage + fees
+    // Data: <2% edge = 0% WR, 2-5% = 5.6% WR, 5-10% = 27.9% WR, 10%+ = 34.1% WR
+    // Only execute trades with enough edge to overcome round-trip costs
+    const MIN_EDGE_FILTER = 0.05; // 5% minimum — backed by win rate data
+
     for (const sig of state.signals) {
       if (!sig.contract) continue;
       const alreadyTraded = state.trades.some(t => t.signal_id === sig.id && t.status === 'filled');
+      const absEdge = Math.abs(sig.divergence || 0);
+
+      // Skip signals with edge below slippage cost
+      if (absEdge < MIN_EDGE_FILTER) continue;
 
       opportunities.push({
         marketId: sig.contract.condition_id || sig.contract.token_id || 'unknown',
@@ -254,7 +263,7 @@ const cryptoLatencyArbStrategy = {
         clobTokenIds: [sig.contract.token_id],
 
         rustEngine: true,
-        bypassThreshold: true,
+        bypassThreshold: false, // was true — caused sub-slippage trades to execute
         alreadyExecuted: alreadyTraded,
         signalId: sig.id,
         trendState: sig.trend_state,
@@ -265,11 +274,16 @@ const cryptoLatencyArbStrategy = {
     }
 
     // Also surface new trades from the engine that the Node.js portfolio doesn't know about yet
+    // Only sync trades that meet minimum edge — don't record garbage
     if (Date.now() - lastTradeSync > TRADE_SYNC_INTERVAL) {
       for (const trade of state.trades) {
         if (syncedTradeIds.has(trade.id)) continue;
         if (trade.status !== 'filled') continue;
         syncedTradeIds.add(trade.id);
+
+        const tradeEdge = Math.abs(trade.divergence_at_entry || 0);
+        // Skip sub-threshold trades — these are net losers
+        if (tradeEdge < MIN_EDGE_FILTER) continue;
 
         opportunities.push({
           marketId: trade.contract_token_id || trade.id,
@@ -279,19 +293,19 @@ const cryptoLatencyArbStrategy = {
           yesPrice: trade.price || 0.5,
           noPrice: 1 - (trade.price || 0.5),
           sum: 1.0,
-          edge: Math.abs(trade.divergence_at_entry || 0.005),
-          edgePercent: Math.abs(trade.divergence_at_entry || 0.005),
-          executableEdge: Math.abs(trade.divergence_at_entry || 0.005),
+          edge: tradeEdge,
+          edgePercent: tradeEdge,
+          executableEdge: tradeEdge,
           liquidity: 50000,
           direction: trade.side === 'buy' ? 'BUY_YES' : 'BUY_NO',
           maxPosition: trade.size || trade.cost || 25,
-          expectedReturn: Math.abs(trade.divergence_at_entry || 0.005),
+          expectedReturn: tradeEdge,
           confidence: 0.7,
           executionSpeed: 1.0,
           strategy: 'crypto-latency-arb',
 
           rustEngine: true,
-          bypassThreshold: true,
+          bypassThreshold: false,
           alreadyExecuted: true,
           rustTradeId: trade.id,
           rustPnl: trade.pnl,

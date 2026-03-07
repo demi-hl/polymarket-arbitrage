@@ -24,7 +24,7 @@ function useNotifications() {
 export default function Header({ minimal = false }) {
   const [clock, setClock] = useState(new Date())
   const { portfolio, systemStatus, loading } = useTrading()
-  const { address } = useWallet()
+  const { address, jwt } = useWallet()
   const notifications = useNotifications()
   const [tradingMode, setTradingMode] = useState('paper')
 
@@ -34,11 +34,12 @@ export default function Header({ minimal = false }) {
   }, [])
 
   useEffect(() => {
-    fetch('/api/settings/live-status')
+    const headers = jwt ? { Authorization: `Bearer ${jwt}` } : {}
+    fetch('/api/settings/live-status', { headers })
       .then(r => r.json())
       .then(j => j.success && setTradingMode(j.data?.mode || 'paper'))
       .catch(() => {})
-  }, [])
+  }, [jwt])
 
   const isLive = !loading && systemStatus?.connected
 
@@ -97,7 +98,7 @@ export default function Header({ minimal = false }) {
           <motion.div className="w-2 h-2 rounded-sm" style={{ background: 'linear-gradient(135deg, #00d4ff, #a855f7)' }} animate={{ rotate: [0, 90, 0] }} transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }} />
         </div>
         <span className="text-[13px] sm:text-[15px] uppercase tracking-[0.22em] font-futuristic font-semibold text-gradient-minimal group-hover:opacity-100 opacity-80 transition-opacity duration-500">
-          DEMI
+          LOCALS ONLY
         </span>
       </Link>
 
@@ -131,9 +132,9 @@ export default function Header({ minimal = false }) {
             <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
           </>
         )}
-        <Link to="/settings">
+        <Link to="/settings" className="flex items-center shrink-0">
           <motion.span
-            className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-md cursor-pointer"
+            className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-md cursor-pointer whitespace-nowrap"
             style={{
               background: tradingMode === 'live' ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.10)',
               color: tradingMode === 'live' ? '#ef4444' : '#10b981',

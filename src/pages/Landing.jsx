@@ -94,7 +94,7 @@ export default function Landing() {
         >
           <span className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-gray-500">
             <span className="w-12 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
-            Polymarket Arbitrage Engine
+            A Locals Only Production
             <span className="w-12 h-px bg-gradient-to-l from-transparent via-accent/30 to-transparent" />
           </span>
         </motion.div>
@@ -103,17 +103,17 @@ export default function Landing() {
         <motion.h1
           variants={stagger.item}
           transition={{ duration: 1.2, ease }}
-          className="text-6xl sm:text-8xl font-extralight tracking-[-0.03em] text-white mb-1 leading-[0.88]"
+          className="text-5xl sm:text-7xl font-extralight tracking-[-0.03em] text-white mb-1 leading-[0.88]"
           style={{ textShadow: '0 0 80px rgba(0, 212, 255, 0.08)' }}
         >
-          A Locals Only
+          Polymarket
         </motion.h1>
         <motion.h2
           variants={stagger.item}
           transition={{ duration: 1.2, ease }}
-          className="text-6xl sm:text-8xl font-extralight tracking-[-0.03em] mb-5 leading-[0.88] text-gradient-hero"
+          className="text-5xl sm:text-7xl font-extralight tracking-[-0.03em] mb-5 pb-3 leading-[1.3] text-gradient-hero overflow-visible"
         >
-          Production
+          Arbitrage Engine
         </motion.h2>
 
         {/* Tagline — animated reveal */}
@@ -122,33 +122,55 @@ export default function Landing() {
           transition={{ duration: 0.7 }}
           className="mb-3 space-y-2"
         >
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            {['Latency Engine', 'Elections', 'Sports Odds', 'Weather', 'Copy-Trade', 'Macro Data', 'New Market Alpha'].map((tag, i) => (
+          <div className="flex items-center justify-center gap-2 flex-wrap max-w-2xl mx-auto">
+            {[
+              { tag: 'GPU Accelerated', icon: '▣', accent: '#a855f7' },
+              { tag: 'Rust Latency Engine', icon: '⟐', accent: '#00d4ff' },
+              { tag: 'Bayesian ML', icon: '◈', accent: '#10b981' },
+              { tag: 'Whale Tracking', icon: '◉', accent: '#ec4899' },
+              { tag: 'Live Sports Feed', icon: '●', accent: '#ef4444' },
+              { tag: 'Mempool Analysis', icon: '◇', accent: '#f59e0b' },
+              { tag: 'Cross-Platform Arb', icon: '⇄', accent: '#6366f1' },
+              { tag: 'Monte Carlo Risk', icon: '◆', accent: '#0ea5e9' },
+            ].map(({ tag, icon, accent }, i) => (
               <motion.span
                 key={tag}
                 initial={{ opacity: 0, scale: 0.8, filter: 'blur(8px)' }}
                 animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                transition={{ delay: 1.2 + i * 0.1, duration: 0.6, ease }}
-                className="text-[11px] uppercase tracking-[0.15em] px-3 py-1.5 rounded-full font-medium"
+                whileHover={{ scale: 1.08, transition: { duration: 0.2 } }}
+                transition={{ delay: 1.2 + i * 0.08, duration: 0.5, ease }}
+                className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.12em] px-2.5 py-1.5 rounded-full font-medium cursor-default select-none"
                 style={{
-                  background: 'rgba(0,212,255,0.06)',
-                  border: '1px solid rgba(0,212,255,0.1)',
-                  color: 'rgba(0,212,255,0.7)',
+                  background: `${accent}08`,
+                  border: `1px solid ${accent}18`,
+                  color: `${accent}b3`,
+                  transition: 'background 0.3s, border-color 0.3s, box-shadow 0.3s',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = `${accent}14`
+                  e.currentTarget.style.borderColor = `${accent}30`
+                  e.currentTarget.style.boxShadow = `0 0 16px ${accent}15`
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = `${accent}08`
+                  e.currentTarget.style.borderColor = `${accent}18`
+                  e.currentTarget.style.boxShadow = 'none'
                 }}
               >
+                <span style={{ fontSize: '7px', lineHeight: 1 }}>{icon}</span>
                 {tag}
               </motion.span>
             ))}
           </div>
-          <p className="text-sm text-gray-600 font-light tracking-wide max-w-md mx-auto leading-relaxed">
-            37 strategies · MRO-Kelly sizing · Rust execution engine
+          <p className="text-[13px] text-gray-600 font-light tracking-wide max-w-md mx-auto leading-relaxed mt-3">
+            39 strategies · GPU-powered inference · Rust execution · Fractional Kelly sizing
           </p>
         </motion.div>
 
         <motion.p
           variants={stagger.item}
           transition={{ duration: 0.5 }}
-          className="text-xs text-gray-600 tracking-[0.3em] uppercase mb-8 font-medium"
+          className="text-xs text-gray-600 tracking-[0.3em] uppercase mb-6 font-medium"
         >
           by DEMI
         </motion.p>
@@ -161,7 +183,7 @@ export default function Landing() {
         >
           {!address && (
             <p className="text-sm text-gray-500 tracking-wide mb-1">
-              Connect your wallet to verify you hold a Locals Only NFT
+              Connect your wallet to verify ownership of Locals Only
             </p>
           )}
           <ConnectWallet />
@@ -219,7 +241,7 @@ export default function Landing() {
         <motion.div
           variants={stagger.item}
           transition={{ duration: 0.8 }}
-          className="flex items-center justify-center gap-3 flex-wrap mb-6"
+          className="flex items-center justify-center gap-3 flex-wrap mb-3"
         >
           <motion.div
             className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl"
@@ -276,7 +298,7 @@ export default function Landing() {
               label="Trades"
               color="#a855f7"
               delay={0.75}
-              icon="⚡"
+              icon="▸"
             />
           )}
 
@@ -290,7 +312,18 @@ export default function Landing() {
             />
           )}
         </motion.div>
+
       </motion.div>
+
+      {/* Version — pinned to bottom */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2.5, duration: 1 }}
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-mono text-gray-700 tracking-widest uppercase z-10"
+      >
+        v4.0
+      </motion.p>
     </div>
   )
 }

@@ -648,12 +648,14 @@ program
     
     // Start API server
     const app = createApiServer(wsServer);
-    app.listen(port, () => {
-      console.log(chalk.green(`✓ API server started on port ${port}`));
+    const bindHost = process.env.BIND_HOST || '0.0.0.0';
+    app.listen(port, bindHost, () => {
+      console.log(chalk.green(`✓ API server started on ${bindHost}:${port}`));
       console.log(chalk.gray(`\nEndpoints:`));
       console.log(chalk.gray(`  - API: http://localhost:${port}/api`));
       console.log(chalk.gray(`  - Health: http://localhost:${port}/health`));
       console.log(chalk.gray(`  - WebSocket: ws://localhost:${wsPort}`));
+      if (bindHost === '127.0.0.1') console.log(chalk.cyan(`  🔒 Bound to localhost only — no network exposure`));
       console.log(chalk.yellow(`\nPress Ctrl+C to stop\n`));
     });
     
@@ -701,8 +703,10 @@ program
     
     console.log(chalk.bold('📊 POLYMARKET ARBITRAGE BOT - DASHBOARD\n'));
     
-    app.listen(port, '0.0.0.0', () => {
+    const dashHost = process.env.BIND_HOST || '0.0.0.0';
+    app.listen(port, dashHost, () => {
       console.log(chalk.green(`✓ Dashboard running at http://localhost:${port}`));
+      if (dashHost === '127.0.0.1') console.log(chalk.cyan(`  🔒 Bound to localhost only — no network exposure`));
       console.log(chalk.gray(`\nPress Ctrl+C to stop\n`));
     });
   });

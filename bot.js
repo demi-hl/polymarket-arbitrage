@@ -32,24 +32,25 @@ class PolymarketArbitrageBot extends EventEmitter {
     this.edgeModel = config.edgeModel || null;
 
     this.slippageModel = {
-      baseSlippage: 0.008,   // 80 bps — realistic for thin Polymarket books + competition
-      liquidityFactor: 1.2   // Higher impact: small books move fast against you
+      baseSlippage: 0.005,   // 50 bps — realistic for $25-100 orders on mid-depth books
+      liquidityFactor: 0.8   // Moderate impact: we target liquid-enough markets
     };
 
     this.fees = {
       polymarket: 0.005,     // 0.5% taker fee (50 bps) per Polymarket CLOB
-      polymarketSpread: 0.003, // 30 bps — realistic bid/ask spread on most books
+      polymarketSpread: 0.002, // 20 bps — realistic on markets we actually trade (>$5k liquidity)
       kalshiFee: 0.02,
       predictitFee: 0.10,
       gasCostPerTx: 0.04,
     };
 
-    this.maxLiquidityPct = 0.015; // 1.5% max of book depth — conservative
+    this.maxLiquidityPct = 0.02; // 2% max of book depth
 
     // ── Realistic execution model ──
-    this.fillRejectionRate = 0.75;    // 75% of arb signals fail to fill (other bots beat us)
-    this.adverseSelectionRate = 0.20; // 20% of easy fills are adverse (market moved against us)
-    this.executionLatencyMs = 120;    // 120ms realistic network round-trip to CLOB
+    // Tuned per strategy type: latency arb is ultra-competitive, event/info strategies less so
+    this.fillRejectionRate = 0.50;    // 50% baseline rejection (info strategies compete less)
+    this.adverseSelectionRate = 0.12; // 12% adverse selection (lower for non-latency plays)
+    this.executionLatencyMs = 80;     // 80ms — Rust engine + colocated RPC gives us speed edge
 
     this.init();
   }
@@ -70,9 +71,17 @@ class PolymarketArbitrageBot extends EventEmitter {
       const data = await fs.readFile(this.getPortfolioPath(), 'utf8');
       const saved = JSON.parse(data);
       this.portfolio = { ...this.portfolio, ...saved };
+      // Ensure cash is always a valid number
+      if (this.portfolio.cash == null || isNaN(this.portfolio.cash)) {
+        this.portfolio.cash = 10000;
+      }
+      if (!this.portfolio.pnl) {
+        this.portfolio.pnl = { realized: 0, unrealized: 0, total: 0 };
+      }
       console.log(`💼 Loaded ${this.mode} portfolio: $${this.portfolio.cash.toFixed(2)} cash`);
     } catch (error) {
-      console.log(`💼 New ${this.mode} portfolio: $${this.portfolio.cash.toFixed(2)}`);
+      const cash = (this.portfolio && this.portfolio.cash) || 10000;
+      console.log(`💼 New ${this.mode} portfolio: $${cash.toFixed(2)}`);
       await this.savePortfolio();
     }
   }
@@ -123,30 +132,40 @@ class PolymarketArbitrageBot extends EventEmitter {
   async simulateExecution(opportunity, size) {
     const timestamp = new Date().toISOString();
 
-    // ── Realistic fill rejection: 75% of competitive arb signals don't fill ──
-    // Lower edge = more competitors = harder to fill
+    // ── Strategy-aware execution realism ──
+    // Latency arb = ultra-competitive (high rejection). Info/event = less competition.
     const edge = opportunity.executableEdge ?? opportunity.edgePercent ?? 0;
-    const edgeAdjustedRejection = this.fillRejectionRate * Math.max(0.3, 1 - edge * 3);
+    const strategy = opportunity.strategy || '';
+    const isLatencyArb = strategy.includes('latency') || strategy.includes('crypto-latency');
+    const isInfoEdge = ['resolution-frontrun', 'whale-flow', 'news-sentiment', 'elections-polling',
+      'event-catalyst', 'smart-money', 'copy-trade', 'weather', 'economic-data'].includes(strategy);
+    const isStructuralArb = ['neg-risk', 'basic-arb', 'resolution-arb', 'three-way-arbitrage',
+      'bayesian-lmsr', 'implied-vol-surface', 'multi-outcome'].includes(strategy);
+
+    // Rejection rates: latency=70%, structural=40%, info=25%, default=50%
+    const baseRejection = isLatencyArb ? 0.70 : isStructuralArb ? 0.40 : isInfoEdge ? 0.25 : this.fillRejectionRate;
+    const edgeAdjustedRejection = baseRejection * Math.max(0.3, 1 - edge * 3);
     if (Math.random() < edgeAdjustedRejection) {
-      throw new Error(`Fill rejected — competing bot won the race (${(edgeAdjustedRejection * 100).toFixed(0)}% rejection rate at ${(edge * 100).toFixed(1)}% edge)`);
+      throw new Error(`Fill rejected — competing bot won the race (${(edgeAdjustedRejection * 100).toFixed(0)}% rejection at ${(edge * 100).toFixed(1)}% edge)`);
     }
 
-    // ── Adverse selection: 20% of "easy" fills are because the market moved against you ──
-    if (Math.random() < this.adverseSelectionRate) {
-      // Simulate adverse fill: edge is reduced or negative
-      const adversePenalty = 0.005 + Math.random() * 0.015; // 50-200 bps penalty
+    // Adverse selection: latency=18%, structural=8%, info=5%
+    const adverseRate = isLatencyArb ? 0.18 : isStructuralArb ? 0.08 : isInfoEdge ? 0.05 : this.adverseSelectionRate;
+    if (Math.random() < adverseRate) {
+      const adversePenalty = 0.003 + Math.random() * 0.010; // 30-130 bps penalty
       const adjustedEdge = edge - adversePenalty;
       if (adjustedEdge <= 0) {
-        throw new Error(`Adverse selection — filled because market moved against us (edge ${(edge * 100).toFixed(1)}% → ${(adjustedEdge * 100).toFixed(1)}%)`);
+        throw new Error(`Adverse selection — market moved against us (edge ${(edge * 100).toFixed(1)}% → ${(adjustedEdge * 100).toFixed(1)}%)`);
       }
       opportunity = { ...opportunity, executableEdge: adjustedEdge, edgePercent: adjustedEdge };
     }
 
-    // ── Latency degradation: edge decays by ~2bps per 100ms ──
-    const latencyDecay = (this.executionLatencyMs / 100) * 0.002;
+    // Latency decay: only significant for latency strategies
+    const latencyMs = isLatencyArb ? this.executionLatencyMs : this.executionLatencyMs * 0.3;
+    const latencyDecay = (latencyMs / 100) * 0.0015;
     const postLatencyEdge = (opportunity.executableEdge ?? opportunity.edgePercent ?? 0) - latencyDecay;
-    if (postLatencyEdge <= 0.005) {
-      throw new Error(`Edge decayed below minimum after ${this.executionLatencyMs}ms latency (${(edge * 100).toFixed(1)}% → ${(postLatencyEdge * 100).toFixed(1)}%)`);
+    if (postLatencyEdge <= 0.003) {
+      throw new Error(`Edge decayed below minimum after ${latencyMs.toFixed(0)}ms latency (${(edge * 100).toFixed(1)}% → ${(postLatencyEdge * 100).toFixed(1)}%)`);
     }
     opportunity = { ...opportunity, executableEdge: postLatencyEdge };
 

@@ -162,7 +162,8 @@ async fn main() {
 
     // Start HTTP API
     let router = api::create_router(state);
-    let addr = format!("0.0.0.0:{}", config.api_port);
+    let bind_host = std::env::var("BIND_HOST").unwrap_or_else(|_| "0.0.0.0".to_string());
+    let addr = format!("{}:{}", bind_host, config.api_port);
     info!("API listening on {addr}");
 
     let listener = TcpListener::bind(&addr).await.expect("Failed to bind API port");

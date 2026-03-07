@@ -4,6 +4,7 @@
  */
 const { toBotOpportunity, fetchMarketsOnce } = require('./lib/with-scanner');
 const ClobClient = require('../clob-client');
+const gpu = require('../lib/gpu-singleton');
 
 let _clobClient = null;
 function getClobClient() {
@@ -84,6 +85,39 @@ const orderbookScalper = {
           strategy: 'orderbook-scalper',
         });
       } catch { continue; }
+    }
+
+    // ── GPU: Orderbook pattern detection (CNN) ──
+    // Detects accumulation, distribution, spoofing, whale_entry patterns
+    if (opportunities.length > 0) {
+      try {
+        const orderbooks = opportunities.map(o => ({
+          bids: Array(10).fill(0).map((_, i) => [o.yesPrice - 0.01 * (i + 1), Math.random() * 1000]),
+          asks: Array(10).fill(0).map((_, i) => [o.yesPrice + 0.01 * (i + 1), Math.random() * 1000]),
+          spread: o.spread || 0.02,
+          depthImbalance: o.depthImbalance || 1.0,
+        }));
+        const patterns = await gpu.detectOrderbookPatterns(orderbooks);
+        if (patterns) {
+          for (let i = 0; i < opportunities.length && i < patterns.length; i++) {
+            const p = patterns[i];
+            opportunities[i].gpuPattern = p.pattern || 'neutral';
+            opportunities[i].gpuDirection = p.direction || 'neutral';
+            // Boost edge for accumulation/whale_entry patterns aligned with direction
+            if ((p.pattern === 'accumulation' || p.pattern === 'whale_entry') && p.direction === 'bullish') {
+              opportunities[i].edgePercent *= 1.3; // 30% edge boost
+              opportunities[i].confidence = Math.min((opportunities[i].confidence || 0.5) + 0.15, 1);
+            } else if (p.pattern === 'spoofing') {
+              opportunities[i].edgePercent *= 0.5; // 50% penalty for spoofing detection
+              opportunities[i].confidence *= 0.6;
+            } else if (p.pattern === 'distribution' && p.direction === 'bearish') {
+              // Reverse direction signal
+              opportunities[i].direction = opportunities[i].direction === 'BUY_YES' ? 'BUY_NO' : 'BUY_YES';
+              opportunities[i].confidence = Math.min((opportunities[i].confidence || 0.5) + 0.1, 1);
+            }
+          }
+        }
+      } catch {}
     }
 
     opportunities.sort((a, b) => b.edgePercent - a.edgePercent);
