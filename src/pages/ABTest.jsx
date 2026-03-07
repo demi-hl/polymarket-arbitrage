@@ -26,9 +26,9 @@ function useAnimatedNumber(value, duration = 600) {
 }
 
 const THEMES = {
-  A: { color: '#10b981', label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment' },
-  B: { color: '#10b981', label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment' },
-  paper: { color: '#10b981', label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment' },
+  A: { color: '#10b981', label: 'Paper Trading', sub: '37 strategies · MRO-Kelly sizing · Weather arbitrage · Whale tracking' },
+  B: { color: '#10b981', label: 'Paper Trading', sub: '37 strategies · MRO-Kelly sizing · Weather arbitrage · Whale tracking' },
+  paper: { color: '#10b981', label: 'Paper Trading', sub: '37 strategies · MRO-Kelly sizing · Weather arbitrage · Whale tracking' },
 }
 
 export default function ABTest() {
@@ -123,7 +123,7 @@ export default function ABTest() {
             Paper <span className="text-gradient-minimal">Trading</span>
           </h1>
           <p className="text-base text-gray-500 font-light tracking-wide">
-            29 strategies &middot; Deep learning &middot; GPU sentiment &middot; Oracle daemon &middot; Whale tracking &middot; Kelly sizing
+            37 strategies &middot; MRO-Kelly sizing &middot; Weather arbitrage &middot; Whale tracking &middot; Kelly sizing
           </p>
         </motion.div>
 

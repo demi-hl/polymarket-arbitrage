@@ -153,46 +153,67 @@ class StrategyRegistry extends EventEmitter {
   }
 }
 
-const fundamental = require('./fundamental');
-const flow = require('./flow');
-const crossPlatform = require('./cross-platform');
+// ── Core strategies (individual modules) ──
+const cryptoLatencyArb = require('./crypto-latency-arb');
 const multiOutcome = require('./multi-outcome');
+const negRisk = require('./neg-risk');
+const eventCatalyst = require('./event-catalyst');
+const impliedVolSurface = require('./implied-vol-surface');
+const flow = require('./flow');
 const { marketMakerStrategy } = require('./market-maker');
 const correlated = require('./correlated');
-const negRisk = require('./neg-risk');
 const volumeSpike = require('./volume-spike');
 const taMomentum = require('./ta-momentum');
 const liquiditySniper = require('./liquidity-sniper');
-const eventCatalyst = require('./event-catalyst');
 const smartMoney = require('./smart-money');
 const newsSentiment = require('./news-sentiment');
 const resolutionFrontrun = require('./resolution-frontrun');
-const cryptoLatencyArb = require('./crypto-latency-arb');
+const whaleFlow = require('./whale-flow');
+const weather = require('./weather');
+const electionsPolling = require('./elections-polling');
+const economicData = require('./economic-data');
+const sportsOdds = require('./sports-odds');
+const newMarketAlpha = require('./new-market-alpha');
+const copyTrade = require('./copy-trade');
+
+// ── Multi-strategy modules (each exports an array) ──
+const crossPlatform = require('./cross-platform');
+const fundamental = require('./fundamental');
 const systematicFactorSuite = require('./systematic-factor-suite');
-const impliedVolSurface = require('./implied-vol-surface');
-const { strategies: whaleFlow, setOrderflowWatcher } = require('./whale-flow');
+
+let _orderflowWatcher = null;
+function setOrderflowWatcher(watcher) {
+  _orderflowWatcher = watcher;
+  if (whaleFlow.setOrderflowWatcher) whaleFlow.setOrderflowWatcher(watcher);
+}
 
 const ALL_STRATEGIES = [].concat(
-  resolutionFrontrun,
-  multiOutcome,
-  fundamental,
-  crossPlatform,
-  [marketMakerStrategy],
-  flow,
-  correlated,
-  negRisk,
-  volumeSpike,
-  taMomentum,
-  liquiditySniper,
-  eventCatalyst,
-  smartMoney,
-  newsSentiment,
-  cryptoLatencyArb,
-  systematicFactorSuite,
-  impliedVolSurface,
-  whaleFlow,
+  cryptoLatencyArb,                   // Rust latency engine
+  crossPlatform,                      // kalshi, predictit, manifold, metaculus, three-way, value-betting
+  fundamental,                        // basic-arb, resolution-arb
+  systematicFactorSuite,              // 8 factor strategies
+  multiOutcome,                       // structural multi-outcome arb
+  impliedVolSurface,                  // vol surface mispricing
+  eventCatalyst,                      // time-decay near resolution
+  negRisk,                            // guaranteed structural arb
+  flow,                               // orderbook scalper
+  [marketMakerStrategy].filter(Boolean), // market maker
+  correlated,                         // correlated market arb
+  volumeSpike,                        // volume spike detector
+  taMomentum,                         // technical analysis momentum
+  liquiditySniper,                    // liquidity sniper
+  smartMoney,                         // smart money detector
+  newsSentiment,                      // news sentiment
+  resolutionFrontrun,                 // resolution frontrunner
+  whaleFlow.strategies || [],         // whale flow tracker
+  weather,                            // weather forecast mispricing
+  electionsPolling,                   // polls vs market pricing
+  economicData,                       // CPI, unemployment, Fed rates
+  sportsOdds,                         // sportsbook odds cross-reference
+  newMarketAlpha,                     // first-mover on new markets
+  copyTrade,                          // follow top PnL wallets
 );
 
 const STRATEGY_COUNT = ALL_STRATEGIES.length;
 
-module.exports = { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT, setWhaleTracker, setOrderflowWatcher };
+module.exports = { StrategyRegistry, ALL_STRATEGIES, STRATEGY_COUNT, setWhaleTracker, setOrderflowWatcher, getWhaleTracker };

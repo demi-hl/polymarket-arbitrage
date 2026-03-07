@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion'
 
 const variants = {
-  initial: { opacity: 0, y: 16, filter: 'blur(6px)', scale: 0.995 },
+  initial: { opacity: 0, y: 12, filter: 'blur(8px)', scale: 0.98 },
   animate: { opacity: 1, y: 0, filter: 'blur(0px)', scale: 1 },
-  exit: { opacity: 0, y: -10, filter: 'blur(6px)', scale: 0.995 },
+  exit: { opacity: 0, y: -8, filter: 'blur(10px)', scale: 0.98 },
 }
 
 export default function PageTransition({ children }) {
@@ -13,7 +13,7 @@ export default function PageTransition({ children }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </motion.div>
@@ -41,7 +41,7 @@ export function StaggerItem({ children, className = '' }) {
     <motion.div
       className={className}
       variants={{
-        hidden: { opacity: 0, y: 20, filter: 'blur(4px)' },
+        hidden: { opacity: 0, y: 16, filter: 'blur(6px)' },
         visible: {
           opacity: 1, y: 0, filter: 'blur(0px)',
           transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },

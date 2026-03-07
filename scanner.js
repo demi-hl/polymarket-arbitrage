@@ -15,7 +15,7 @@ class PolymarketScanner {
     this.gammaApi = config.gammaApi || 'https://gamma-api.polymarket.com';
     this.minLiquidity = config.minLiquidity || 5000;
     this.edgeThreshold = config.edgeThreshold || 0.05;
-    this.timeout = config.timeout || 15000;
+    this.timeout = config.timeout || 5000;
     this.pageSize = config.pageSize || 100;
     this.clob = config.clobClient || new ClobClient({ timeout: this.timeout });
     this.useClobPricing = config.useClobPricing !== false;
@@ -69,8 +69,13 @@ class PolymarketScanner {
   }
 
   async _getWithRetry(url, config = {}) {
-    const maxAttempts = Math.max(1, parseInt(process.env.SCAN_FETCH_RETRIES || '4', 10));
-    const baseDelayMs = Math.max(100, parseInt(process.env.SCAN_FETCH_RETRY_BASE_MS || '400', 10));
+    const maxAttempts = Math.max(1, parseInt(process.env.SCAN_FETCH_RETRIES || '2', 10));
+    const baseDelayMs = Math.max(100, parseInt(process.env.SCAN_FETCH_RETRY_BASE_MS || '300', 10));
+
+    // Circuit breaker: if API has been failing, skip retries for 60s
+    if (this._circuitOpen && Date.now() - this._circuitOpenedAt < 60000) {
+      throw new Error('Circuit breaker open: Polymarket API unavailable');
+    }
 
     let lastErr = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -80,9 +85,23 @@ class PolymarketScanner {
           if (elapsed < this.interRequestDelayMs) await sleep(this.interRequestDelayMs - elapsed);
         }
         this._lastRequestAt = Date.now();
-        return await axios.get(url, config);
+        const result = await axios.get(url, config);
+        // Success — reset circuit breaker
+        this._circuitOpen = false;
+        this._consecutiveFailures = 0;
+        return result;
       } catch (err) {
         lastErr = err;
+        this._consecutiveFailures = (this._consecutiveFailures || 0) + 1;
+
+        // Trip circuit breaker after 3 consecutive failures
+        if (this._consecutiveFailures >= 3) {
+          this._circuitOpen = true;
+          this._circuitOpenedAt = Date.now();
+          console.error(`[Scanner] Circuit breaker tripped after ${this._consecutiveFailures} failures — pausing API calls for 60s`);
+          break;
+        }
+
         const status = err?.response?.status;
         const retryable = status === 429 || (status >= 500 && status <= 599) || !status;
         if (!retryable || attempt === maxAttempts) break;

@@ -166,22 +166,22 @@ function WalletCard({ wallet, rank }) {
           </a>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 mb-1">P&L</p>
-            <p className={`font-mono text-sm font-medium ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-gray-600 mb-1">P&L</p>
+            <p className={`font-mono text-sm font-medium truncate ${pnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
               {pnl >= 0 ? '+' : ''}${Math.abs(pnl) >= 1000 ? `${(pnl / 1000).toFixed(1)}k` : pnl.toFixed(0)}
             </p>
           </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 mb-1">Win Rate</p>
-            <p className="font-mono text-sm text-white">
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-gray-600 mb-1">Win Rate</p>
+            <p className="font-mono text-sm text-white truncate">
               {typeof winRate === 'string' ? winRate : `${(winRate * 100).toFixed(0)}%`}
             </p>
           </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.15em] text-gray-600 mb-1">Markets</p>
-            <p className="font-mono text-sm text-gray-400">{wallet.markets || wallet.totalMarkets || '—'}</p>
+          <div className="min-w-0">
+            <p className="text-[10px] uppercase tracking-[0.1em] text-gray-600 mb-1">Markets</p>
+            <p className="font-mono text-sm text-gray-400 truncate">{wallet.markets || wallet.totalMarkets || '—'}</p>
           </div>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function CopyTrading() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gradient-minimal">Whale Tracker & Copy Trading</h2>
+          <h2 className="text-2xl font-bold text-gradient-minimal">Copy Trading</h2>
           <p className="text-xs text-gray-500 mt-1">
             {whaleData?.trackedWallets || 0} tracked wallets · {allWhaleSignals.length} signals · real-time orderflow
           </p>

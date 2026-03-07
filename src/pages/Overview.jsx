@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { useTrading } from '../context/TradingContext'
 import { useMultiAccount } from '../context/MultiAccountContext'
 import { TrendingUp, TrendingDown, Activity, Clock } from '../components/Icons'
 import AnimatedNumber from '../components/AnimatedNumber'
+import PulseRing from '../components/PulseRing'
+import Sparkline from '../components/Sparkline'
 
 function Skeleton({ className = '' }) {
   return <div className={`shimmer rounded-2xl bg-trader-700/50 ${className}`} />
@@ -167,9 +170,14 @@ export default function Overview() {
   return (
     <div className="space-y-8">
       <motion.div {...anim(0)}>
-        <h2 className="text-4xl font-extralight tracking-tight text-gradient-minimal">Dashboard</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-4xl font-extralight tracking-tight text-gradient-minimal text-display">Polymarket Arbitrage Engine</h2>
+          <div className="heartbeat-line text-accent/60 mt-2">
+            <span /><span /><span /><span /><span /><span />
+          </div>
+        </div>
         <p className="text-[13px] text-gray-500 mt-2.5 tracking-wide font-light">
-          29 strategies · Deep learning · GPU sentiment · Oracle daemon · Whale tracking · Kelly sizing
+          37 strategies · MRO-Kelly sizing · Rust latency engine · Whale tracking
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2.5">
           <span className="text-[10px] uppercase tracking-wider text-gray-500">Paper→live gap</span>
@@ -405,14 +413,15 @@ export default function Overview() {
             {filteredRecentTrades.slice(0, 12).map((trade, i) => {
               const hasRealized = trade.realizedPnl != null
               const pnl = hasRealized ? trade.realizedPnl : (trade.expectedProfit || 0)
+              const marketLink = trade.conditionId || trade.marketId || encodeURIComponent(trade.question || '')
               return (
+                <Link to={`/market/${marketLink}`} key={trade.id || i} className="block">
                 <motion.div
-                  key={trade.id || i}
                   initial={{ opacity: 0, x: 12, filter: 'blur(4px)' }}
                   animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                   transition={{ delay: 0.4 + i * 0.04, duration: 0.5 }}
                   whileHover={{ x: -4, backgroundColor: 'rgba(0, 212, 255, 0.03)' }}
-                  className="p-4 rounded-xl transition-colors"
+                  className="p-4 rounded-xl transition-colors cursor-pointer"
                   style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
                 >
                   <div className="flex items-center gap-3 mb-2">
@@ -439,6 +448,7 @@ export default function Overview() {
                     </div>
                   </div>
                 </motion.div>
+                </Link>
               )
             })}
             {filteredRecentTrades.length === 0 && (

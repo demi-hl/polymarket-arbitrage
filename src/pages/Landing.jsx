@@ -8,16 +8,26 @@ import ConnectWallet from '../components/ConnectWallet'
 
 const ease = [0.16, 1, 0.3, 1]
 
-function StatRing({ value, label, color = '#00d4ff', delay = 0 }) {
+function StatPill({ value, label, color = '#00d4ff', delay = 0, icon }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.9, delay, ease }}
-      className="flex flex-col items-center gap-1"
+      initial={{ opacity: 0, y: 10, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.7, delay, ease }}
+      className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl relative overflow-hidden group"
+      style={{
+        background: 'rgba(12, 12, 20, 0.6)',
+        backdropFilter: 'blur(20px)',
+        border: `1px solid ${color}11`,
+        boxShadow: `0 0 20px ${color}06, inset 0 1px 0 rgba(255,255,255,0.03)`,
+      }}
     >
-      <span className="font-mono text-xl tabular-nums tracking-tight" style={{ color }}>{value}</span>
-      <span className="text-xs uppercase tracking-[0.2em] text-gray-600">{label}</span>
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `radial-gradient(circle at center, ${color}08, transparent 70%)` }} />
+      {icon && <span className="text-xs" style={{ color: `${color}99` }}>{icon}</span>}
+      <div className="flex flex-col items-start gap-0.5 relative z-10">
+        <span className="font-mono text-base tabular-nums tracking-tight font-medium" style={{ color }}>{value}</span>
+        <span className="text-[9px] uppercase tracking-[0.25em] text-gray-600 font-medium">{label}</span>
+      </div>
     </motion.div>
   )
 }
@@ -83,9 +93,9 @@ export default function Landing() {
           className="mb-6"
         >
           <span className="inline-flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-gray-500">
-            <span className="w-8 h-px bg-gradient-to-r from-transparent to-gray-600" />
-            Polymarket Arbitrage System
-            <span className="w-8 h-px bg-gradient-to-l from-transparent to-gray-600" />
+            <span className="w-12 h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent" />
+            Polymarket Arbitrage Engine
+            <span className="w-12 h-px bg-gradient-to-l from-transparent via-accent/30 to-transparent" />
           </span>
         </motion.div>
 
@@ -106,17 +116,32 @@ export default function Landing() {
           Production
         </motion.h2>
 
-        {/* Tagline */}
+        {/* Tagline — animated reveal */}
         <motion.div
           variants={stagger.item}
           transition={{ duration: 0.7 }}
-          className="mb-3 space-y-1"
+          className="mb-3 space-y-2"
         >
-          <p className="text-base text-gray-500 font-light tracking-wide max-w-lg mx-auto leading-relaxed">
-            31 strategies · Whale flow detection · Crypto latency engine
-          </p>
-          <p className="text-base text-gray-500 font-light tracking-wide max-w-lg mx-auto leading-relaxed">
-            Real-time orderflow · Cross-platform arbitrage · AI sentiment analysis
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {['Latency Engine', 'Elections', 'Sports Odds', 'Weather', 'Copy-Trade', 'Macro Data', 'New Market Alpha'].map((tag, i) => (
+              <motion.span
+                key={tag}
+                initial={{ opacity: 0, scale: 0.8, filter: 'blur(8px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                transition={{ delay: 1.2 + i * 0.1, duration: 0.6, ease }}
+                className="text-[11px] uppercase tracking-[0.15em] px-3 py-1.5 rounded-full font-medium"
+                style={{
+                  background: 'rgba(0,212,255,0.06)',
+                  border: '1px solid rgba(0,212,255,0.1)',
+                  color: 'rgba(0,212,255,0.7)',
+                }}
+              >
+                {tag}
+              </motion.span>
+            ))}
+          </div>
+          <p className="text-sm text-gray-600 font-light tracking-wide max-w-md mx-auto leading-relaxed">
+            37 strategies · MRO-Kelly sizing · Rust execution engine
           </p>
         </motion.div>
 
@@ -190,68 +215,78 @@ export default function Landing() {
           <div className="glow-line mb-6" />
         </motion.div>
 
-        {/* Stats bar */}
+        {/* Stats bar — glass pills */}
         <motion.div
           variants={stagger.item}
           transition={{ duration: 0.8 }}
-          className="flex items-center justify-center gap-10 mb-6"
+          className="flex items-center justify-center gap-3 flex-wrap mb-6"
         >
-          <div className="flex items-center gap-2.5">
+          <motion.div
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl"
+            style={{
+              background: 'rgba(12, 12, 20, 0.6)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(255,255,255,0.04)',
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.7 }}
+          >
             <motion.div
               className="w-2 h-2 rounded-full relative"
               animate={{
                 boxShadow: live
-                  ? ['0 0 4px rgba(16,185,129,0.4)', '0 0 20px rgba(16,185,129,0.8)', '0 0 4px rgba(16,185,129,0.4)']
+                  ? ['0 0 4px rgba(16,185,129,0.4)', '0 0 16px rgba(16,185,129,0.8)', '0 0 4px rgba(16,185,129,0.4)']
                   : 'none'
               }}
               transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
               style={{ background: live ? '#10b981' : '#4b5563' }}
             />
-            <span className="text-xs uppercase tracking-[0.2em] text-gray-600">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-gray-500 font-medium">
               {live ? 'Live' : 'Standby'}
             </span>
-          </div>
-
-          <StatRing
-            value={clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-            label="Local"
-            color="#6b7280"
-            delay={0.5}
-          />
+            <span className="font-mono text-sm tabular-nums text-gray-500">
+              {clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+          </motion.div>
 
           {totalEquity > 0 && (
-            <StatRing
+            <StatPill
               value={`$${Math.round(totalEquity).toLocaleString()}`}
               label="Portfolio"
               color="#00d4ff"
               delay={0.6}
+              icon="◆"
             />
           )}
 
           {totalPnl !== 0 && (
-            <StatRing
+            <StatPill
               value={`${totalPnl >= 0 ? '+' : ''}$${totalPnl.toFixed(2)}`}
               label="P&L"
               color={totalPnl >= 0 ? '#10b981' : '#ef4444'}
               delay={0.7}
+              icon={totalPnl >= 0 ? '▲' : '▼'}
             />
           )}
 
           {totalTrades > 0 && (
-            <StatRing
-              value={totalTrades}
+            <StatPill
+              value={totalTrades.toLocaleString()}
               label="Trades"
               color="#a855f7"
               delay={0.75}
+              icon="⚡"
             />
           )}
 
           {totalOpen > 0 && (
-            <StatRing
+            <StatPill
               value={totalOpen}
               label="Open"
               color="#10b981"
               delay={0.8}
+              icon="●"
             />
           )}
         </motion.div>

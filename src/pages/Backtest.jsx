@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { BarChart3, Play, Download, Settings } from '../components/Icons'
+import { BarChart3, Play, Settings } from '../components/Icons'
 import useApi from '../hooks/useApi'
 
 export default function Backtest() {

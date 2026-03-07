@@ -170,6 +170,29 @@ export const Users = ({ size = 24, className }) => (
   </svg>
 )
 
+// Copy Trading — two mirrored arrows (minimalistic)
+export const CopyTrade = ({ size = 24, className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4 8h12l-4-4" /><path d="M4 8l4 4" />
+    <path d="M20 16H8l4 4" /><path d="M20 16l-4-4" />
+  </svg>
+)
+
+// Candlestick chart icon for market detail
+export const CandlestickChart = ({ size = 24, className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M9 5v4" /><rect x="7" y="9" width="4" height="6" rx="1" /><path d="M9 15v4" />
+    <path d="M17 3v3" /><rect x="15" y="6" width="4" height="8" rx="1" /><path d="M17 14v7" />
+  </svg>
+)
+
+// Back arrow
+export const ArrowLeft = ({ size = 24, className }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m12 19-7-7 7-7" /><path d="M19 12H5" />
+  </svg>
+)
+
 export const Newspaper = ({ size = 24, className }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />

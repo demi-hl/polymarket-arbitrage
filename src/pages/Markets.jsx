@@ -1,13 +1,14 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useTrading } from '../context/TradingContext'
-import { Search, ArrowUpDown } from '../components/Icons'
+import { Search, ArrowUpDown, CandlestickChart } from '../components/Icons'
 
 export default function Markets() {
   const { opportunities, executeTrade, opportunitiesMeta } = useTrading()
   const [search, setSearch] = useState('')
   const [minEdge, setMinEdge] = useState(5)
   const [sortBy, setSortBy] = useState('edge')
-  
+
   const filtered = opportunities
     .filter(o => {
       const matchesSearch = o.question?.toLowerCase().includes(search.toLowerCase())
@@ -19,8 +20,10 @@ export default function Markets() {
       if (sortBy === 'liquidity') return b.liquidity - a.liquidity
       return 0
     })
-  
-  const handleExecute = async (opp) => {
+
+  const handleExecute = async (e, opp) => {
+    e.preventDefault()
+    e.stopPropagation()
     const res = await executeTrade(opp.marketId, opp.maxPosition)
     if (res.success) {
       alert('Trade executed!')
@@ -28,7 +31,7 @@ export default function Markets() {
       alert('Trade failed: ' + res.error)
     }
   }
-  
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-0 lg:justify-between lg:items-center">
@@ -44,7 +47,7 @@ export default function Markets() {
               className="input-field pl-10 w-full sm:w-64"
             />
           </div>
-          
+
           <select
             value={minEdge}
             onChange={(e) => setMinEdge(Number(e.target.value))}
@@ -55,7 +58,7 @@ export default function Markets() {
             <option value={10}>10%+ Edge</option>
             <option value={15}>15%+ Edge</option>
           </select>
-          
+
           <button
             onClick={() => setSortBy(sortBy === 'edge' ? 'liquidity' : 'edge')}
             className="btn-secondary flex items-center gap-2"
@@ -83,7 +86,7 @@ export default function Markets() {
           ) : null}
         </div>
       )}
-      
+
       <div className="card overflow-hidden">
         <table className="data-table">
           <thead>
@@ -98,33 +101,43 @@ export default function Markets() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((opp, i) => (
-              <tr key={i}>
-                <td className="max-w-md">
-                  <p className="font-medium truncate">{opp.question}</p>
-                  <p className="text-xs text-gray-500">{opp.slug}</p>
-                </td>
-                <td>
-                  <span className="text-profit font-mono">
-                    +{(opp.edgePercent * 100).toFixed(2)}%
-                  </span>
-                </td>
-                <td className="font-mono">{((opp.yesPrice || 0) * 100).toFixed(1)}%</td>
-                <td className="font-mono">{((opp.noPrice || 0) * 100).toFixed(1)}%</td>
-                <td className={`font-mono ${opp.sum < 1 ? 'text-profit' : 'text-loss'}`}>
-                  {((opp.sum || 0) * 100).toFixed(1)}%
-                </td>
-                <td className="font-mono">${opp.liquidity?.toLocaleString()}</td>
-                <td>
-                  <button
-                    onClick={() => handleExecute(opp)}
-                    className="btn-primary text-sm py-1 px-3"
-                  >
-                    Execute
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {filtered.map((opp, i) => {
+              const marketLink = opp.conditionId || opp.marketId || encodeURIComponent(opp.question || '')
+              return (
+                <tr key={i} className="cursor-pointer hover:bg-accent/[0.03] transition-colors">
+                  <td className="max-w-md">
+                    <Link to={`/market/${marketLink}`} className="block">
+                      <div className="flex items-center gap-2">
+                        <CandlestickChart size={14} className="text-accent/40 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium truncate hover:text-accent transition-colors">{opp.question}</p>
+                          <p className="text-xs text-gray-500">{opp.slug}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  </td>
+                  <td>
+                    <span className="text-profit font-mono">
+                      +{(opp.edgePercent * 100).toFixed(2)}%
+                    </span>
+                  </td>
+                  <td className="font-mono">{((opp.yesPrice || 0) * 100).toFixed(1)}%</td>
+                  <td className="font-mono">{((opp.noPrice || 0) * 100).toFixed(1)}%</td>
+                  <td className={`font-mono ${opp.sum < 1 ? 'text-profit' : 'text-loss'}`}>
+                    {((opp.sum || 0) * 100).toFixed(1)}%
+                  </td>
+                  <td className="font-mono">${opp.liquidity?.toLocaleString()}</td>
+                  <td>
+                    <button
+                      onClick={(e) => handleExecute(e, opp)}
+                      className="btn-primary text-sm py-1 px-3"
+                    >
+                      Execute
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
             {filtered.length === 0 && (
               <tr>
                 <td colSpan={7} className="text-center py-8 text-gray-400">

@@ -152,7 +152,7 @@ function createApiServer(wsServer) {
           ...stats,
           gpuAvailable,
           gpuUrl: _gpuClient.baseUrl,
-          rustEngineUrl: process.env.LATENCY_ENGINE_URL || 'http://localhost:8900',
+          rustEngineUrl: process.env.LATENCY_ENGINE_URL || 'http://127.0.0.1:8900',
         },
       });
     } catch (err) {
@@ -629,14 +629,29 @@ function createApiServer(wsServer) {
       try { whales = JSON.parse(fs.readFileSync(whaleSignalsPath, 'utf8')); } catch {}
       try { xSentiment = JSON.parse(fs.readFileSync(xSignalsPath, 'utf8')); } catch {}
 
-      const maxAge = parseInt(req.query.maxAge) || 3600000;
+      const maxAge = parseInt(req.query.maxAge) || 86400000; // 24h default
       const cutoff = Date.now() - maxAge;
+
+      let filteredWhales = (Array.isArray(whales) ? whales : []).filter(s => s.timestamp > cutoff);
+      let filteredX = (Array.isArray(xSentiment) ? xSentiment : []).filter(s => s.timestamp > cutoff);
+      let stale = false;
+
+      // If no signals within maxAge, return the most recent ones so the page isn't blank
+      if (filteredWhales.length === 0 && Array.isArray(whales) && whales.length > 0) {
+        filteredWhales = whales.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 50);
+        stale = true;
+      }
+      if (filteredX.length === 0 && Array.isArray(xSentiment) && xSentiment.length > 0) {
+        filteredX = xSentiment.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 20);
+        stale = true;
+      }
 
       res.json({
         success: true,
         data: {
-          whales: (Array.isArray(whales) ? whales : []).filter(s => s.timestamp > cutoff),
-          xSentiment: (Array.isArray(xSentiment) ? xSentiment : []).filter(s => s.timestamp > cutoff),
+          whales: filteredWhales,
+          xSentiment: filteredX,
+          stale,
         },
       });
     } catch (err) {
@@ -674,7 +689,7 @@ function createApiServer(wsServer) {
     }
   }
 
-  const RUST_ENGINE_URL = process.env.LATENCY_ENGINE_URL || 'http://localhost:8900';
+  const RUST_ENGINE_URL = process.env.LATENCY_ENGINE_URL || 'http://127.0.0.1:8900';
   const STARTING_CAPITAL = toNumber(process.env.STARTING_CAPITAL, 10000);
   const RUST_CACHE_TTL_MS = 2000;
   let _rustSnapshotCache = { ts: 0, data: null };
@@ -1046,46 +1061,79 @@ function createApiServer(wsServer) {
     }
   }
 
+  // Accounts response cache — serves stale data when API is slow
+  let _accountsCache = { data: null, ts: 0 };
+  const ACCOUNTS_CACHE_TTL = 10000; // 10s fresh cache
+  const ACCOUNTS_STALE_TTL = 120000; // serve stale up to 2 min
+
+  async function buildAccountsResponse() {
+    const ids = discoverAccounts();
+    const accounts = [];
+    const rust = await fetchRustSnapshot();
+    for (const id of ids) {
+      const bot = await loadAccountBot(id);
+      const portfolio = bot.getPortfolio();
+      const report = await bot.generateReport();
+      const includeRust = id === SINGLE_ACCOUNT_ID || id === 'paper';
+      const merged = computeMergedStats(portfolio, report, includeRust ? rust : null);
+      const realClosed = merged.realClosedCount || merged.closedTrades.length;
+      const hasClosed = realClosed > 0;
+      const winRate = hasClosed ? (merged.wins.length / realClosed * 100) : 0;
+      const realTradeCount = includeRust ? (rust?.tradeCount || merged.mergedTrades.length) : merged.mergedTrades.length;
+      accounts.push({
+        id,
+        portfolio: {
+          ...portfolio,
+          trades: merged.mergedTrades,
+          totalTrades: realTradeCount,
+          totalValue: merged.totalValue,
+          pnl: merged.mergedPnl,
+        },
+        performance: {
+          ...(report.performance || {}),
+          totalTrades: realTradeCount,
+          closedTrades: realClosed,
+          winningTrades: merged.wins.length,
+          losingTrades: merged.losses.length,
+          winRate: `${winRate.toFixed(1)}%`,
+          totalReturn: merged.totalReturn.toFixed(2),
+        },
+        pnl: merged.mergedPnl,
+        recentTrades: selectFeedTrades(merged.mergedTrades, 80),
+        totalValue: merged.totalValue,
+        rust: includeRust ? rust : { available: false },
+      });
+    }
+    return accounts;
+  }
+
   api.get('/accounts', async (req, res) => {
     try {
-      const ids = discoverAccounts();
-      const accounts = [];
-      const rust = await fetchRustSnapshot();
-      for (const id of ids) {
-        const bot = await loadAccountBot(id);
-        const portfolio = bot.getPortfolio();
-        const report = await bot.generateReport();
-        const includeRust = id === SINGLE_ACCOUNT_ID || id === 'paper';
-        const merged = computeMergedStats(portfolio, report, includeRust ? rust : null);
-        const realClosed = merged.realClosedCount || merged.closedTrades.length;
-        const hasClosed = realClosed > 0;
-        const winRate = hasClosed ? (merged.wins.length / realClosed * 100) : 0;
-        const realTradeCount = includeRust ? (rust?.tradeCount || merged.mergedTrades.length) : merged.mergedTrades.length;
-        accounts.push({
-          id,
-          portfolio: {
-            ...portfolio,
-            trades: merged.mergedTrades,
-            totalTrades: realTradeCount,
-            totalValue: merged.totalValue,
-            pnl: merged.mergedPnl,
-          },
-          performance: {
-            ...(report.performance || {}),
-            totalTrades: realTradeCount,
-            closedTrades: realClosed,
-            winningTrades: merged.wins.length,
-            losingTrades: merged.losses.length,
-            winRate: `${winRate.toFixed(1)}%`,
-            totalReturn: merged.totalReturn.toFixed(2),
-          },
-          pnl: merged.mergedPnl,
-          recentTrades: selectFeedTrades(merged.mergedTrades, 80),
-          totalValue: merged.totalValue,
-          rust: includeRust ? rust : { available: false },
-        });
+      // Return fresh cache if available
+      if (_accountsCache.data && Date.now() - _accountsCache.ts < ACCOUNTS_CACHE_TTL) {
+        return res.json({ success: true, data: _accountsCache.data });
       }
-      res.json({ success: true, data: accounts });
+
+      // Race: build fresh data vs 4s timeout
+      const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 4000));
+      const fresh = buildAccountsResponse().then(data => {
+        _accountsCache = { data, ts: Date.now() };
+        return data;
+      });
+
+      try {
+        const data = await Promise.race([fresh, timeout]);
+        res.json({ success: true, data });
+      } catch {
+        // Timeout — serve stale cache if available
+        if (_accountsCache.data && Date.now() - _accountsCache.ts < ACCOUNTS_STALE_TTL) {
+          res.json({ success: true, data: _accountsCache.data, stale: true });
+        } else {
+          res.status(504).json({ success: false, error: 'Account data temporarily unavailable' });
+        }
+        // Let the fresh build finish in background to update cache
+        fresh.catch(() => {});
+      }
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -1274,7 +1322,32 @@ function createApiServer(wsServer) {
     try {
       const watcher = getOrderflowWatcher(wsServer);
       const limit = parseInt(req.query.limit) || 50;
-      res.json({ success: true, data: watcher.getActivityFeed(limit) });
+      let feed = watcher.getActivityFeed(limit);
+
+      // If orderflow watcher has no data yet, seed from whale-signals.json
+      if ((!feed || feed.length === 0)) {
+        try {
+          const whaleSignalsPath = path.join(__dirname, '..', 'data', 'whale-signals.json');
+          const raw = JSON.parse(fs.readFileSync(whaleSignalsPath, 'utf8'));
+          if (Array.isArray(raw) && raw.length > 0) {
+            feed = raw
+              .filter(s => s.timestamp)
+              .sort((a, b) => b.timestamp - a.timestamp)
+              .slice(0, limit)
+              .map(s => ({
+                event: s.size >= 5000 ? 'mega-whale' : 'whale-trade',
+                side: (s.side || s.direction || 'BUY').toLowerCase(),
+                size: s.totalSize || s.size || 0,
+                assetId: s.conditionId || s.marketId || '',
+                title: s.title || '',
+                wallet: s.walletAddress || '',
+                timestamp: s.timestamp,
+              }));
+          }
+        } catch {}
+      }
+
+      res.json({ success: true, data: feed });
     } catch (err) {
       res.status(500).json({ success: false, error: err.message });
     }
@@ -1302,6 +1375,84 @@ function createApiServer(wsServer) {
   setTimeout(() => {
     try { getOrderflowWatcher(wsServer); } catch (e) { console.error('[OrderflowWatcher] Init error:', e.message); }
   }, 5000);
+
+  // ── Settings Endpoints ──
+  const SETTINGS_PATH = path.join(__dirname, '..', 'data', 'settings.json');
+  const DEFAULT_SETTINGS = {
+    positionSizing: { mode: 'fixed', fixedAmount: 25, percentageOfPortfolio: 2, maxPositionPerMarket: 100 },
+    risk: { maxConcurrentPositions: 10, stopLossPercent: 15, takeProfitPercent: 25, maxDailyLoss: 500 },
+    trading: { mode: 'paper', autoExecute: true, minEdgePercent: 3, minLiquidity: 1000 },
+  };
+
+  api.get('/settings', (req, res) => {
+    try {
+      let settings = DEFAULT_SETTINGS;
+      try { settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')); } catch {}
+      res.json({ success: true, data: settings });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.post('/settings', express.json(), (req, res) => {
+    try {
+      const settings = req.body;
+      fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+      res.json({ success: true, data: settings });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.get('/settings/live-status', (req, res) => {
+    try {
+      const credentials = {
+        POLYMARKET_KEY: !!process.env.POLYMARKET_KEY,
+        POLYMARKET_API_KEY: !!process.env.POLYMARKET_API_KEY,
+        POLYMARKET_API_SECRET: !!process.env.POLYMARKET_API_SECRET,
+        POLYMARKET_API_PASSPHRASE: !!process.env.POLYMARKET_API_PASSPHRASE,
+      };
+      const hasAll = Object.values(credentials).every(Boolean);
+      let currentMode = 'paper';
+      try { currentMode = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8'))?.trading?.mode || 'paper'; } catch {}
+      res.json({
+        success: true,
+        data: {
+          credentials,
+          hasAllCredentials: hasAll,
+          mode: currentMode,
+          canGoLive: hasAll,
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
+
+  api.post('/settings/trading-mode', express.json(), (req, res) => {
+    try {
+      const { mode } = req.body;
+      if (!['paper', 'live'].includes(mode)) {
+        return res.status(400).json({ success: false, error: 'Mode must be paper or live' });
+      }
+      if (mode === 'live') {
+        const hasKey = !!process.env.POLYMARKET_KEY;
+        const hasApi = !!process.env.POLYMARKET_API_KEY;
+        const hasSecret = !!process.env.POLYMARKET_API_SECRET;
+        const hasPass = !!process.env.POLYMARKET_API_PASSPHRASE;
+        if (!hasKey || !hasApi || !hasSecret || !hasPass) {
+          return res.status(400).json({ success: false, error: 'Missing CLOB credentials. Set POLYMARKET_KEY, POLYMARKET_API_KEY, POLYMARKET_API_SECRET, POLYMARKET_API_PASSPHRASE env vars.' });
+        }
+      }
+      let settings = DEFAULT_SETTINGS;
+      try { settings = JSON.parse(fs.readFileSync(SETTINGS_PATH, 'utf8')); } catch {}
+      settings.trading = { ...settings.trading, mode };
+      fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+      res.json({ success: true, data: { mode } });
+    } catch (err) {
+      res.status(500).json({ success: false, error: err.message });
+    }
+  });
 
   app.use('/api', api);
 

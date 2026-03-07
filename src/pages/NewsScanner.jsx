@@ -61,7 +61,11 @@ function useOracleSignals() {
 
 function timeAgo(ts) {
   if (!ts) return '—'
-  const diff = Date.now() - ts
+  // Handle ISO strings, Date objects, and epoch ms
+  const epoch = typeof ts === 'number' ? ts : new Date(ts).getTime()
+  if (isNaN(epoch)) return '—'
+  const diff = Date.now() - epoch
+  if (diff < 0) return 'just now'
   if (diff < 60000) return `${Math.floor(diff / 1000)}s ago`
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`
   if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`

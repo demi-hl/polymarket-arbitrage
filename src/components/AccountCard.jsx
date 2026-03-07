@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
-import { TrendingUp, TrendingDown } from './Icons'
+import { TrendingUp } from './Icons'
 
 const ACCOUNT_THEMES = {
-  A: { label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
-  B: { label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
-  paper: { label: 'Paper Trading', sub: '29 strategies + Deep Learning + GPU Sentiment', color: '#10b981' },
+  A: { label: 'Paper Trading', sub: '37 strategies · MRO-Kelly · Weather Arb · Whale Tracking', color: '#10b981' },
+  B: { label: 'Paper Trading', sub: '37 strategies · MRO-Kelly · Weather Arb · Whale Tracking', color: '#10b981' },
+  paper: { label: 'Paper Trading', sub: '37 strategies · MRO-Kelly · Weather Arb · Whale Tracking', color: '#10b981' },
 }
 
 function fallback(id) {

@@ -16,9 +16,11 @@
  * Execution happens entirely in the Rust engine — the Node.js side just records it.
  */
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 const { fetchMarketsOnce } = require('./lib/with-scanner');
 
-const ENGINE_URL = process.env.LATENCY_ENGINE_URL || 'http://localhost:8900';
+const ENGINE_URL = process.env.LATENCY_ENGINE_URL || 'http://127.0.0.1:8900';
 
 const CRYPTO_PRICE_PATTERN = /\b(?:bitcoin|btc)\b.*\b(?:price|above|below|between|reach|hit)\b|\b(?:price|above|below|between|reach|hit)\b.*\b(?:bitcoin|btc)\b/i;
 const ETH_PRICE_PATTERN = /\b(?:ethereum|eth)\b.*\b(?:price|above|below|between|reach|hit)\b|\b(?:price|above|below|between|reach|hit)\b.*\b(?:ethereum|eth)\b/i;
@@ -27,12 +29,27 @@ const STRIKE_PATTERN = /\$\s*([\d,]+(?:\.\d+)?)/;
 const DIRECTION_PATTERN = /\b(above|below|over|under|exceed|reach|hit|dip)\b/i;
 const SHORT_EXPIRY_PATTERN = /\b(?:15[- ]?min|30[- ]?min|1[- ]?hour|hourly)\b/i;
 
+// Cache file for last-known-good contracts (survives API outages + restarts)
+const CONTRACT_CACHE_PATH = path.join(__dirname, '..', 'data', 'rust-contracts-cache.json');
+
 let engineAvailable = null;
 let lastMarketSync = 0;
 let lastTradeSync = 0;
 let syncedTradeIds = new Set();
+let lastGoodContracts = []; // in-memory fallback
 const MARKET_SYNC_INTERVAL = 60_000;
 const TRADE_SYNC_INTERVAL = 10_000;
+
+// Load cached contracts on startup
+try {
+  if (fs.existsSync(CONTRACT_CACHE_PATH)) {
+    const cached = JSON.parse(fs.readFileSync(CONTRACT_CACHE_PATH, 'utf-8'));
+    if (Array.isArray(cached) && cached.length > 0) {
+      lastGoodContracts = cached;
+      console.log(`[crypto-latency-arb] Loaded ${cached.length} cached contracts from disk`);
+    }
+  }
+} catch {}
 
 async function checkEngine() {
   try {
@@ -125,11 +142,45 @@ async function syncMarkets() {
 
       await axios.post(`${ENGINE_URL}/markets`, { contracts: cryptoContracts }, { timeout: 5000 });
       lastMarketSync = Date.now();
+
+      // Cache good contracts to disk (survives restarts + API outages)
+      lastGoodContracts = cryptoContracts;
+      try {
+        fs.writeFileSync(CONTRACT_CACHE_PATH, JSON.stringify(cryptoContracts, null, 2));
+      } catch {}
+
       return cryptoContracts.length;
+    }
+
+    // API returned empty — use cached contracts as fallback
+    if (lastGoodContracts.length > 0) {
+      // Filter out expired contracts
+      const now = Date.now();
+      const valid = lastGoodContracts.filter(c => new Date(c.expiry).getTime() > now);
+      if (valid.length > 0) {
+        console.log(`[crypto-latency-arb] API returned 0 markets, re-registering ${valid.length} cached contracts`);
+        await axios.post(`${ENGINE_URL}/markets`, { contracts: valid }, { timeout: 5000 });
+        lastMarketSync = Date.now();
+        return valid.length;
+      }
     }
     return 0;
   } catch (e) {
     console.error('[crypto-latency-arb] Market sync failed:', e.message);
+
+    // On failure, try to re-register cached contracts so engine never runs dry
+    if (lastGoodContracts.length > 0) {
+      try {
+        const now = Date.now();
+        const valid = lastGoodContracts.filter(c => new Date(c.expiry).getTime() > now);
+        if (valid.length > 0) {
+          console.log(`[crypto-latency-arb] Using ${valid.length} cached contracts after sync failure`);
+          await axios.post(`${ENGINE_URL}/markets`, { contracts: valid }, { timeout: 5000 });
+          lastMarketSync = Date.now();
+          return valid.length;
+        }
+      } catch {}
+    }
     return 0;
   }
 }

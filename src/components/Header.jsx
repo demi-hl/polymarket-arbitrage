@@ -26,10 +26,18 @@ export default function Header({ minimal = false }) {
   const { portfolio, systemStatus, loading } = useTrading()
   const { address } = useWallet()
   const notifications = useNotifications()
+  const [tradingMode, setTradingMode] = useState('paper')
 
   useEffect(() => {
     const t = setInterval(() => setClock(new Date()), 1000)
     return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/settings/live-status')
+      .then(r => r.json())
+      .then(j => j.success && setTradingMode(j.data?.mode || 'paper'))
+      .catch(() => {})
   }, [])
 
   const isLive = !loading && systemStatus?.connected
@@ -84,8 +92,13 @@ export default function Header({ minimal = false }) {
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/8 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none" style={{ background: 'linear-gradient(180deg, transparent, rgba(0,212,255,0.01))' }} />
 
-      <Link to="/" className="text-[11px] sm:text-[13px] uppercase tracking-[0.16em] sm:tracking-[0.22em] text-gray-500 hover:text-gray-200 transition-colors duration-500 font-futuristic">
-        Polymarket Bot
+      <Link to="/" className="flex items-center gap-2.5 group">
+        <div className="w-6 h-6 rounded-md flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.2), rgba(168,85,247,0.15))', border: '1px solid rgba(0,212,255,0.12)' }}>
+          <motion.div className="w-2 h-2 rounded-sm" style={{ background: 'linear-gradient(135deg, #00d4ff, #a855f7)' }} animate={{ rotate: [0, 90, 0] }} transition={{ repeat: Infinity, duration: 8, ease: 'easeInOut' }} />
+        </div>
+        <span className="text-[13px] sm:text-[15px] uppercase tracking-[0.22em] font-futuristic font-semibold text-gradient-minimal group-hover:opacity-100 opacity-80 transition-opacity duration-500">
+          DEMI
+        </span>
       </Link>
 
       <div className="flex items-center gap-3 sm:gap-6 text-[10px] uppercase tracking-[0.2em] text-gray-500 font-futuristic">
@@ -118,6 +131,22 @@ export default function Header({ minimal = false }) {
             <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />
           </>
         )}
+        <Link to="/settings">
+          <motion.span
+            className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-1 rounded-md cursor-pointer"
+            style={{
+              background: tradingMode === 'live' ? 'rgba(239,68,68,0.12)' : 'rgba(16,185,129,0.10)',
+              color: tradingMode === 'live' ? '#ef4444' : '#10b981',
+              border: `1px solid ${tradingMode === 'live' ? 'rgba(239,68,68,0.25)' : 'rgba(16,185,129,0.20)'}`,
+              boxShadow: tradingMode === 'live' ? '0 0 8px rgba(239,68,68,0.15)' : 'none',
+            }}
+            animate={tradingMode === 'live' ? { opacity: [1, 0.7, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            {tradingMode === 'live' ? '● LIVE' : '◉ PAPER'}
+          </motion.span>
+        </Link>
+
         <div className="flex items-center gap-2.5">
           <div className="relative">
             <motion.div
@@ -131,7 +160,7 @@ export default function Header({ minimal = false }) {
               }}
             />
           </div>
-          <span>{isLive ? 'Live' : 'Standby'}</span>
+          <span>{isLive ? 'Engine' : 'Standby'}</span>
         </div>
 
         <div className="hidden sm:block w-px h-4" style={{ background: 'rgba(255,255,255,0.06)' }} />

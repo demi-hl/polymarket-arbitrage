@@ -40,10 +40,12 @@ const MultiAccountConfig = {
     
     // Execution Settings
     execution: {
-      slippageModel: 'aggressive',
-      fillProbability: 0.85,    // 85% of signals get filled
-      latencyMs: 150,           // Faster execution
-      partialFills: true
+      slippageModel: 'realistic',
+      fillProbability: 0.22,    // 22% of competitive arb signals actually fill
+      latencyMs: 120,           // 120ms realistic network round-trip
+      partialFills: true,
+      adverseSelectionRate: 0.20,  // 20% of fills are adverse
+      competitorRejection: 0.75   // 75% of signals lost to faster bots
     }
   },
 
@@ -82,10 +84,12 @@ const MultiAccountConfig = {
     
     // Execution Settings
     execution: {
-      slippageModel: 'conservative',
-      fillProbability: 0.95,    // 95% of signals get filled (more selective)
-      latencyMs: 300,           // More deliberate execution
-      partialFills: false       // All or nothing
+      slippageModel: 'realistic',
+      fillProbability: 0.65,       // 65% fill rate (more selective = less competition)
+      latencyMs: 300,              // More deliberate execution
+      partialFills: false,         // All or nothing
+      adverseSelectionRate: 0.10,  // 10% adverse (less exposed than aggressive)
+      competitorRejection: 0.30   // 30% lost to competitors (less competitive signals)
     }
   },
 

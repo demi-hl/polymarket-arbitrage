@@ -3,10 +3,10 @@
   "configurations": [
     {
       "name": "vite-dashboard",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["vite", "--port", "3000"],
+      "runtimeExecutable": "/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/.claude/worktrees/admiring-heyrovsky/agents/polymarket-arbitrage-bot/node_modules/.bin/vite",
+      "runtimeArgs": ["--port", "3000"],
       "port": 3000,
-      "cwd": "agents/polymarket-arbitrage-bot"
+      "cwd": "/Users/christophergervais/clawd-local/agents/polymarket-arbitrage-bot/.claude/worktrees/admiring-heyrovsky/agents/polymarket-arbitrage-bot"
     },
     {
       "name": "api-server",

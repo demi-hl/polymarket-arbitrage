@@ -32,19 +32,24 @@ class PolymarketArbitrageBot extends EventEmitter {
     this.edgeModel = config.edgeModel || null;
 
     this.slippageModel = {
-      baseSlippage: 0.003,   // 30 bps — realistic for $50-100 orders on typical Polymarket books
-      liquidityFactor: 0.5
+      baseSlippage: 0.008,   // 80 bps — realistic for thin Polymarket books + competition
+      liquidityFactor: 1.2   // Higher impact: small books move fast against you
     };
 
     this.fees = {
       polymarket: 0.005,     // 0.5% taker fee (50 bps) per Polymarket CLOB
-      polymarketSpread: 0.001,
+      polymarketSpread: 0.003, // 30 bps — realistic bid/ask spread on most books
       kalshiFee: 0.02,
       predictitFee: 0.10,
       gasCostPerTx: 0.04,
     };
 
-    this.maxLiquidityPct = 0.02;
+    this.maxLiquidityPct = 0.015; // 1.5% max of book depth — conservative
+
+    // ── Realistic execution model ──
+    this.fillRejectionRate = 0.75;    // 75% of arb signals fail to fill (other bots beat us)
+    this.adverseSelectionRate = 0.20; // 20% of easy fills are adverse (market moved against us)
+    this.executionLatencyMs = 120;    // 120ms realistic network round-trip to CLOB
 
     this.init();
   }
@@ -117,10 +122,38 @@ class PolymarketArbitrageBot extends EventEmitter {
 
   async simulateExecution(opportunity, size) {
     const timestamp = new Date().toISOString();
+
+    // ── Realistic fill rejection: 75% of competitive arb signals don't fill ──
+    // Lower edge = more competitors = harder to fill
+    const edge = opportunity.executableEdge ?? opportunity.edgePercent ?? 0;
+    const edgeAdjustedRejection = this.fillRejectionRate * Math.max(0.3, 1 - edge * 3);
+    if (Math.random() < edgeAdjustedRejection) {
+      throw new Error(`Fill rejected — competing bot won the race (${(edgeAdjustedRejection * 100).toFixed(0)}% rejection rate at ${(edge * 100).toFixed(1)}% edge)`);
+    }
+
+    // ── Adverse selection: 20% of "easy" fills are because the market moved against you ──
+    if (Math.random() < this.adverseSelectionRate) {
+      // Simulate adverse fill: edge is reduced or negative
+      const adversePenalty = 0.005 + Math.random() * 0.015; // 50-200 bps penalty
+      const adjustedEdge = edge - adversePenalty;
+      if (adjustedEdge <= 0) {
+        throw new Error(`Adverse selection — filled because market moved against us (edge ${(edge * 100).toFixed(1)}% → ${(adjustedEdge * 100).toFixed(1)}%)`);
+      }
+      opportunity = { ...opportunity, executableEdge: adjustedEdge, edgePercent: adjustedEdge };
+    }
+
+    // ── Latency degradation: edge decays by ~2bps per 100ms ──
+    const latencyDecay = (this.executionLatencyMs / 100) * 0.002;
+    const postLatencyEdge = (opportunity.executableEdge ?? opportunity.edgePercent ?? 0) - latencyDecay;
+    if (postLatencyEdge <= 0.005) {
+      throw new Error(`Edge decayed below minimum after ${this.executionLatencyMs}ms latency (${(edge * 100).toFixed(1)}% → ${(postLatencyEdge * 100).toFixed(1)}%)`);
+    }
+    opportunity = { ...opportunity, executableEdge: postLatencyEdge };
+
     const liquidityCap = this.calculateMaxPosition(opportunity.liquidity);
 
-    const edge = opportunity.executableEdge ?? opportunity.edgePercent ?? 0;
-    const edgeMultiplier = Math.min(Math.max(edge / this.edgeThreshold, 0.5), 2.0);
+    const finalEdge = opportunity.executableEdge ?? opportunity.edgePercent ?? 0;
+    const edgeMultiplier = Math.min(Math.max(finalEdge / this.edgeThreshold, 0.5), 2.0);
     const dynamicSize = size * edgeMultiplier;
 
     const positionSize = Math.min(dynamicSize, opportunity.maxPosition, this.maxPositionSize, liquidityCap);
@@ -243,8 +276,63 @@ class PolymarketArbitrageBot extends EventEmitter {
   }
 
   async executeLive(opportunity, size) {
-    console.log('🔴 LIVE TRADE - This would execute on-chain');
-    throw new Error('Live trading not yet implemented. Use paper mode.');
+    const OrderManager = require('./execution/order-manager');
+
+    if (!this._liveOrderManager) {
+      this._liveOrderManager = new OrderManager({ mode: 'live' });
+    }
+
+    const tokenId = opportunity.clobTokenIds?.[0] || opportunity.tokenId;
+    if (!tokenId) {
+      throw new Error('No CLOB token ID available for live execution');
+    }
+
+    const side = (opportunity.direction === 'BUY_YES' || opportunity.direction === 'BUY') ? 'buy' : 'sell';
+    const price = side === 'buy' ? (opportunity.yesPrice || 0.5) : (opportunity.noPrice || 0.5);
+    const shares = Math.floor(size / price);
+
+    console.log(`🔴 LIVE TRADE — ${side.toUpperCase()} ${shares} shares @ $${price.toFixed(3)} on token ${tokenId.slice(0, 16)}...`);
+
+    const order = await this._liveOrderManager.placeOrder(tokenId, side, price, shares, {
+      marketId: opportunity.marketId || opportunity.conditionId,
+      strategy: opportunity.strategy,
+      negRisk: opportunity.negRisk || false,
+    });
+
+    // Wait for fill (max 60s)
+    const settled = await this._liveOrderManager.waitForFill(order.id, {
+      intervalMs: 2000,
+      maxAttempts: 30,
+    });
+
+    if (!settled || settled.status === 'cancelled') {
+      throw new Error(`Order ${order.id} was cancelled or timed out`);
+    }
+
+    // Record the trade in portfolio
+    const timestamp = new Date().toISOString();
+    const trade = {
+      id: `live-${Date.now()}`,
+      market: opportunity.question || opportunity.marketId,
+      marketId: opportunity.marketId || opportunity.conditionId,
+      yesPrice: opportunity.yesPrice || 0.5,
+      noPrice: opportunity.noPrice || 0.5,
+      size: settled.filledSize * price,
+      direction: opportunity.direction || 'BUY_YES',
+      strategy: opportunity.strategy || 'manual',
+      timestamp,
+      clobOrderId: settled.clobOrderId || order.id,
+      status: 'open',
+      live: true,
+    };
+
+    this.portfolio.cash -= trade.size;
+    this.portfolio.trades.push(trade);
+    await this.savePortfolio();
+
+    this.emit('trade:executed', { trade, portfolio: this.portfolio, live: true });
+    console.log(`✅ LIVE TRADE FILLED — ${settled.filledSize} shares, order ${order.id}`);
+    return trade;
   }
 
   async execute(opportunity, options = {}) {

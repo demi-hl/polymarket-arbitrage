@@ -50,6 +50,10 @@ export default {
           heavy: 'rgba(18, 18, 26, 0.8)',
           light: 'rgba(18, 18, 26, 0.4)',
         },
+        'surface': {
+          elevated: 'rgba(20, 20, 32, 0.8)',
+        },
+        'accent-warm': '#ff6b35',
       },
       fontFamily: {
         futuristic: ['Space Grotesk', 'system-ui', 'sans-serif'],
@@ -90,6 +94,12 @@ export default {
         'breathe': 'breathe 4s ease-in-out infinite',
 
         'spotlight': 'spotlight 8s ease-in-out infinite',
+        'glow-breathe': 'glowBreathe 8s ease-in-out infinite',
+        'metric-pop': 'metricPop 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+        'card-shimmer-hover': 'cardShimmerHover 1.5s ease forwards',
+        'border-flow': 'borderFlow 3s linear infinite',
+        'draw-line': 'drawLine 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
       },
       keyframes: {
         glow: {
@@ -150,6 +160,34 @@ export default {
           '25%': { opacity: '0.8', transform: 'translateX(20%) translateY(-10%)' },
           '50%': { opacity: '0.5', transform: 'translateX(10%) translateY(20%)' },
           '75%': { opacity: '0.8', transform: 'translateX(-10%) translateY(10%)' },
+        },
+        glowBreathe: {
+          '0%, 100%': { boxShadow: '0 0 8px rgba(0, 212, 255, 0.1), inset 0 0 4px rgba(0, 212, 255, 0.03)' },
+          '50%': { boxShadow: '0 0 24px rgba(0, 212, 255, 0.25), inset 0 0 12px rgba(0, 212, 255, 0.06)' },
+        },
+        metricPop: {
+          '0%': { transform: 'scale(1)', color: 'inherit' },
+          '40%': { transform: 'scale(1.06)', filter: 'brightness(1.3)' },
+          '100%': { transform: 'scale(1)', color: 'inherit' },
+        },
+        cardShimmerHover: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        borderFlow: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
+        },
+        drawLine: {
+          '0%': { strokeDashoffset: '100' },
+          '100%': { strokeDashoffset: '0' },
+        },
+        heartbeat: {
+          '0%, 100%': { transform: 'scaleY(0.6)', opacity: '0.4' },
+          '25%': { transform: 'scaleY(1.4)', opacity: '1' },
+          '50%': { transform: 'scaleY(0.8)', opacity: '0.6' },
+          '75%': { transform: 'scaleY(1.1)', opacity: '0.9' },
         },
       },
     },

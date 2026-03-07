@@ -17,6 +17,8 @@ import Portfolio from './pages/Portfolio'
 import Backtest from './pages/Backtest'
 import CopyTrading from './pages/CopyTrading'
 import NewsScanner from './pages/NewsScanner'
+import MarketDetail from './pages/MarketDetail'
+import Settings from './pages/Settings'
 import { WalletProvider } from './context/WalletContext'
 import { MultiAccountProvider } from './context/MultiAccountContext'
 import { TradingProvider } from './context/TradingContext'
@@ -57,6 +59,8 @@ function AppLayout() {
                 <Route path="/whales" element={<PageTransition><NFTGate><CopyTrading /></NFTGate></PageTransition>} />
                 <Route path="/news" element={<PageTransition><NFTGate><NewsScanner /></NFTGate></PageTransition>} />
                 <Route path="/backtest" element={<PageTransition><NFTGate><Backtest /></NFTGate></PageTransition>} />
+                <Route path="/market/:id" element={<PageTransition><NFTGate><MarketDetail /></NFTGate></PageTransition>} />
+                <Route path="/settings" element={<PageTransition><NFTGate><Settings /></NFTGate></PageTransition>} />
               </Routes>
             </AnimatePresence>
           </ErrorBoundary>

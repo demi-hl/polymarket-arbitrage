@@ -1,5 +1,23 @@
 #!/usr/bin/env node
 
+// Prevent crashes from unhandled network errors (Polymarket API timeouts)
+process.on('uncaughtException', (err) => {
+  if (err.code === 'ETIMEDOUT' || err.code === 'EHOSTUNREACH' || err.code === 'ECONNRESET' || err.code === 'ENOTFOUND') {
+    console.error(`[uncaughtException] Network error (non-fatal): ${err.code} ${err.message}`);
+  } else {
+    console.error('[uncaughtException] Fatal:', err);
+    process.exit(1);
+  }
+});
+process.on('unhandledRejection', (reason) => {
+  const code = reason?.code || '';
+  if (code === 'ETIMEDOUT' || code === 'EHOSTUNREACH' || code === 'ECONNRESET' || code === 'ENOTFOUND') {
+    console.error(`[unhandledRejection] Network error (non-fatal): ${code} ${reason?.message || reason}`);
+  } else {
+    console.error('[unhandledRejection]', reason);
+  }
+});
+
 require('dotenv').config();
 
 const { Command } = require('commander');
@@ -173,7 +191,7 @@ program
 
     // Check Rust latency engine
     let rustEngineStatus = null;
-    const rustEngineUrl = process.env.LATENCY_ENGINE_URL || 'http://localhost:8900';
+    const rustEngineUrl = process.env.LATENCY_ENGINE_URL || 'http://127.0.0.1:8900';
     try {
       const axios = require('axios');
       const { data } = await axios.get(`${rustEngineUrl}/health`, { timeout: 2000 });
@@ -683,7 +701,7 @@ program
     
     console.log(chalk.bold('📊 POLYMARKET ARBITRAGE BOT - DASHBOARD\n'));
     
-    app.listen(port, () => {
+    app.listen(port, '0.0.0.0', () => {
       console.log(chalk.green(`✓ Dashboard running at http://localhost:${port}`));
       console.log(chalk.gray(`\nPress Ctrl+C to stop\n`));
     });

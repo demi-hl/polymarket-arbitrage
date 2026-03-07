@@ -6,6 +6,11 @@ import ConnectWallet from './ConnectWallet'
 export default function NFTGate({ children }) {
   const { address, nftVerified, checking } = useWallet()
 
+  // Dev bypass — skip NFT gate in local development when no wallet extension
+  if (import.meta.env.DEV && !window.ethereum) {
+    return children
+  }
+
   // Not connected — show connect prompt
   if (!address) {
     return (
